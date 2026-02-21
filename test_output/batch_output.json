@@ -1,6 +1,6 @@
 [
   {
-    "trace_id": "89b12404-31ed-45a0-8494-11c7fb16cd29",
+    "trace_id": "1c833bcb-402b-41d6-a20b-afe492f4dcdc",
     "policy_version_hash": "allowances",
     "extraction_source": "fusion",
     "structured_bill": {
@@ -31,7 +31,7 @@
     "metadata": {
       "ocr_confidence": 0.8808857884490591,
       "llm_model": "qwen2.5:7b",
-      "processing_time_sec": 3.2611,
+      "processing_time_sec": 5.8299,
       "explainability_score": 0.7
     },
     "ocr_extracted": {
@@ -56,7 +56,7 @@
     }
   },
   {
-    "trace_id": "ce11b6e5-f267-46bb-8ee0-e27b916534f2",
+    "trace_id": "8d6414eb-b90d-4f64-964f-2916fd2df4dd",
     "policy_version_hash": "allowances",
     "extraction_source": "fusion",
     "structured_bill": {
@@ -87,7 +87,7 @@
     "metadata": {
       "ocr_confidence": 0.8762276785714286,
       "llm_model": "qwen2.5:7b",
-      "processing_time_sec": 3.6856,
+      "processing_time_sec": 6.4593,
       "explainability_score": 0.69
     },
     "ocr_extracted": {
@@ -112,7 +112,7 @@
     }
   },
   {
-    "trace_id": "feb61387-96c6-4e59-b7c6-4f39f800c26c",
+    "trace_id": "c66b8f30-85e3-4668-8752-237372955a9a",
     "policy_version_hash": "allowances",
     "extraction_source": "fusion",
     "structured_bill": {
@@ -143,7 +143,7 @@
     "metadata": {
       "ocr_confidence": 0.7857261410788382,
       "llm_model": "qwen2.5:7b",
-      "processing_time_sec": 3.6191,
+      "processing_time_sec": 6.3194,
       "explainability_score": 0.69
     },
     "ocr_extracted": {
@@ -168,7 +168,7 @@
     }
   },
   {
-    "trace_id": "5df65728-7318-48be-9e92-0261f3caec71",
+    "trace_id": "0b432070-cbc6-4bf3-bd1f-01a8473b9881",
     "policy_version_hash": "allowances",
     "extraction_source": "fusion",
     "structured_bill": {
@@ -199,7 +199,7 @@
     "metadata": {
       "ocr_confidence": 0.7414932126696833,
       "llm_model": "qwen2.5:7b",
-      "processing_time_sec": 3.447,
+      "processing_time_sec": 6.1596,
       "explainability_score": 0.69
     },
     "ocr_extracted": {
@@ -224,7 +224,7 @@
     }
   },
   {
-    "trace_id": "66f89e07-d2b7-4952-9ae9-ca5688e29ad6",
+    "trace_id": "27bd2cb3-7d27-46cf-8ffc-13bb9fda75ca",
     "policy_version_hash": "allowances",
     "extraction_source": "fusion",
     "structured_bill": {
@@ -255,7 +255,7 @@
     "metadata": {
       "ocr_confidence": 0.7875,
       "llm_model": "qwen2.5:7b",
-      "processing_time_sec": 3.3544,
+      "processing_time_sec": 6.2881,
       "explainability_score": 0.69
     },
     "ocr_extracted": {

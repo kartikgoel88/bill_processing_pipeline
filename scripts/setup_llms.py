@@ -118,7 +118,7 @@ def setup_layoutlm(*, install_deps: bool = True) -> bool:
         print("  Installing [document] extras (covers LayoutLM deps) ...")
         if not run(pip_install_cmd(), cwd=PROJECT_ROOT):
             return False
-    print("  Note: LayoutLM extractor is not implemented; pipeline falls back to Donut if layoutlm is set.")
+    print("  Note: Use VISION_EXTRACTOR=layoutlm and LAYOUTLM_MODEL_ID (e.g. nielsr/layoutlmv3-finetuned-cord) in .env to use LayoutLM.")
     return True
 
 

@@ -61,6 +61,8 @@ class PipelineConfig:
     )
     donut_model_id: str = field(
         default_factory=lambda: os.getenv("DONUT_MODEL_ID", "naver-clova-ix/donut-base-finetuned-cord-v2"))
+    layoutlm_model_id: str = field(
+        default_factory=lambda: os.getenv("LAYOUTLM_MODEL_ID", "nielsr/layoutlmv3-finetuned-cord"))
     llm_decision_model: str = field(
         default_factory=lambda: os.getenv("LLM_DECISION_MODEL", "llama3.2")
     )
@@ -175,6 +177,7 @@ class PipelineConfig:
             "llm_vision_model": os.getenv("LLM_VISION_MODEL", "llava"),
             "vision_extractor": (os.getenv("VISION_EXTRACTOR", "donut") or "donut").strip().lower(),
             "donut_model_id": os.getenv("DONUT_MODEL_ID", "naver-clova-ix/donut-base-finetuned-cord-v2"),
+            "layoutlm_model_id": os.getenv("LAYOUTLM_MODEL_ID", "nielsr/layoutlmv3-finetuned-cord"),
             "llm_decision_model": os.getenv("LLM_DECISION_MODEL", "llama3.2"),
             "ocr_confidence_threshold": float(os.getenv("OCR_CONFIDENCE_THRESHOLD", "0.6")),
             "decision_confidence_threshold": float(os.getenv("DECISION_CONFIDENCE_THRESHOLD", "0.7")),

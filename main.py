@@ -130,6 +130,7 @@ def run_batch_single_process(
         audit_log_path=audit_log_path,
         vision_extractor=config.vision_extractor,
         donut_model_id=config.donut_model_id,
+        layoutlm_model_id=config.layoutlm_model_id,
     )
     results = orch.process_batch_from_folder(input_root, dry_run=config.dry_run)
     return [r.model_dump(mode="json") for r in results]
@@ -209,6 +210,7 @@ def _config_to_dict(c: PipelineConfig) -> dict[str, Any]:
         "llm_decision_api_key": c.llm_decision_api_key,
         "vision_extractor": c.vision_extractor,
         "donut_model_id": c.donut_model_id,
+        "layoutlm_model_id": c.layoutlm_model_id,
         "llm_vision_model": c.llm_vision_model,
         "llm_decision_model": c.llm_decision_model,
         "ocr_confidence_threshold": c.ocr_confidence_threshold,

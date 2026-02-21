@@ -161,6 +161,7 @@ def _get_structured_bill(
     trace_id: str,
     vision_extractor: str = "vision_llm",
     donut_model_id: str = "naver-clova-ix/donut-base-finetuned-cord-v2",
+    layoutlm_model_id: str = "nielsr/layoutlmv3-finetuned-cord",
 ) -> tuple[
     ReimbursementSchema | None,
     str,
@@ -192,14 +193,12 @@ def _get_structured_bill(
             line_items=[],
         )
 
-    # 2. Vision/document extraction: Donut (default) or Vision LLM
+    # 2. Vision/document extraction: Donut, LayoutLM, or Vision LLM
     llm_schema: ReimbursementSchema | None = None
     llm_conf: float | None = None
     extractor = (vision_extractor or "donut").strip().lower()
-    # LayoutLM is not implemented; fall back to donut so pipeline still runs
-    if extractor in ("layoutlm", "layout"):
-        logger.info("vision_extractor=%s not implemented; using donut", vision_extractor or extractor)
-        extractor = "donut"
+    if extractor == "layout":
+        extractor = "layoutlm"
     if image_bytes:
         try:
             if extractor == "donut":
@@ -215,7 +214,7 @@ def _get_structured_bill(
                     ocr_result.raw_text or "",
                     employee_id=employee_id,
                     expense_type=expense_type,
-                    model_id=None,
+                    model_id=layoutlm_model_id,
                 )
             elif llm_client and extractor == "vision_llm":
                 llm_schema, llm_conf = extract_bill_via_llm(
@@ -306,6 +305,7 @@ class ReimbursementOrchestrator:
         audit_log_path: str | Path | None = None,
         vision_extractor: str = "donut",
         donut_model_id: str = "naver-clova-ix/donut-base-finetuned-cord-v2",
+        layoutlm_model_id: str = "nielsr/layoutlmv3-finetuned-cord",
     ) -> None:
         self.policy_json = policy_json
         self.policy_version_hash = policy_version_hash
@@ -324,6 +324,7 @@ class ReimbursementOrchestrator:
         self.audit_log_path = Path(audit_log_path) if audit_log_path else None
         self.vision_extractor = (vision_extractor or "donut").strip().lower()
         self.donut_model_id = donut_model_id or "naver-clova-ix/donut-base-finetuned-cord-v2"
+        self.layoutlm_model_id = layoutlm_model_id or "nielsr/layoutlmv3-finetuned-cord"
 
     def _trace_id(self) -> str:
         return str(uuid.uuid4())
@@ -385,6 +386,7 @@ class ReimbursementOrchestrator:
             trace_id=tid,
             vision_extractor=self.vision_extractor,
             donut_model_id=self.donut_model_id,
+            layoutlm_model_id=self.layoutlm_model_id,
         )
 
         # For single-file we don't have running monthly total; use bill amount as placeholder.
@@ -482,9 +484,10 @@ class ReimbursementOrchestrator:
                 max_retries=self.max_retries,
                 retry_delay_sec=self.retry_delay_sec,
                 trace_id=tid,
-                vision_extractor=self.vision_extractor,
-                donut_model_id=self.donut_model_id,
-            )
+            vision_extractor=self.vision_extractor,
+            donut_model_id=self.donut_model_id,
+            layoutlm_model_id=self.layoutlm_model_id,
+        )
             phase1.append((file_path, employee_id, expense_type, schema, source, ocr_c, llm_c, critical_failure, ocr_result, fusion_metadata))
 
         # Group by (employee_id, month) for running monthly total
