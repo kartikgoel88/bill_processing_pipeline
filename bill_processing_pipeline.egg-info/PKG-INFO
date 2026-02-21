@@ -100,6 +100,29 @@ python main.py --input test_input --log-level DEBUG
 - **audit_trail.log** — Append-only audit log (trace_id, stage, payload).
 - **policy_allowances.json** — Policy allowances (from `--policy-allowances`); required for bill processing.
 
+## Self-test pipeline
+
+Run the pipeline with **test_input** and compare outputs to a baseline in **test_expected**:
+
+```bash
+# Run pipeline, then compare test_output to test_expected (fails if diff)
+python scripts/run_self_test.py
+
+# Only run the pipeline (no comparison)
+python scripts/run_self_test.py --run-only
+
+# Only compare existing test_output to test_expected (no run)
+python scripts/run_self_test.py --compare-only
+
+# Update baseline: run pipeline and save normalized output as expected
+python scripts/run_self_test.py --update-expected
+```
+
+- **Input**: `test_input/` (expense_type/employee_id/bills).
+- **Output**: `test_output/batch_output.json` (and decisions.csv).
+- **Expected**: `test_expected/batch_output.json` (normalized: no trace_id/timing).
+- Comparison is by (employee_id, month, expense_type, amount); fields compared: decision, amount, approved_amount, etc. See `test_expected/README.md`.
+
 ## Module structure
 
 | Module | Role |
@@ -134,7 +157,7 @@ It returns strict JSON: `decision`, `confidence_score`, `reasoning`, `violated_r
 
 ## Configuration
 
-- **LLM:** `LLM_BASE_URL` (default `http://localhost:11434/v1`), `LLM_API_KEY`, `LLM_VISION_MODEL`, `LLM_DECISION_MODEL`.
+- **LLM:** `LLM_BASE_URL` (default `http://localhost:11434/v1`), `LLM_API_KEY`, `LLM_VISION_MODEL`, `LLM_DECISION_MODEL`. Decision model supports e.g. `llama3.2`, `gpt-4o-mini`, Qwen3 (`qwen3:1.7b`, `qwen3:4b`).
 - **Paths:** `POLICY_PDF_PATH`, `INPUT_ROOT`, `POLICY_ALLOWANCES_OUTPUT_PATH` (default `policy_allowances.json`), `AUDIT_LOG_PATH`, `OUTPUT_JSON_PATH`, `OUTPUT_CSV_PATH`.
 - **Thresholds:** `OCR_CONFIDENCE_THRESHOLD`, `LLM_MAX_RETRIES`, `MAX_WORKERS`.
 

@@ -10,6 +10,7 @@ Usage:
   python scripts/setup_llms.py              # interactive: offer each group
   python scripts/setup_llms.py --all         # setup everything
   python scripts/setup_llms.py --ollama     # only Ollama models
+  python scripts/setup_llms.py --ollama-model qwen2.5:7b   # pull a single Ollama model
   python scripts/setup_llms.py --donut      # only Donut (pip + optional download)
   python scripts/setup_llms.py --layoutlm   # only LayoutLM deps (pip)
   python scripts/setup_llms.py --llava       # only LLaVA (Ollama vision)
@@ -58,6 +59,13 @@ def ollama_available() -> bool:
     return shutil.which("ollama") is not None
 
 
+def pip_install_cmd() -> list[str]:
+    """Return command to run for 'pip install' (prefer uv when venv has no pip)."""
+    if shutil.which("uv") is not None:
+        return ["uv", "pip", "install", "-e", ".[document]"]
+    return [sys.executable, "-m", "pip", "install", "-e", ".[document]"]
+
+
 def setup_ollama(*, decision: bool = True, vision: bool = True) -> bool:
     """Pull Ollama models for decision (Qwen, Llama) and/or vision (LLava)."""
     if not ollama_available():
@@ -80,7 +88,7 @@ def setup_donut(*, install_deps: bool = True, download_model: bool = True) -> bo
     """Install [document] extras and optionally pre-download Donut model."""
     if install_deps:
         print("  Installing [document] extras (transformers, torch) ...")
-        if not run([sys.executable, "-m", "pip", "install", "-e", ".[document]"], cwd=PROJECT_ROOT):
+        if not run(pip_install_cmd(), cwd=PROJECT_ROOT):
             return False
     if download_model:
         print(f"  Pre-downloading Donut model {DONUT_MODEL_ID} ...")
@@ -108,7 +116,7 @@ def setup_layoutlm(*, install_deps: bool = True) -> bool:
     """Install deps for LayoutLM. Extractor not implemented in pipeline yet."""
     if install_deps:
         print("  Installing [document] extras (covers LayoutLM deps) ...")
-        if not run([sys.executable, "-m", "pip", "install", "-e", ".[document]"], cwd=PROJECT_ROOT):
+        if not run(pip_install_cmd(), cwd=PROJECT_ROOT):
             return False
     print("  Note: LayoutLM extractor is not implemented; pipeline falls back to Donut if layoutlm is set.")
     return True
@@ -126,22 +134,33 @@ def main() -> int:
     ap.add_argument("--donut", action="store_true", help="Install Donut deps and pre-download model")
     ap.add_argument("--layoutlm", action="store_true", help="Install LayoutLM/document deps")
     ap.add_argument("--llava", action="store_true", help="Pull only LLaVA (Ollama vision)")
+    ap.add_argument("--ollama-model", metavar="TAG", dest="ollama_model", help="Pull only this Ollama model (e.g. qwen2.5:7b, llama3.2)")
     ap.add_argument("--no-download-donut", action="store_true", help="With --donut: skip pre-download (load on first run)")
     args = ap.parse_args()
 
-    if not any([args.all, args.ollama, args.donut, args.layoutlm, args.llava]):
-        print("Choose one or more: --all, --ollama, --donut, --layoutlm, --llava")
+    if not any([args.all, args.ollama, args.donut, args.layoutlm, args.llava, args.ollama_model]):
+        print("Choose one or more: --all, --ollama, --donut, --layoutlm, --llava, --ollama-model TAG")
         print("  Example: python scripts/setup_llms.py --all")
+        print("  Example: python scripts/setup_llms.py --ollama-model qwen2.5:7b")
         return 0
 
     ok = True
+
+    if args.ollama_model:
+        if not ollama_available():
+            print("Ollama not found. Install from https://ollama.com and ensure `ollama` is on PATH.")
+            ok = False
+        else:
+            print(f"\n[Ollama] Pulling {args.ollama_model} ...")
+            if not run(["ollama", "pull", args.ollama_model]):
+                ok = False
 
     if args.all or args.ollama:
         print("\n[Ollama] Pulling decision + vision models (Llama, Qwen, LLaVA) ...")
         if not setup_ollama(decision=True, vision=True):
             ok = False
 
-    if args.llava and not (args.all or args.ollama):
+    if args.llava and not (args.all or args.ollama) and not args.ollama_model:
         print("\n[Ollama] Pulling LLaVA (vision) ...")
         if not setup_llava():
             ok = False

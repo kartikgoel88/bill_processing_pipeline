@@ -29,3 +29,4 @@ policy/policy_pipeline_allowances.py
 policy/policy_reader.py
 prompts/__init__.py
 tests/test_decision_engine.py
+tests/test_self_test_pipeline.py
