@@ -1,0 +1,152 @@
+# Employee Reimbursement Processing Pipeline
+
+Production-grade pipeline for employee reimbursement processing. **Reimbursement rules are not hardcoded**; they are **dynamically extracted from a Policy PDF** and passed to the decision LLM.
+
+## High-level flow
+
+### Step 1: Policy allowances (run once per policy update)
+
+1. Read policy PDF (pypdf or OCR fallback).
+2. Use LLM to extract **allowances** JSON: `client_location_allowance`, `fuel_reimbursement_two_wheeler`, `fuel_reimbursement_four_wheeler`, `meal_allowance`.
+3. Write **policy_allowances.json** (required for bill processing).
+
+### Step 2: Bill processing (batch)
+
+1. Read bills from folder: `root/{fuel,meal,commute}/{EMP001,EMP002,...}/` (expense_type / employee_id).
+2. Extract bill via OCR.
+3. Validate critical fields: **amount**, **month** (YYYY-MM). If missing/invalid → LLM extraction fallback.
+4. If still invalid → **auto REJECTED** (no decision LLM).
+5. Pass **structured policy JSON + bill JSON + expense type + employee monthly total** to decision LLM.
+6. LLM returns decision: **APPROVED** | **REJECTED** | **NEEDS_REVIEW**.
+
+## Folder structure
+
+```
+root/
+    fuel/
+        EMP001/
+            bill1.pdf
+        EMP002/
+            bill2.jpg
+    meal/
+        EMP001/
+            bill3.jpg
+    commute/
+        EMP003/
+            bill4.pdf
+```
+
+- **Top-level** = expense_type (fuel | meal | commute)
+- **Second-level** = employee_id
+- **Files** = bills (PDF, JPG, PNG, etc.)
+
+## Setup
+
+```bash
+uv sync
+# or: pip install -e .
+# Optional: .env with LLM_BASE_URL (default http://localhost:11434/v1), POLICY_PDF_PATH, INPUT_ROOT, etc.
+```
+
+## Usage
+
+```bash
+# 1) Create policy_allowances.json (PDF → OCR → LLM → allowances JSON). Run once per policy update.
+python main.py --policy-allowances --output-dir ./out
+
+# 2) Process bills (requires policy_allowances.json in output-dir; run step 1 first)
+python main.py --input test_input --output-dir ./out
+
+# Specify input and output
+python main.py --input /path/to/root_folder --output-dir ./out
+
+# Dry-run: only count bills
+python main.py --input test_input --dry-run
+
+# Multiprocessing (parallel by expense-type folder)
+python main.py --input test_input --workers 4
+
+# Log level
+python main.py --input test_input --log-level DEBUG
+```
+
+## Outputs
+
+- **batch_output.json** — List of final results per bill: `trace_id`, `policy_version_hash`, `extraction_source`, `structured_bill`, `policy_used`, `decision`, `metadata`.
+- **decisions.csv** — One row per bill: trace_id, employee_id, expense_type, amount, month, decision, confidence_score, reasoning, violated_rules, etc.
+- **audit_trail.log** — Append-only audit log (trace_id, stage, payload).
+- **policy_allowances.json** — Policy allowances (from `--policy-allowances`); required for bill processing.
+
+## Self-test pipeline
+
+Run the pipeline with **test_input** and compare outputs to a baseline in **test_expected**:
+
+```bash
+# Run pipeline, then compare test_output to test_expected (fails if diff)
+python scripts/run_self_test.py
+
+# Only run the pipeline (no comparison)
+python scripts/run_self_test.py --run-only
+
+# Only compare existing test_output to test_expected (no run)
+python scripts/run_self_test.py --compare-only
+
+# Update baseline: run pipeline and save normalized output as expected
+python scripts/run_self_test.py --update-expected
+```
+
+- **Input**: `test_input/` (expense_type/employee_id/bills).
+- **Output**: `test_output/batch_output.json` (and decisions.csv).
+- **Expected**: `test_expected/batch_output.json` (normalized: no trace_id/timing).
+- Comparison is by (employee_id, month, expense_type, amount); fields compared: decision, amount, approved_amount, etc. See `test_expected/README.md`.
+
+## Module structure
+
+| Module | Role |
+|--------|------|
+| `policy/policy_reader.py` | Read policy PDF; pypdf + OCR fallback |
+| `policy/policy_extractor_allowances.py` | LLM extraction → allowances JSON (client_location_allowance, fuel 2W/4W, meal_allowance) |
+| `policy/policy_pipeline_allowances.py` | PDF → OCR → LLM → policy_allowances.json |
+| `prompts/system_prompt_policy_allowances.txt` | System prompt for allowances shape |
+| `bills/bill_folder_reader.py` | Traverse root → (expense_type, employee_id, path) |
+| `bills/ocr_engine.py` | Tesseract OCR on PDF/images |
+| `bills/bill_extractor.py` | Parse OCR/LLM into ReimbursementSchema |
+| `decision/validator.py` | Critical (amount, month) + validate_structured_bill |
+| `llm_client.py` | OpenAI-compatible API; retry; vision |
+| `decision_engine.py` | Decision LLM: policy JSON + bill JSON only (no hardcoded rules) |
+| `orchestrator.py` | Load policy → OCR → validate → LLM fallback → decision → FinalOutput + audit |
+| `main.py` | CLI: --policy-allowances, batch, multiprocessing, audit |
+
+## Policy (allowances shape)
+
+Policy is extracted via `--policy-allowances` and saved as **policy_allowances.json** with keys: `client_location_allowance`, `fuel_reimbursement_two_wheeler`, `fuel_reimbursement_four_wheeler`, `meal_allowance`. The decision LLM receives this JSON.
+
+## Decision engine (no hardcoded rules)
+
+The decision LLM receives:
+
+1. **Policy allowances JSON** (from policy_allowances.json).
+2. **Extracted bill JSON**.
+3. **Expense type**.
+4. **Employee's current monthly total**.
+
+It returns strict JSON: `decision`, `confidence_score`, `reasoning`, `violated_rules`. Rules are **not** hardcoded in code; the LLM uses only the provided policy JSON.
+
+## Configuration
+
+- **LLM:** `LLM_BASE_URL` (default `http://localhost:11434/v1`), `LLM_API_KEY`, `LLM_VISION_MODEL`, `LLM_DECISION_MODEL`. Decision model supports e.g. `llama3.2`, `gpt-4o-mini`, Qwen3 (`qwen3:1.7b`, `qwen3:4b`).
+- **Paths:** `POLICY_PDF_PATH`, `INPUT_ROOT`, `POLICY_ALLOWANCES_OUTPUT_PATH` (default `policy_allowances.json`), `AUDIT_LOG_PATH`, `OUTPUT_JSON_PATH`, `OUTPUT_CSV_PATH`.
+- **Thresholds:** `OCR_CONFIDENCE_THRESHOLD`, `LLM_MAX_RETRIES`, `MAX_WORKERS`.
+
+## Programmatic usage
+
+Use `main.py` and the package modules (`commons`, `bills`, `policy`, `decision`, `llm`) for policy ingestion, single-bill or batch processing, and the decision engine (policy JSON + bill JSON).
+
+## Exception hierarchy
+
+- `PolicyExtractionError` — Policy PDF extraction or schema validation failed.
+- `BillExtractionError` — Bill extraction (OCR/LLM) failed.
+- `ValidationError` — Critical or other validation failed.
+- `DecisionError` — Decision LLM call or parse error.
+
+All extend `BillProcessingError` (optional `trace_id`).

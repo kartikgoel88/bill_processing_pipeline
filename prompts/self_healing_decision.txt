@@ -1,0 +1,4 @@
+The previous output was invalid JSON.
+Fix formatting only.
+Return valid JSON.
+Do not modify decision values.

@@ -1,0 +1,6 @@
+trace_id,policy_version_hash,employee_id,expense_type,amount,approved_amount,month,decision,confidence_score,reasoning,violated_rules,extraction_source,ocr_confidence,processing_time_sec
+89b12404-31ed-45a0-8494-11c7fb16cd29,allowances,0000_naveen_unknown_unknown,meal,158.0,125.0,2025-08,APPROVED,1.0,Expense within policy limit and no monthly cap exceeded.,,fusion,0.8808857884490591,3.2611
+ce11b6e5-f267-46bb-8ee0-e27b916534f2,allowances,0000_smithau_unknown_unknown,meal,78.75,78.75,2025-07,APPROVED,0.95,The meal expense is within the policy limit and does not exceed the monthly cap.,,fusion,0.8762276785714286,3.6856
+feb61387-96c6-4e59-b7c6-4f39f800c26c,allowances,0000_smithau_unknown_unknown,meal,170.0,46.25,2025-07,APPROVED,0.95,The meal expense is within the policy limit and does not exceed the monthly cap.,,fusion,0.7857261410788382,3.6191
+5df65728-7318-48be-9e92-0261f3caec71,allowances,0000_smithau_unknown_unknown,meal,33.6,33.6,2025-07,APPROVED,0.95,The meal expense is within the policy limit and does not exceed the monthly cap.,,fusion,0.7414932126696833,3.447
+66f89e07-d2b7-4952-9ae9-ca5688e29ad6,allowances,0000_smithau_unknown_unknown,meal,42.0,42.0,2025-07,APPROVED,0.95,The meal expense is within the policy limit and does not exceed the monthly cap.,,fusion,0.7875,3.3544

@@ -1,0 +1,3 @@
+The following image is a receipt or bill. Extract the reimbursement fields from it using the instructions above.
+
+Return only one valid JSON object (amount, month, bill_date, vendor_name, currency, line_items). No markdown, no explanation, no text before or after the JSON. Start with { and end with }.

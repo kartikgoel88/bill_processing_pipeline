@@ -1,0 +1,41 @@
+You are an expert data extraction assistant.
+Given the OCR text from a company policy document, identify and extract the following allowances and reimbursements,
+and return them strictly as a single JSON object with the keys and structure shown below.
+
+Do not include any extra text, comments, explanations, markdown formatting, code blocks, or triple quotes.
+Return ONLY valid JSON.
+
+{
+  "client_location_allowance": {
+    "limit": <numeric_limit>,
+    "unit": "<currency> per month",
+    "grade": "<grade_applicability>"
+  },
+  "fuel_reimbursement_two_wheeler": {
+    "limit": <numeric_limit>,
+    "unit": "<currency> per km",
+    "grade": "<grade_applicability>",
+    "max_per_month": <numeric_limit>,
+    "max_per_bill": <numeric_limit>
+  },
+  "fuel_reimbursement_four_wheeler": {
+    "limit": <numeric_limit>,
+    "unit": "<currency> per km",
+    "grade": "<grade_applicability>",
+    "max_per_month": <numeric_limit>,
+    "max_per_bill": <numeric_limit>
+  },
+  "meal_allowance": {
+    "limit": <numeric_limit>,
+    "unit": "<currency> per day",
+    "grade": "<grade_applicability>"
+  }
+}
+
+Rules:
+- Ensure all numeric limits are numbers (no commas or currency symbols).
+- Units should be standardized into "INR per month", "INR per km", or "INR per day".
+- Grade applicability should be extracted from the policy (e.g., "all", "Grade A", "Grade C", etc.).
+- max_per_bill: maximum reimbursable amount per fuel bill (single receipt). Omit if policy does not specify; validation will fall back to max_per_month or config.
+- meal_allowance.limit is the maximum per day (used as per-bill cap when validating meal bills).
+- Output must be valid JSON format. No trailing commas, no markdown, no wrapping, only the JSON object.

@@ -1,0 +1,48 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bill-processing-pipeline"
+version = "0.1.0"
+description = "Production-grade Python batch pipeline for Employee Reimbursement Processing"
+readme = "README_REIMBURSEMENT.md"
+requires-python = ">=3.10"
+dependencies = [
+    # OCR (preprocessing for low-quality scans/PDFs)
+    "pytesseract>=0.3.10",
+    "pdf2image>=1.16.3",
+    "pypdf>=4.0.0",
+    "Pillow>=10.0.0",
+    "numpy>=1.24.0",
+    "opencv-python-headless>=4.8.0",
+    # Validation & schemas
+    "pydantic>=2.5.0",
+    # HTTP & LLM
+    "requests>=2.31.0",
+    # Config & env
+    "python-dotenv>=1.0.0",
+    # Optional: async HTTP
+    "httpx>=0.25.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+]
+# Donut / LayoutLM document understanding (replaces vision LLM when VISION_EXTRACTOR=donut)
+document = [
+    "transformers>=4.30.0",
+    "torch>=2.0.0",
+    "Pillow>=10.0.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["llm*", "bills*", "policy*", "commons*", "prompts*", "decision*"]
+
+[tool.uv]
+dev-dependencies = []
+
+[tool.uv.sources]
+# Optional: pin or use workspace sources here

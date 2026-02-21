@@ -1,0 +1,282 @@
+[
+  {
+    "trace_id": "89b12404-31ed-45a0-8494-11c7fb16cd29",
+    "policy_version_hash": "allowances",
+    "extraction_source": "fusion",
+    "structured_bill": {
+      "employee_id": "0000_naveen_unknown_unknown",
+      "expense_type": "meal",
+      "amount": 158.0,
+      "month": "2025-08",
+      "bill_date": "2025-08-18",
+      "vendor_name": "Unknown",
+      "currency": "INR",
+      "category": "",
+      "line_items": [
+        {
+          "description": "Bill total",
+          "amount": 158.0,
+          "quantity": 1,
+          "code": ""
+        }
+      ]
+    },
+    "decision": {
+      "decision": "APPROVED",
+      "confidence_score": 1.0,
+      "reasoning": "Expense within policy limit and no monthly cap exceeded.",
+      "violated_rules": [],
+      "approved_amount": 125.0
+    },
+    "metadata": {
+      "ocr_confidence": 0.8808857884490591,
+      "llm_model": "qwen2.5:7b",
+      "processing_time_sec": 3.2611,
+      "explainability_score": 0.7
+    },
+    "ocr_extracted": {
+      "raw_text": "< Receipts\n2025-08-18 - 2025-08-31 Ratings Amount\nAug 29, 15:00 #95232620\n1 Mini Meal Veg F158\nTotal 158\nEmail receipt Reorder Rate order\n\n< Receipts\nAug 25, 15:00 #94434859\n1 Mini Meal Veg F158\nTotal F158\nEmail receipt Reorder Rate order\nAug 22, 15:00 #94283403\n1 Mini Meal Veg F158\nTotal F158\nEmail receipt Reorder Rate order\nAug 20, 15:00 #93866913\n1 Mini Meal Veg F158\nTotal F158\nEmail receipt Reorder Rate order\nAug 18, 15:00 #93476464\n1 Mini Meal Veg F158\nTotal F158\nEmail receipt Reorder Rate order\nee",
+      "confidence": 0.8808857884490591
+    },
+    "fusion_metadata": {
+      "field_sources": {
+        "amount": "OCR",
+        "month": "OCR",
+        "vendor_name": "LLM",
+        "currency": "LLM",
+        "category": "OCR",
+        "employee_id": "LLM",
+        "expense_type": "LLM",
+        "bill_date": "OCR",
+        "line_items": "OCR"
+      },
+      "conflicts": [],
+      "final_confidence_score": 0.8654428942245296,
+      "has_major_numeric_conflict": false
+    }
+  },
+  {
+    "trace_id": "ce11b6e5-f267-46bb-8ee0-e27b916534f2",
+    "policy_version_hash": "allowances",
+    "extraction_source": "fusion",
+    "structured_bill": {
+      "employee_id": "0000_smithau_unknown_unknown",
+      "expense_type": "meal",
+      "amount": 78.75,
+      "month": "2025-07",
+      "bill_date": "2025-07-08",
+      "vendor_name": "Unknown",
+      "currency": "INR",
+      "category": "",
+      "line_items": [
+        {
+          "description": "Bill total",
+          "amount": 278.75,
+          "quantity": 1,
+          "code": ""
+        }
+      ]
+    },
+    "decision": {
+      "decision": "APPROVED",
+      "confidence_score": 0.95,
+      "reasoning": "The meal expense is within the policy limit and does not exceed the monthly cap.",
+      "violated_rules": [],
+      "approved_amount": 78.75
+    },
+    "metadata": {
+      "ocr_confidence": 0.8762276785714286,
+      "llm_model": "qwen2.5:7b",
+      "processing_time_sec": 3.6856,
+      "explainability_score": 0.69
+    },
+    "ocr_extracted": {
+      "raw_text": ".\nwy HungerBox\nTax Invoice\nInvoice No : JUIQIT313692S Invoice Date: 2025-07-08\nInvoice issued by Eatgood Technologies Pvt Ltd on behalf of Vendor\nOrdered From: Bill To:\nFruit Pro Smitha Upadya\nJUICE JUNCTION- HSR Whitefield\n29ADRPR7O69N1Z9 81 & 82, EPIP Area, Near Vydehi Hospital\nNO 2628, 27TH MAIN, Tesco Campus Rd, Whitefield\nBengaluru Bengaluru\n29-Karnataka 29-Karnataka\nPincode: 560102 Pincode: 560066\nDescription GST Rat at Invoice Val\nHSN ate y nvoice Value\nSI.No: 1 - CGST @ 2.50%, SGST @ 2.50%, CESS @ 0.00%\nOther Menu Items : Fruit Bowl\nHSN : 996333 % 33.60 % 33.60\nOther Menu Items : Paneer Cheese Grill\nHSN | 996333 sx (Ragas \u00a345.15\nGST Breakup Details (Amount INR)\nGST IND Taxable Amount IGST CGST SGST CESS\n1 R701 -feaey (aay (ooo (eves\n[ali rae 40-7 cw [ml\nPayment Summary l :- % | ae ao\nPayment Mod ears 3\nooo eo\nPaytm UPI 278.75 = ma La J\n) Pte tear ee\nnn i\n[=] 1 arirk, FB .\nName: Eatgood Technologies Pvt Ltd (HungerBox)\nAddress: Ground & 4th Floor at Siri Snambhavi, #2346\nGST Applied For : 29AADCE9896J1ZQ\nHungerBox FBO FSSAI:10019043002849\nThis invoice is issued by Eatgood Technologies Pvt Ltd in accordance with section 9(5) of the\nCGST Act 2017 and the corresponding Section 5(5) of the IGST Act 2017 read with\nNotification 17/2021 - Central Tax(rate)\n\nThis is computer generated Invoice\nNo Signature Required",
+      "confidence": 0.8762276785714286
+    },
+    "fusion_metadata": {
+      "field_sources": {
+        "amount": "OCR",
+        "month": "OCR",
+        "vendor_name": "LLM",
+        "currency": "LLM",
+        "category": "OCR",
+        "employee_id": "LLM",
+        "expense_type": "LLM",
+        "bill_date": "OCR",
+        "line_items": "OCR"
+      },
+      "conflicts": [],
+      "final_confidence_score": 0.8631138392857143,
+      "has_major_numeric_conflict": false
+    }
+  },
+  {
+    "trace_id": "feb61387-96c6-4e59-b7c6-4f39f800c26c",
+    "policy_version_hash": "allowances",
+    "extraction_source": "fusion",
+    "structured_bill": {
+      "employee_id": "0000_smithau_unknown_unknown",
+      "expense_type": "meal",
+      "amount": 170.0,
+      "month": "2025-07",
+      "bill_date": "2025-07-08",
+      "vendor_name": "Unknown",
+      "currency": "INR",
+      "category": "",
+      "line_items": [
+        {
+          "description": "Bill total",
+          "amount": 170.0,
+          "quantity": 1,
+          "code": ""
+        }
+      ]
+    },
+    "decision": {
+      "decision": "APPROVED",
+      "confidence_score": 0.95,
+      "reasoning": "The meal expense is within the policy limit and does not exceed the monthly cap.",
+      "violated_rules": [],
+      "approved_amount": 46.25
+    },
+    "metadata": {
+      "ocr_confidence": 0.7857261410788382,
+      "llm_model": "qwen2.5:7b",
+      "processing_time_sec": 3.6191,
+      "explainability_score": 0.69
+    },
+    "ocr_extracted": {
+      "raw_text": "oe\nwy HungerBox\nTax Invoice\nInvoice No : COONND1443S Invoice Date: 2025-07-08\nInvoice issued by Eatgood Technologies Pvt Ltd on behalf of Vendor\nOrdered From: Bill To:\nCookie Man - Pop Up Smitha Upadya\nAustralian Foods India Private Limited Whitefield\n29AABCC1999C1ZL 81 & 82, EPIP Area, Near Vydehi Hospital\nAustralian Foods India Private Limited Tesco Campus Rd, Whitefield\nBengaluru Bengaluru\n29-Karnataka 29-Karnataka\nPincode: 560029 Pincode: 560066\nDescription GST Rat at Invoice Val\nHSN ate y nvoice Value\nSI.No: 1 - CGST @ 2.50%, SGST @ 2.50%, CESS @ 0.00%\nOther Menu Items : Butter Cashew Cookie\nHSN 996333 5% Sd \u00abavo = 170.00\nGST Breakup Details (Amount INR)\nGST IND Taxable Amount IGST CGST SGST CESS\n1 Rae190 -feaos kaos feooo  (eavooo\n[ali a TE pe iO\nPayment Summary a z 5,\nen in\u201d =r ih 3\u00b0\nee Le .\n. I\nPaytm UPI % 170.00 - Chi ey 1 Oe\n= i\" oF s \u2018 ; <a i\nTotal 8 70.00 Teher cere giesy\nld Oo in C1!\n= r * = s\nName: Eatgood Technologies Pvt Ltd (HungerBox)\nAddress: Ground & 4th Floor at Siri Snambhavi, #2346\nGST Applied For : 29AADCE9896J1ZQ\nHungerBox FBO FSSAI:10019043002849\nThis invoice is issued by Eatgood Technologies Pvt Ltd in accordance with section 9(5) of the\nCGST Act 2017 and the corresponding Section 5(5) of the IGST Act 2017 read with\nNotification 17/2021 - Central Tax(rate)\nThis is computer generated Invoice\nNo Signature Required",
+      "confidence": 0.7857261410788382
+    },
+    "fusion_metadata": {
+      "field_sources": {
+        "amount": "OCR",
+        "month": "OCR",
+        "vendor_name": "LLM",
+        "currency": "LLM",
+        "category": "OCR",
+        "employee_id": "LLM",
+        "expense_type": "LLM",
+        "bill_date": "OCR",
+        "line_items": "OCR"
+      },
+      "conflicts": [],
+      "final_confidence_score": 0.8178630705394191,
+      "has_major_numeric_conflict": false
+    }
+  },
+  {
+    "trace_id": "5df65728-7318-48be-9e92-0261f3caec71",
+    "policy_version_hash": "allowances",
+    "extraction_source": "fusion",
+    "structured_bill": {
+      "employee_id": "0000_smithau_unknown_unknown",
+      "expense_type": "meal",
+      "amount": 33.6,
+      "month": "2025-07",
+      "bill_date": "2025-07-30",
+      "vendor_name": "Unknown",
+      "currency": "INR",
+      "category": "",
+      "line_items": [
+        {
+          "description": "Bill total",
+          "amount": 33.6,
+          "quantity": 1,
+          "code": ""
+        }
+      ]
+    },
+    "decision": {
+      "decision": "APPROVED",
+      "confidence_score": 0.95,
+      "reasoning": "The meal expense is within the policy limit and does not exceed the monthly cap.",
+      "violated_rules": [],
+      "approved_amount": 33.6
+    },
+    "metadata": {
+      "ocr_confidence": 0.7414932126696833,
+      "llm_model": "qwen2.5:7b",
+      "processing_time_sec": 3.447,
+      "explainability_score": 0.69
+    },
+    "ocr_extracted": {
+      "raw_text": "a e\nwy HungerBox Tax Invoice\nInvoice No : JUIQIT323151S Invoice Date: 2025-07-30\nInvoice issued by Eatgood Technologies Pvt Ltd on behalf of Vendor\nOrdered From: Bill To:\nFruit Pro Smitha Upadya\nJUICE JUNCTION- HSR Whitefield\n29ADRPR7069N1Z9 81 & 82, EPIP Area, Near Vydehi Hospital\nNO 2628, 27TH MAIN, Tesco Campus Rd, Whitefield\nBengaluru Bengaluru\n29-Karnataka 29-Karnataka\nPincode: 560102 Pincode: 560066\nSI.No: 1 - CGST @ 2.50%, SGST @ 2.50%, CESS @ 0.00%\nOther Menu Items : Fruit Bowl\nHSN : 996333 5% ti<\u201c<i~\u2018\u00e9\u2018*d:SC*<\u2018\u00e9*\u2018 332\u00ab 33.60\nGST Breakup Details (Amount INR)\n\nGSTIND _ |Taxable Amount IGst |ccstT |SGsST __|CESS\n1 = \u00ab32.00 - e080 =F 0.80 ~=[F 0.00 \u2014((R 33.60\nPayment Summary rt ; ,\n\n[a]: ae 40-7. 0\nPayment Mode RE ieee\nPaytm UPI X 33.60 Fentes x He L\n\nen ne a _\n\nTotal =i 33.60 ieee\n\nao. a Le: 1\n\nLctaperie\u2019, ee\n\nPei Ao eee oo!\n\nof \". : oe iL:\nName: Eatgood Technologies Pvt Ltd (HungerBox)\nAddress: Ground & 4th Floor at Siri Shambhavi, #2346\nGST Applied For : 29AADCE9896J1ZQ\nHungerBox FBO FSSATI:10019043002849\nThis invoice is issued by Eatgood Technologies Pvt Ltd in accordance with section 9(5) of the\nCGST Act 2017 and the corresponding Section 5(5) of the IGST Act 2017 read with\nNotification 17/2021 - Central Tax(rate)\nThis is computer generated Invoice\nNo Signature Required",
+      "confidence": 0.7414932126696833
+    },
+    "fusion_metadata": {
+      "field_sources": {
+        "amount": "OCR",
+        "month": "OCR",
+        "vendor_name": "LLM",
+        "currency": "LLM",
+        "category": "OCR",
+        "employee_id": "LLM",
+        "expense_type": "LLM",
+        "bill_date": "OCR",
+        "line_items": "OCR"
+      },
+      "conflicts": [],
+      "final_confidence_score": 0.7957466063348416,
+      "has_major_numeric_conflict": false
+    }
+  },
+  {
+    "trace_id": "66f89e07-d2b7-4952-9ae9-ca5688e29ad6",
+    "policy_version_hash": "allowances",
+    "extraction_source": "fusion",
+    "structured_bill": {
+      "employee_id": "0000_smithau_unknown_unknown",
+      "expense_type": "meal",
+      "amount": 42.0,
+      "month": "2025-07",
+      "bill_date": "2025-07-30",
+      "vendor_name": "Unknown",
+      "currency": "INR",
+      "category": "",
+      "line_items": [
+        {
+          "description": "Bill total",
+          "amount": 42.0,
+          "quantity": 1,
+          "code": ""
+        }
+      ]
+    },
+    "decision": {
+      "decision": "APPROVED",
+      "confidence_score": 0.95,
+      "reasoning": "The meal expense is within the policy limit and does not exceed the monthly cap.",
+      "violated_rules": [],
+      "approved_amount": 42.0
+    },
+    "metadata": {
+      "ocr_confidence": 0.7875,
+      "llm_model": "qwen2.5:7b",
+      "processing_time_sec": 3.3544,
+      "explainability_score": 0.69
+    },
+    "ocr_extracted": {
+      "raw_text": "a e\nwy HungerBox Tax Invoice\nInvoice No : DOSXNV50443S Invoice Date: 2025-07-30\nInvoice issued by Eatgood Technologies Pvt Ltd on behalf of Vendor\nOrdered From: Bill To:\nDosa Pavilion Smitha Upadya\nPURIKA BREAD BAY PRIVATE LIMITED Whitefield\n29AAOCP7212J1ZY 81 & 82, EPIP Area, Near Vydehi Hospital\nNA Tesco Campus Rd, Whitefield\nBengaluru Bengaluru\n29-Karnataka 29-Karnataka\nPincode: 0 Pincode: 560066\nSI.No: 1 - CGST @ 2.50%, SGST @ 2.50%, CESS @ 0.00%\nOther Menu Items : Ragi Masala Dosa\nHSN : 996333 5% =\u2014ti(<i\u2018\u00e9\u2018dASCOC \u00abR200 T 42.00\nGST Breakup Details (Amount INR)\nGSTIND _ |Taxable Amount IGst |ccstT |SGsST __|CESS\n1 ==\u2014\u2014s\u00ab&R 40.00 - fe 1.00 =F 1.00 =F 0.00 ~\u2014\u2014*R 42.00\nPayment Summary Oban eee)\nPaytm UPI X 42.00 ae Bete eb GF\nat PL\nTotal \u00abi 42.00 oar at\n= \u201c- .\neel Ae ee\neaten\n[=] oa ira\nName: Eatgood Technologies Pvt Ltd (HungerBox)\nAddress: Ground & 4th Floor at Siri Shambhavi, #2346\nGST Applied For : 29AADCE9896J1ZQ\nHungerBox FBO FSSATI:10019043002849\nThis invoice is issued by Eatgood Technologies Pvt Ltd in accordance with section 9(5) of the\nCGST Act 2017 and the corresponding Section 5(5) of the IGST Act 2017 read with\nNotification 17/2021 - Central Tax(rate)\nThis is computer generated Invoice\nNo Signature Required",
+      "confidence": 0.7875
+    },
+    "fusion_metadata": {
+      "field_sources": {
+        "amount": "OCR",
+        "month": "OCR",
+        "vendor_name": "LLM",
+        "currency": "LLM",
+        "category": "OCR",
+        "employee_id": "LLM",
+        "expense_type": "LLM",
+        "bill_date": "OCR",
+        "line_items": "OCR"
+      },
+      "conflicts": [],
+      "final_confidence_score": 0.81875,
+      "has_major_numeric_conflict": false
+    }
+  }
+]

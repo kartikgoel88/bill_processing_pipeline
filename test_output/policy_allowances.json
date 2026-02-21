@@ -1,0 +1,24 @@
+{
+  "client_location_allowance": {
+    "limit": 6000,
+    "unit": "INR per month",
+    "grade": "all"
+  },
+  "fuel_reimbursement_two_wheeler": {
+    "limit": 5,
+    "unit": "INR per km",
+    "grade": "all",
+    "max_per_month": 6000
+  },
+  "fuel_reimbursement_four_wheeler": {
+    "limit": 10,
+    "unit": "INR per km",
+    "grade": "all",
+    "max_per_month": 6000
+  },
+  "meal_allowance": {
+    "limit": 125,
+    "unit": "INR per day",
+    "grade": "all"
+  }
+}
