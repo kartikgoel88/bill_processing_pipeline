@@ -5,49 +5,21 @@ Uses ILLMProvider (injected); supports donut/layoutlm/vision_llm via config.
 
 from __future__ import annotations
 
-import io
 import logging
-from pathlib import Path
 from typing import Any
 
 from core.interfaces import IVisionService, ILLMProvider
 from core.models import ExtractionResult
 from core.exceptions import VisionExtractionError
 
-from PIL import Image
-from extraction.ocr import load_images_from_path
-
-from extraction.parser import _bill_extraction_system_prompt, _bill_extraction_vision_prompt
-
-from extraction.parser import parse_llm_extraction
+from extraction.parser import (
+    _bill_extraction_system_prompt,
+    _bill_extraction_vision_prompt,
+    parse_llm_extraction,
+)
 from core.schema import ReimbursementSchema
 
 logger = logging.getLogger(__name__)
-
-VISION_IMAGE_MAX_PX = 1024
-VISION_JPEG_QUALITY = 85
-VISION_FIRST_PAGE_DPI = 150
-
-
-def _image_bytes_from_path(path: Path) -> bytes:
-    """First page as JPEG, size-limited. Uses extraction.load_images_from_path (first page only) then resize + encode."""
-
-    path = Path(path)
-    try:
-        images = load_images_from_path(path, dpi=VISION_FIRST_PAGE_DPI, first_page_only=True)
-    except (FileNotFoundError, RuntimeError):
-        return b""
-    if not images:
-        return b""
-    img = images[0]
-    w, h = img.size
-    if max(w, h) > VISION_IMAGE_MAX_PX:
-        ratio = VISION_IMAGE_MAX_PX / max(w, h)
-        new_size = (int(w * ratio), int(h * ratio))
-        img = img.resize(new_size, Image.Resampling.LANCZOS)
-    buf = io.BytesIO()
-    img.save(buf, format="JPEG", quality=VISION_JPEG_QUALITY)
-    return buf.getvalue()
 
 
 def _vision_prompt() -> str:
@@ -117,8 +89,3 @@ class VisionService(IVisionService):
             confidence=0.85,
             source="vision_llm",
         )
-
-
-def image_bytes_for_vision(path: Path) -> bytes:
-    """Helper: get image bytes for vision from file path (PDF or image)."""
-    return _image_bytes_from_path(Path(path))

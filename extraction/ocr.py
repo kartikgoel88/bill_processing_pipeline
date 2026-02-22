@@ -4,27 +4,18 @@ BaseOCREngine + TesseractEngine / EasyOCREngine; BasePreprocessor + PIL / OpenCV
 """
 from __future__ import annotations
 
-import io
 import logging
 import os
 from abc import ABC, abstractmethod
-from pathlib import Path
 from typing import Any
 
-from PIL import Image, ImageEnhance, ImageFilter, ImageOps
+from PIL import Image, ImageEnhance, ImageFilter
 
 logger = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
 # Optional dependencies
 # ---------------------------------------------------------------------------
-
-try:
-    from pdf2image import convert_from_path
-    PDF_AVAILABLE = True
-except ImportError:
-    PDF_AVAILABLE = False
-    convert_from_path = None  # type: ignore
 
 try:
     import pytesseract
@@ -306,40 +297,6 @@ def default_engine_name() -> str:
     if name == "easyocr" and not EASYOCR_AVAILABLE:
         return "tesseract"
     return name if name in ("tesseract", "easyocr") else "tesseract"
-
-
-def load_images_from_path(
-    path: Path,
-    dpi: int = 300,
-    first_page_only: bool = False,
-) -> list[Image.Image]:
-    """Load one or more images from file. PDF -> list of page images; image file -> single-element list.
-    first_page_only: if True, only load first page (for PDF); saves memory when only one image is needed."""
-    path = Path(path)
-    if not path.exists():
-        raise FileNotFoundError(f"File not found: {path}")
-    if path.suffix.lower() == ".pdf":
-        if not PDF_AVAILABLE or convert_from_path is None:
-            raise RuntimeError("pdf2image is not installed; install it and poppler")
-        kwargs = {"dpi": dpi}
-        if first_page_only:
-            kwargs["first_page"] = 1
-            kwargs["last_page"] = 1
-        pages = convert_from_path(str(path), **kwargs)
-        return [p.convert("RGB") if p.mode != "RGB" else p for p in pages]
-    img = Image.open(path).convert("RGB")
-    return [img]
-
-
-def load_images_from_bytes(data: bytes, is_pdf: bool, dpi: int = 300) -> list[Image.Image]:
-    """Load one or more images from bytes. PDF -> list of page images; image -> single-element list."""
-    if is_pdf:
-        if not PDF_AVAILABLE or convert_from_path is None:
-            raise RuntimeError("pdf2image required for PDF bytes")
-        pages = convert_from_path(io.BytesIO(data), dpi=dpi)
-        return [p.convert("RGB") if p.mode != "RGB" else p for p in pages]
-    img = Image.open(io.BytesIO(data)).convert("RGB")
-    return [img]
 
 
 def run_engine_on_images(engine: BaseOCREngine, images: list[Image.Image]) -> tuple[str, float]:

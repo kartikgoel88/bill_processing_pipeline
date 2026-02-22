@@ -14,16 +14,14 @@ logger = logging.getLogger(__name__)
 
 
 def _extract_from_path(path: Path, engine_name: str, dpi: int = 300) -> tuple[str, float]:
-    from extraction.ocr import (
-        create_ocr_engine,
-        load_images_from_path,
-        run_engine_on_images,
-    )
+    from extraction.image_io import PathImageReader
+    from extraction.ocr import create_ocr_engine, run_engine_on_images
+
     path = Path(path)
     if not path.exists():
         raise OCRError(f"File not found: {path}", trace_id=None)
     eng = create_ocr_engine(engine_name)
-    images = load_images_from_path(path, dpi=dpi)
+    images = PathImageReader(path, dpi=dpi).read()
     text, confidence = run_engine_on_images(eng, images)
     if path.suffix.lower() == ".pdf" and images:
         logger.info(
@@ -34,13 +32,11 @@ def _extract_from_path(path: Path, engine_name: str, dpi: int = 300) -> tuple[st
 
 
 def _extract_from_bytes(data: bytes, is_pdf: bool, engine_name: str, dpi: int = 300) -> tuple[str, float]:
-    from extraction.ocr import (
-        create_ocr_engine,
-        load_images_from_bytes,
-        run_engine_on_images,
-    )
+    from extraction.image_io import BytesImageReader
+    from extraction.ocr import create_ocr_engine, run_engine_on_images
+
     eng = create_ocr_engine(engine_name)
-    images = load_images_from_bytes(data, is_pdf=is_pdf, dpi=dpi)
+    images = BytesImageReader(data, is_pdf=is_pdf, dpi=dpi).read()
     text, confidence = run_engine_on_images(eng, images)
     return (text or "", float(confidence))
 

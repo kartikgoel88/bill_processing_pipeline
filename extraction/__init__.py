@@ -1,10 +1,16 @@
 """Extraction: OCR engines, preprocessing, bill parsing, and file discovery."""
 
+from extraction.image_io import (
+    IImageReader,
+    IImageWriter,
+    PathImageReader,
+    BytesImageReader,
+    PathImageWriter,
+    BytesImageWriter,
+)
 from extraction.ocr import (
     create_ocr_engine,
     create_preprocessor,
-    load_images_from_path,
-    load_images_from_bytes,
     run_engine_on_images,
     default_engine_name,
     BaseOCREngine,
@@ -21,10 +27,14 @@ from extraction.parser import (
 from extraction.discovery import iter_bills
 
 __all__ = [
+    "IImageReader",
+    "IImageWriter",
+    "PathImageReader",
+    "BytesImageReader",
+    "PathImageWriter",
+    "BytesImageWriter",
     "create_ocr_engine",
     "create_preprocessor",
-    "load_images_from_path",
-    "load_images_from_bytes",
     "run_engine_on_images",
     "default_engine_name",
     "BaseOCREngine",

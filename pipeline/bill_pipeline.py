@@ -19,22 +19,9 @@ from core.interfaces import (
     IPostProcessingService,
 )
 from core.models import BillResult, ExtractionResult
-from core.exceptions import BillProcessingError
+from utils.image_utils import image_bytes_from_path_for_vision
 
 logger = logging.getLogger(__name__)
-
-
-def _read_bytes(path: Path) -> bytes:
-    return path.read_bytes()
-
-
-def _is_pdf(path: Path) -> bool:
-    return path.suffix.lower() == ".pdf"
-
-
-def _image_bytes_for_vision(path: Path) -> bytes:
-    from services.vision_service import image_bytes_for_vision as _img
-    return _img(Path(path))
 
 
 def _ocr_fallback(
@@ -146,7 +133,7 @@ class BillProcessingPipeline:
                 logger.exception("OCR failed for %s: %s", path, e)
 
         # 2) Vision extraction
-        image_bytes = _image_bytes_for_vision(path)
+        image_bytes = image_bytes_from_path_for_vision(path)
         if not image_bytes:
             logger.warning("No image bytes for vision (e.g. pdf2image missing or failed); using OCR only")
         try:

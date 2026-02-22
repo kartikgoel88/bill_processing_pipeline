@@ -12,7 +12,7 @@ This document describes the production-grade refactored architecture: clean laye
     exceptions.py  # BillProcessingError, OCRError, VisionExtractionError, DecisionError, PostProcessingError
 
 /extraction
-    ocr.py              # OCR: create_ocr_engine, load_images_from_path/from_bytes, run_engine_on_images (Tesseract/EasyOCR + preprocessors)
+    ocr.py              # OCR: create_ocr_engine, run_engine_on_images (Tesseract/EasyOCR + preprocessors); image_io: PathImageReader/BytesImageReader for loading
     parser.py            # parse_structured_from_ocr, parse_llm_extraction, prompts
     numeric_validator.py # is_valid_amount (amount-in-context guardrails)
     discovery.py         # iter_bills(root) -> (expense_type, employee_id, file_path)
