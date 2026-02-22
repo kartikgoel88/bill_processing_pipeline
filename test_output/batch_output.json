@@ -1,6 +1,6 @@
 [
   {
-    "trace_id": "21dfaf3f-bac8-4a33-8476-a9aa3bbe3a19",
+    "trace_id": "ae6da72d-f505-4d1f-bd15-22402f06917f",
     "file": "AUTO_RECEIPT_RD17313323427215751.pdf",
     "extraction_source": "vision_llm",
     "structured_bill": {
@@ -9,12 +9,12 @@
       "amount": 160.0,
       "month": "2024-11",
       "bill_date": "2024-11-11",
-      "vendor_name": "R\u00e1pido",
+      "vendor_name": "Rapido",
       "currency": "INR",
       "category": "",
       "line_items": [
         {
-          "description": "Bill total",
+          "description": "Ride",
           "amount": 160.0,
           "quantity": 1,
           "code": ""
@@ -30,11 +30,11 @@
     },
     "metadata": {
       "ocr_confidence": 0.0,
-      "processing_time_sec": 46.299
+      "processing_time_sec": 86.074
     }
   },
   {
-    "trace_id": "2f54c1d1-22cd-4267-866f-58d6b709bfd1",
+    "trace_id": "44d00665-8421-42e0-a6fc-89efb367c0b2",
     "file": "AUTO_RECEIPT_RD17315579158315167.pdf",
     "extraction_source": "vision_llm",
     "structured_bill": {
@@ -48,7 +48,7 @@
       "category": "",
       "line_items": [
         {
-          "description": "Cab/commute",
+          "description": "Bill total",
           "amount": 188.0,
           "quantity": 1,
           "code": ""
@@ -64,11 +64,11 @@
     },
     "metadata": {
       "ocr_confidence": 0.0,
-      "processing_time_sec": 36.3224
+      "processing_time_sec": 58.8988
     }
   },
   {
-    "trace_id": "1f0f3637-143c-4655-8e11-30273c916fb9",
+    "trace_id": "cfada517-d858-4677-83e0-3d498f13a51e",
     "file": "AUTO_RECEIPT_RD17315907206185320.pdf",
     "extraction_source": "vision_llm",
     "structured_bill": {
@@ -76,13 +76,13 @@
       "expense_type": "meal",
       "amount": 183.0,
       "month": "2024-11",
-      "bill_date": "2024-11-14",
-      "vendor_name": "Unknown",
+      "bill_date": "",
+      "vendor_name": "Rapido",
       "currency": "INR",
       "category": "",
       "line_items": [
         {
-          "description": "cab/commute",
+          "description": "Cab fare",
           "amount": 183.0,
           "quantity": 1,
           "code": ""
@@ -98,11 +98,11 @@
     },
     "metadata": {
       "ocr_confidence": 0.0,
-      "processing_time_sec": 36.1331
+      "processing_time_sec": 60.1898
     }
   },
   {
-    "trace_id": "1d7e52f1-9d62-4e6f-b172-719d27f243fe",
+    "trace_id": "dee297bd-db83-4b35-a738-8a45ed89f92f",
     "file": "AUTO_RECEIPT_RD17321585542843974.pdf",
     "extraction_source": "vision_llm",
     "structured_bill": {
@@ -116,7 +116,7 @@
       "category": "",
       "line_items": [
         {
-          "description": "Cab commute",
+          "description": "Ride",
           "amount": 147.0,
           "quantity": 1,
           "code": ""
@@ -132,11 +132,11 @@
     },
     "metadata": {
       "ocr_confidence": 0.0,
-      "processing_time_sec": 36.574
+      "processing_time_sec": 62.3843
     }
   },
   {
-    "trace_id": "19f82a1a-70a0-4f1e-8bb7-d09b2cb96193",
+    "trace_id": "12b5c331-5481-42e6-a8d7-c1b6b5d8e5b6",
     "file": "AUTO_RECEIPT_RD17321854214454215.pdf",
     "extraction_source": "vision_llm",
     "structured_bill": {
@@ -150,7 +150,7 @@
       "category": "",
       "line_items": [
         {
-          "description": "Bill total",
+          "description": "Ride",
           "amount": 133.0,
           "quantity": 1,
           "code": ""
@@ -166,11 +166,11 @@
     },
     "metadata": {
       "ocr_confidence": 0.0,
-      "processing_time_sec": 36.7489
+      "processing_time_sec": 60.5436
     }
   },
   {
-    "trace_id": "ad9e64e2-e677-4c20-aafd-780a39cf9371",
+    "trace_id": "dbe8069c-12e1-4fdc-8f9b-5b9b4efa9217",
     "file": "AUTO_RECEIPT_RD17322466992750953.pdf",
     "extraction_source": "vision_llm",
     "structured_bill": {
@@ -179,7 +179,7 @@
       "amount": 151.0,
       "month": "2024-11",
       "bill_date": "2024-11-22",
-      "vendor_name": "Unknown",
+      "vendor_name": "Rapido",
       "currency": "INR",
       "category": "",
       "line_items": [
@@ -200,11 +200,11 @@
     },
     "metadata": {
       "ocr_confidence": 0.0,
-      "processing_time_sec": 37.2501
+      "processing_time_sec": 61.4972
     }
   },
   {
-    "trace_id": "8a19dc30-c9ed-47dc-9721-0cbde950ff07",
+    "trace_id": "5fdbdd0c-d842-49ba-b1db-209db9d1efd8",
     "file": "AUTO_RECEIPT_RD17327642156571431.pdf",
     "extraction_source": "vision_llm",
     "structured_bill": {
@@ -212,13 +212,13 @@
       "expense_type": "meal",
       "amount": 152.0,
       "month": "2024-11",
-      "bill_date": "",
+      "bill_date": "2024-11-28",
       "vendor_name": "Rapido",
       "currency": "INR",
       "category": "",
       "line_items": [
         {
-          "description": "Bill total",
+          "description": "Ride",
           "amount": 152.0,
           "quantity": 1,
           "code": ""
@@ -234,11 +234,11 @@
     },
     "metadata": {
       "ocr_confidence": 0.0,
-      "processing_time_sec": 34.8935
+      "processing_time_sec": 63.0731
     }
   },
   {
-    "trace_id": "fb79474e-cefd-4a54-8be5-e4cd800525cc",
+    "trace_id": "4c414891-0ed0-4776-8e7d-164f0d0574e8",
     "file": "AUTO_RECEIPT_RD17328020445687517.pdf",
     "extraction_source": "vision_llm",
     "structured_bill": {
@@ -252,7 +252,7 @@
       "category": "",
       "line_items": [
         {
-          "description": "Bill total",
+          "description": "Cab/Commute",
           "amount": 155.0,
           "quantity": 1,
           "code": ""
@@ -268,11 +268,11 @@
     },
     "metadata": {
       "ocr_confidence": 0.0,
-      "processing_time_sec": 36.5355
+      "processing_time_sec": 65.7128
     }
   },
   {
-    "trace_id": "fa0114ec-393f-4648-9ae7-07c3562f94a1",
+    "trace_id": "82fd60b4-f5f3-4c34-97a5-383e98299434",
     "file": "CAB_RECEIP.pdf",
     "extraction_source": "vision_llm",
     "structured_bill": {
@@ -281,12 +281,12 @@
       "amount": 210.0,
       "month": "2025-06",
       "bill_date": "2025-06-23",
-      "vendor_name": "Rapido",
+      "vendor_name": "rapido",
       "currency": "INR",
       "category": "",
       "line_items": [
         {
-          "description": "Cab/commute",
+          "description": "Ride total",
           "amount": 210.0,
           "quantity": 1,
           "code": ""
@@ -302,11 +302,11 @@
     },
     "metadata": {
       "ocr_confidence": 0.0,
-      "processing_time_sec": 36.5916
+      "processing_time_sec": 61.9346
     }
   },
   {
-    "trace_id": "a10dea47-27c3-40dc-954d-3b728f9f8bc5",
+    "trace_id": "1744fa1c-d473-4566-b2ea-6dfa9ccb05c7",
     "file": "CAB_RECEIPT_RD17506969273550314.pdf",
     "extraction_source": "vision_llm",
     "structured_bill": {
@@ -336,18 +336,18 @@
     },
     "metadata": {
       "ocr_confidence": 0.0,
-      "processing_time_sec": 36.7141
+      "processing_time_sec": 62.9014
     }
   },
   {
-    "trace_id": "602c1a60-635c-4728-bcd5-6726d51985a3",
+    "trace_id": "6be5285b-4469-4943-96e4-ff854a57c7d0",
     "file": "receipt_9ed71f8b-428d-4d31-8743-c3dda2c2e686.pdf",
     "extraction_source": "vision_llm",
     "structured_bill": {
       "employee_id": "",
       "expense_type": "meal",
       "amount": 123.02,
-      "month": "2025-10",
+      "month": "2025-02",
       "bill_date": "2025-10-09",
       "vendor_name": "Uber",
       "currency": "INR",
@@ -370,11 +370,11 @@
     },
     "metadata": {
       "ocr_confidence": 0.0,
-      "processing_time_sec": 33.3101
+      "processing_time_sec": 55.6745
     }
   },
   {
-    "trace_id": "d48357b5-2a07-4b32-829a-ab394fcbc41a",
+    "trace_id": "a26859b8-4c28-45e8-96fe-a2f81fd22ad2",
     "file": "AugMealReceipts.pdf",
     "extraction_source": "vision_llm",
     "structured_bill": {
@@ -383,18 +383,12 @@
       "amount": 158.0,
       "month": "2025-08",
       "bill_date": "2025-08-29",
-      "vendor_name": "Unknown",
+      "vendor_name": "ABC Restaurant",
       "currency": "INR",
       "category": "",
       "line_items": [
         {
-          "description": "Mini Meal Veg",
-          "amount": 158.0,
-          "quantity": 1,
-          "code": ""
-        },
-        {
-          "description": "Bill total",
+          "description": "Meal",
           "amount": 158.0,
           "quantity": 1,
           "code": ""
@@ -410,11 +404,11 @@
     },
     "metadata": {
       "ocr_confidence": 0.0,
-      "processing_time_sec": 34.7964
+      "processing_time_sec": 55.2293
     }
   },
   {
-    "trace_id": "5457d6f5-4c78-49ff-9baf-e25c321863a9",
+    "trace_id": "d3d70005-1041-4c77-9136-b670ccef7676",
     "file": "31st_Lunch.pdf",
     "extraction_source": "vision_llm",
     "structured_bill": {
@@ -423,7 +417,7 @@
       "amount": 33.6,
       "month": "2025-07",
       "bill_date": "2025-07-30",
-      "vendor_name": "HungerBox",
+      "vendor_name": "Eatgood Technologies Pvt Ltd (HungerBox)",
       "currency": "INR",
       "category": "",
       "line_items": [
@@ -444,11 +438,11 @@
     },
     "metadata": {
       "ocr_confidence": 0.0,
-      "processing_time_sec": 32.9559
+      "processing_time_sec": 65.5181
     }
   },
   {
-    "trace_id": "b7a0740d-78c9-4f16-8608-5c8bb14401ca",
+    "trace_id": "78324fae-1bfd-4b18-adf4-debec38cc85b",
     "file": "31st_Lunch_1.pdf",
     "extraction_source": "vision_llm",
     "structured_bill": {
@@ -457,7 +451,7 @@
       "amount": 42.0,
       "month": "2025-07",
       "bill_date": "2025-07-30",
-      "vendor_name": "Eatgood Technologies Pvt Ltd (HungerBox)",
+      "vendor_name": "HungerBox",
       "currency": "INR",
       "category": "",
       "line_items": [
@@ -465,24 +459,24 @@
           "description": "Ragi Masala Dosa",
           "amount": 42.0,
           "quantity": 1,
-          "code": "996333"
+          "code": ""
         }
       ]
     },
     "decision": {
       "decision": "APPROVED",
       "confidence_score": 1.0,
-      "reasoning": "Within meal allowance limit of INR 125 per day.",
+      "reasoning": "Within meal allowance limit",
       "violated_rules": [],
       "approved_amount": 42.0
     },
     "metadata": {
       "ocr_confidence": 0.0,
-      "processing_time_sec": 35.3003
+      "processing_time_sec": 66.1921
     }
   },
   {
-    "trace_id": "5fc01b87-9af8-4935-bfdf-e421315ad69f",
+    "trace_id": "05066386-d1c5-47e6-ab04-40422a1ce194",
     "file": "July8th_Lunch.pdf",
     "extraction_source": "vision_llm",
     "structured_bill": {
@@ -512,11 +506,11 @@
     },
     "metadata": {
       "ocr_confidence": 0.0,
-      "processing_time_sec": 33.4216
+      "processing_time_sec": 67.1408
     }
   },
   {
-    "trace_id": "32708d8d-2943-467f-9022-39baeb6c25d2",
+    "trace_id": "7d526168-4b26-4ff2-9f0a-d24df22f200f",
     "file": "July8th_Lunch_1.pdf",
     "extraction_source": "vision_llm",
     "structured_bill": {
@@ -546,7 +540,7 @@
     },
     "metadata": {
       "ocr_confidence": 0.0,
-      "processing_time_sec": 34.5244
+      "processing_time_sec": 69.1475
     }
   }
 ]

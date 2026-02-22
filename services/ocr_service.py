@@ -1,29 +1,42 @@
 """
 OCR service: implements IOCRService using extraction.ocr engine API.
+Uses image_io reader strategies (PathImageReader, BytesImageReader); one extraction path.
 """
 
 from __future__ import annotations
 
 import logging
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from core.interfaces import IOCRService
 from core.exceptions import OCRError
 
+from extraction.ocr import create_ocr_engine, run_engine_on_images
+from extraction.image_io import PathImageReader
+from extraction.image_io import BytesImageReader
+
+
+if TYPE_CHECKING:
+    from extraction.image_io import IImageReader
+
 logger = logging.getLogger(__name__)
 
 
-def _extract_from_path(path: Path, engine_name: str, dpi: int = 300) -> tuple[str, float]:
-    from extraction.image_io import PathImageReader
-    from extraction.ocr import create_ocr_engine, run_engine_on_images
+def _extract_from_reader(
+    reader: IImageReader,
+    engine_name: str,
+    *,
+    path: Path | None = None,
+    dpi: int = 300,
+) -> tuple[str, float]:
+    """Run OCR on images from any reader (path, bytes, etc.). path optional for PDF logging."""
+    
 
-    path = Path(path)
-    if not path.exists():
-        raise OCRError(f"File not found: {path}", trace_id=None)
     eng = create_ocr_engine(engine_name)
-    images = PathImageReader(path, dpi=dpi).read()
+    images = reader.read()
     text, confidence = run_engine_on_images(eng, images)
-    if path.suffix.lower() == ".pdf" and images:
+    if path is not None and path.suffix.lower() == ".pdf" and images:
         logger.info(
             "OCR from PDF: %s pages, dpi=%s, engine=%s, combined length %s, avg confidence %.3f",
             len(images), dpi, eng.name, len(text), confidence,
@@ -31,14 +44,26 @@ def _extract_from_path(path: Path, engine_name: str, dpi: int = 300) -> tuple[st
     return (text or "", float(confidence))
 
 
-def _extract_from_bytes(data: bytes, is_pdf: bool, engine_name: str, dpi: int = 300) -> tuple[str, float]:
-    from extraction.image_io import BytesImageReader
-    from extraction.ocr import create_ocr_engine, run_engine_on_images
+def _extract_from_path(path: Path, engine_name: str, dpi: int = 300) -> tuple[str, float]:
 
-    eng = create_ocr_engine(engine_name)
-    images = BytesImageReader(data, is_pdf=is_pdf, dpi=dpi).read()
-    text, confidence = run_engine_on_images(eng, images)
-    return (text or "", float(confidence))
+    path = Path(path)
+    if not path.exists():
+        raise OCRError(f"File not found: {path}", trace_id=None)
+    return _extract_from_reader(
+        PathImageReader(path, dpi=dpi),
+        engine_name,
+        path=path,
+        dpi=dpi,
+    )
+
+
+def _extract_from_bytes(data: bytes, is_pdf: bool, engine_name: str, dpi: int = 300) -> tuple[str, float]:
+
+    return _extract_from_reader(
+        BytesImageReader(data, is_pdf=is_pdf, dpi=dpi),
+        engine_name,
+        dpi=dpi,
+    )
 
 
 class OCRService(IOCRService):
