@@ -8,6 +8,12 @@ Usage:
   python scripts/run_self_test.py --update-expected # run pipeline, write outputs to test_expected
   python scripts/run_self_test.py --run-only        # run pipeline only (no comparison)
   python scripts/run_self_test.py --compare-only    # compare existing test_output to test_expected (no run)
+
+Input layout:
+  - Full: input_root/expense_type/employee_id/*.pdf  (e.g. test_input/meal/emp_id/file.pdf)
+  - Single expense: input_root/expense_type/*.pdf    (e.g. test_input/commute/*.pdf → employee_id "unknown")
+After changing test input or fixing extraction/validation, run with --update-expected to refresh
+test_expected/batch_output.json so the self-test passes.
 """
 from __future__ import annotations
 
@@ -28,10 +34,11 @@ BATCH_JSON = "batch_output.json"
 
 
 def _normalize_record(r: dict) -> dict:
-    """Produce a comparable record (no trace_id, timing, raw OCR)."""
+    """Produce a comparable record (no trace_id, timing, raw OCR). Includes file name for tracking."""
     bill = r.get("structured_bill") or {}
     decision = r.get("decision") or {}
     return {
+        "file": r.get("file", ""),
         "employee_id": bill.get("employee_id", ""),
         "expense_type": bill.get("expense_type", ""),
         "amount": bill.get("amount"),
@@ -44,13 +51,14 @@ def _normalize_record(r: dict) -> dict:
 
 
 def _sort_key(rec: dict) -> tuple:
-    """Sort by bill identity; use amount as tiebreaker so same-day bills order consistently (donut vs layout)."""
+    """Sort by bill identity; use file then amount so order is stable and trackable."""
     amt = rec.get("amount")
     amt_val = float(amt) if amt is not None else 0.0
     return (
         rec.get("employee_id", ""),
         rec.get("month", ""),
         rec.get("expense_type", ""),
+        rec.get("file", ""),
         str(rec.get("bill_date") or ""),
         (rec.get("vendor_name") or "").strip(),
         amt_val,
@@ -72,6 +80,7 @@ def load_and_normalize_batch(path: Path) -> list[dict]:
         else:
             # Already normalized (e.g. test_expected)
             normalized.append({
+                "file": r.get("file", ""),
                 "employee_id": r.get("employee_id", ""),
                 "expense_type": r.get("expense_type", ""),
                 "amount": r.get("amount"),
@@ -93,8 +102,8 @@ def compare_records(actual: list[dict], expected: list[dict]) -> list[str]:
 
     # Compare field-by-field for each index (after sort, order should align by employee/month/type/amount)
     for i, (a, e) in enumerate(zip(actual, expected)):
-        prefix = f"[{i}] {a.get('employee_id')}/{a.get('month')}/{a.get('expense_type')}"
-        for key in ("employee_id", "expense_type", "month", "decision"):
+        prefix = f"[{i}] {a.get('file') or a.get('employee_id')}/{a.get('month')}/{a.get('expense_type')}"
+        for key in ("file", "employee_id", "expense_type", "month", "decision"):
             av, ev = a.get(key), e.get(key)
             if str(av).strip() != str(ev).strip():
                 diffs.append(f"{prefix} {key}: actual={av!r}, expected={ev!r}")

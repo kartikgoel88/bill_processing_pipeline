@@ -131,6 +131,8 @@ def run_batch_single_process(
         vision_extractor=config.vision_extractor,
         donut_model_id=config.donut_model_id,
         layoutlm_model_id=config.layoutlm_model_id,
+        extraction_strategy=config.extraction_strategy,
+        output_all_extractors=config.output_all_extractors,
     )
     results = orch.process_batch_from_folder(input_root, dry_run=config.dry_run)
     return [r.model_dump(mode="json") for r in results]
@@ -208,6 +210,8 @@ def _config_to_dict(c: PipelineConfig) -> dict[str, Any]:
         "llm_vision_api_key": c.llm_vision_api_key,
         "llm_decision_base_url": c.llm_decision_base_url,
         "llm_decision_api_key": c.llm_decision_api_key,
+        "extraction_strategy": c.extraction_strategy,
+        "output_all_extractors": c.output_all_extractors,
         "vision_extractor": c.vision_extractor,
         "donut_model_id": c.donut_model_id,
         "layoutlm_model_id": c.layoutlm_model_id,
@@ -243,6 +247,7 @@ def save_decisions_csv(results: list[dict[str, Any]], path: Path) -> None:
         meta = r.get("metadata") or {}
         rows.append({
             "trace_id": r.get("trace_id", ""),
+            "file": r.get("file", ""),
             "policy_version_hash": (r.get("policy_version_hash") or "")[:16],
             "employee_id": bill.get("employee_id", ""),
             "expense_type": bill.get("expense_type", ""),

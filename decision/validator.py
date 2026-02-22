@@ -83,7 +83,10 @@ def validate_reimbursement(
         critical_failure = True
     elif schema.amount == 0:
         reasons.append("amount is zero")
-        critical_failure = True
+        # Allow decision LLM to run when amount is 0 if month is present (e.g. ride receipt with missing amount → NEEDS_REVIEW)
+        month_parsed_for_zero = _parse_month(schema.month)
+        if not (schema.month and schema.month.strip() and month_parsed_for_zero and _month_not_future(*month_parsed_for_zero)):
+            critical_failure = True
     elif schema.amount < 0:
         reasons.append("amount must be > 0")
         critical_failure = True

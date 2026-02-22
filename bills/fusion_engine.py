@@ -12,7 +12,7 @@ from typing import Any
 
 from commons.schema import ReimbursementSchema
 from bills.numeric_validator import is_valid_amount
-from bills.bill_extractor import _correct_rupee_read_as_leading_2
+from bills.bill_extractor import _correct_rupee_read_as_leading_2, _text_has_year_in_date_context
 
 logger = logging.getLogger(__name__)
 
@@ -137,6 +137,12 @@ def fuse_extractions(
         if corrected != amt:
             logger.info("Fusion: amount corrected from %.2f to %.2f (rupee symbol read as 2)", amt, corrected)
             final["amount"] = corrected
+    # Reject year (2000-2030) in date context (e.g. "Nov 14th 2024" mistaken as amount)
+    if ocr_raw_text and final.get("amount"):
+        amt = float(final["amount"])
+        if amt == int(amt) and 2000 <= amt <= 2030 and _text_has_year_in_date_context(ocr_raw_text, amt):
+            logger.info("Fusion: amount %.0f rejected (year in date context); using 0", amt)
+            final["amount"] = 0.0
 
     # --- month ---
     ocr_month = _valid_month(ocr.get("month"))

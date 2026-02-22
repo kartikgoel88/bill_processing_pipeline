@@ -148,8 +148,106 @@ def _ocr_from_path(path: Path) -> tuple[OCRExtractionResult, bytes]:
     return ocr_result, vision_bytes
 
 
+def _ocr_result_from_path(path: Path) -> OCRExtractionResult:
+    """Run OCR only (Tesseract/EasyOCR). Used when extraction_strategy=vision_first and vision fails."""
+    if path.suffix.lower() == ".pdf":
+        return extract_from_pdf(path)
+    return extract_from_bytes(_read_file_bytes(path), is_pdf=False)
+
+
+def _run_all_extractors(
+    path: Path,
+    image_bytes: bytes,
+    employee_id: str,
+    expense_type: str,
+    donut_model_id: str,
+    llm_client: Any,
+    qwen_vl_model: str,
+) -> dict[str, Any]:
+    """
+    Run OCR (Tesseract), EasyOCR, Donut, and Qwen-VL and return their outputs.
+    Used when OUTPUT_ALL_EXTRACTORS=1 so you can compare all extractors in batch_output.json.
+    Returns dict with keys: tesseract, easyocr, donut, qwen_vl. Each value is
+    { raw_text?, confidence, structured } for OCR or { structured, confidence } for vision, or { error: "..." }.
+    """
+    import os as _os
+
+    out: dict[str, Any] = {}
+
+    def _schema_to_dict(s: ReimbursementSchema | None) -> dict[str, Any]:
+        if s is None:
+            return {}
+        return s.model_dump(mode="json")
+
+    # 1. Tesseract OCR
+    try:
+        if path.suffix.lower() == ".pdf":
+            ocr_t = extract_from_pdf(path, engine_override="tesseract")
+        else:
+            ocr_t = extract_from_bytes(_read_file_bytes(path), is_pdf=False, engine_override="tesseract")
+        schema_t = parse_structured_from_ocr(ocr_t.raw_text or "", employee_id=employee_id, expense_type=expense_type)
+        out["tesseract"] = {
+            "raw_text": ocr_t.raw_text or "",
+            "confidence": ocr_t.confidence,
+            "structured": _schema_to_dict(schema_t),
+        }
+    except Exception as e:
+        out["tesseract"] = {"error": str(e)}
+
+    # 2. EasyOCR
+    try:
+        from bills.ocr_engine import EASYOCR_AVAILABLE
+        if not EASYOCR_AVAILABLE:
+            out["easyocr"] = {"error": "easyocr not installed (pip install .[ocr])"}
+        else:
+            if path.suffix.lower() == ".pdf":
+                ocr_e = extract_from_pdf(path, engine_override="easyocr")
+            else:
+                ocr_e = extract_from_bytes(_read_file_bytes(path), is_pdf=False, engine_override="easyocr")
+            schema_e = parse_structured_from_ocr(ocr_e.raw_text or "", employee_id=employee_id, expense_type=expense_type)
+            out["easyocr"] = {
+                "raw_text": ocr_e.raw_text or "",
+                "confidence": ocr_e.confidence,
+                "structured": _schema_to_dict(schema_e),
+            }
+    except Exception as e:
+        out["easyocr"] = {"error": str(e)}
+
+    # 3. Donut
+    try:
+        if image_bytes:
+            schema_d, conf_d = extract_bill_via_donut(
+                image_bytes,
+                employee_id=employee_id,
+                expense_type=expense_type,
+                model_id=donut_model_id,
+            )
+            out["donut"] = {"structured": _schema_to_dict(schema_d), "confidence": conf_d or 0.0}
+        else:
+            out["donut"] = {"error": "no image bytes (e.g. pdf2image not available)"}
+    except Exception as e:
+        out["donut"] = {"error": str(e)}
+
+    # 4. Qwen-VL (vision LLM)
+    try:
+        if image_bytes and llm_client:
+            schema_q, conf_q = extract_bill_via_llm(
+                llm_client,
+                image_bytes,
+                employee_id=employee_id,
+                expense_type=expense_type,
+                vision_model=qwen_vl_model,
+            )
+            out["qwen_vl"] = {"structured": _schema_to_dict(schema_q), "confidence": conf_q or 0.0}
+        else:
+            out["qwen_vl"] = {"error": "no image bytes or vision client not configured"}
+    except Exception as e:
+        out["qwen_vl"] = {"error": str(e)}
+
+    return out
+
+
 def _get_structured_bill(
-    ocr_result: OCRExtractionResult,
     image_bytes: bytes,
     employee_id: str,
     expense_type: str,
@@ -162,6 +260,9 @@ def _get_structured_bill(
     vision_extractor: str = "vision_llm",
     donut_model_id: str = "naver-clova-ix/donut-base-finetuned-cord-v2",
     layoutlm_model_id: str = "nielsr/layoutlmv3-finetuned-cord",
+    extraction_strategy: str = "fusion",
+    ocr_result: OCRExtractionResult | None = None,
+    path: Path | None = None,
 ) -> tuple[
     ReimbursementSchema | None,
     str,
@@ -169,12 +270,146 @@ def _get_structured_bill(
     float | None,
     bool,
     dict[str, Any],
+    OCRExtractionResult | None,
 ]:
     """
-    Run OCR + vision/document extraction (Donut or Vision LLM), then fuse → validate.
-    Returns (schema, extraction_source, ocr_conf, llm_conf, critical_failure, fusion_metadata).
+    Run extraction per strategy; return (schema, extraction_source, ocr_conf, llm_conf, critical_failure, fusion_metadata, ocr_result_used).
+    - vision_first: try vision/document (Donut, LayoutLMv3, Qwen-VL, vision_llm) first; use Tesseract only as fallback.
+    - fusion: run OCR + vision, then fuse (current behaviour).
     """
-    # 1. OCR extraction
+    import os as _os
+
+    strategy = (extraction_strategy or "fusion").strip().lower()
+    extractor = (vision_extractor or "donut").strip().lower()
+    if extractor == "layout":
+        extractor = "layoutlm"
+    extractor_name = extractor  # for extraction_source in response (donut, layoutlm, vision_llm, qwen_vl)
+    # Qwen-VL: use vision_llm path; prefer QWEN_VL_MODEL, else use configured vision_model (LLM_VISION_MODEL) so no 404 when qwen2-vl not installed
+    if extractor == "qwen_vl":
+        vision_model_actual = _os.getenv("QWEN_VL_MODEL") or vision_model
+        extractor = "vision_llm"
+    else:
+        vision_model_actual = vision_model
+
+    empty_fusion = {
+        "field_sources": {},
+        "conflicts": [],
+        "final_confidence_score": 0.0,
+        "has_major_numeric_conflict": False,
+    }
+
+    def _run_vision_extractor() -> tuple[ReimbursementSchema | None, float | None]:
+        """Run Donut, LayoutLM, or vision LLM; return (schema, confidence)."""
+        if not image_bytes:
+            return None, None
+        try:
+            if extractor == "donut":
+                return extract_bill_via_donut(
+                    image_bytes,
+                    employee_id=employee_id,
+                    expense_type=expense_type,
+                    model_id=donut_model_id,
+                )
+            if extractor == "layoutlm":
+                # LayoutLM needs OCR text for word alignment; run OCR if we have path
+                ocr_text = ""
+                if path:
+                    _ocr = _ocr_result_from_path(path)
+                    ocr_text = _ocr.raw_text or ""
+                return extract_bill_via_layoutlm(
+                    image_bytes,
+                    ocr_text,
+                    employee_id=employee_id,
+                    expense_type=expense_type,
+                    model_id=layoutlm_model_id,
+                )
+            if llm_client and extractor == "vision_llm":
+                return extract_bill_via_llm(
+                    llm_client,
+                    image_bytes,
+                    employee_id=employee_id,
+                    expense_type=expense_type,
+                    vision_model=vision_model_actual,
+                    max_retries=max_retries,
+                    retry_delay_sec=retry_delay_sec,
+                )
+        except Exception as e:
+            logger.warning("Vision/document extraction failed trace_id=%s: %s", trace_id, e)
+        return None, None
+
+    def _vision_has_critical(s: ReimbursementSchema | None, conf: float | None) -> bool:
+        if s is None:
+            return False
+        if (conf or 0) < ocr_confidence_threshold:
+            return False
+        if (s.amount or 0) <= 0 or not (s.month or "").strip():
+            return False
+        return True
+
+    # --- vision_first: try vision first; Tesseract only as fallback ---
+    if strategy == "vision_first" and path is not None:
+        llm_schema, llm_conf = _run_vision_extractor()
+        if _vision_has_critical(llm_schema, llm_conf):
+            try:
+                out_schema = ReimbursementSchema(**llm_schema.model_dump(mode="json"))
+            except Exception:
+                out_schema = llm_schema
+            validation = validate_reimbursement(
+                out_schema,
+                expected_employee_id=employee_id or None,
+                expected_expense_type=expense_type or None,
+            )
+            return (
+                out_schema,
+                extractor_name,
+                None,
+                llm_conf,
+                validation.critical_failure,
+                empty_fusion,
+                None,
+            )
+        # Fallback: Tesseract (image_to_data) → parse_structured_from_ocr → numeric validation
+        ocr_result_fb = _ocr_result_from_path(path)
+        ocr_schema_fb = parse_structured_from_ocr(
+            ocr_result_fb.raw_text,
+            employee_id=employee_id,
+            expense_type=expense_type,
+        )
+        if ocr_schema_fb is None:
+            ocr_schema_fb = ReimbursementSchema(
+                employee_id=employee_id,
+                expense_type=expense_type or "meal",
+                amount=0.0,
+                month="",
+                bill_date="",
+                vendor_name="Unknown",
+                currency="INR",
+                category="",
+                line_items=[],
+            )
+        try:
+            fused_fb = ReimbursementSchema(**ocr_schema_fb.model_dump(mode="json"))
+        except Exception as e:
+            logger.warning("OCR fallback schema validation failed trace_id=%s: %s", trace_id, e)
+            return None, "ocr_fallback", ocr_result_fb.confidence, None, True, empty_fusion, ocr_result_fb
+        validation = validate_reimbursement(
+            fused_fb,
+            expected_employee_id=employee_id or None,
+            expected_expense_type=expense_type or None,
+        )
+        return (
+            fused_fb,
+            "ocr_fallback",
+            ocr_result_fb.confidence,
+            None,
+            validation.critical_failure,
+            empty_fusion,
+            ocr_result_fb,
+        )
+
+    # --- fusion: OCR + vision, then fuse (require ocr_result) ---
+    if ocr_result is None:
+        ocr_result = OCRExtractionResult()
     ocr_schema = parse_structured_from_ocr(
         ocr_result.raw_text,
         employee_id=employee_id,
@@ -193,46 +428,10 @@ def _get_structured_bill(
             line_items=[],
         )
 
-    # 2. Vision/document extraction: Donut, LayoutLM, or Vision LLM
-    llm_schema: ReimbursementSchema | None = None
-    llm_conf: float | None = None
-    extractor = (vision_extractor or "donut").strip().lower()
-    if extractor == "layout":
-        extractor = "layoutlm"
-    if image_bytes:
-        try:
-            if extractor == "donut":
-                llm_schema, llm_conf = extract_bill_via_donut(
-                    image_bytes,
-                    employee_id=employee_id,
-                    expense_type=expense_type,
-                    model_id=donut_model_id,
-                )
-            elif extractor == "layoutlm":
-                llm_schema, llm_conf = extract_bill_via_layoutlm(
-                    image_bytes,
-                    ocr_result.raw_text or "",
-                    employee_id=employee_id,
-                    expense_type=expense_type,
-                    model_id=layoutlm_model_id,
-                )
-            elif llm_client and extractor == "vision_llm":
-                llm_schema, llm_conf = extract_bill_via_llm(
-                    llm_client,
-                    image_bytes,
-                    employee_id=employee_id,
-                    expense_type=expense_type,
-                    vision_model=vision_model,
-                    max_retries=max_retries,
-                    retry_delay_sec=retry_delay_sec,
-                )
-            else:
-                if extractor not in ("donut", "layoutlm", "vision_llm"):
-                    logger.warning("Unknown vision_extractor=%s; skipping vision extraction", vision_extractor)
-        except Exception as e:
-            logger.warning("Vision/document bill extraction failed trace_id=%s: %s", trace_id, e)
+    llm_schema, llm_conf = _run_vision_extractor()
+    if extractor not in ("donut", "layoutlm", "vision_llm") and llm_schema is None:
+        logger.debug("Vision extractor=%s not run or failed; using OCR only", vision_extractor)
 
-    # 3. Fusion (pass OCR raw text for numeric guardrails: reject invoice IDs as amount)
     fusion_result = fuse_extractions(
         ocr_schema,
         llm_schema,
@@ -246,7 +445,6 @@ def _get_structured_bill(
         "has_major_numeric_conflict": fusion_result.fusion_metadata.has_major_numeric_conflict,
     }
 
-    # 4. Build schema from fused data and validate (critical field enforcement)
     try:
         fused_schema = ReimbursementSchema(**fusion_result.final_structured_data)
     except Exception as e:
@@ -258,6 +456,7 @@ def _get_structured_bill(
             llm_conf,
             True,
             fusion_metadata,
+            ocr_result,
         )
     validation = validate_reimbursement(
         fused_schema,
@@ -272,6 +471,7 @@ def _get_structured_bill(
             llm_conf,
             True,
             fusion_metadata,
+            ocr_result,
         )
     return (
         fused_schema,
@@ -280,6 +480,7 @@ def _get_structured_bill(
         llm_conf,
         False,
         fusion_metadata,
+        ocr_result,
     )
 
 
@@ -306,6 +507,8 @@ class ReimbursementOrchestrator:
         vision_extractor: str = "donut",
         donut_model_id: str = "naver-clova-ix/donut-base-finetuned-cord-v2",
         layoutlm_model_id: str = "nielsr/layoutlmv3-finetuned-cord",
+        extraction_strategy: str = "fusion",
+        output_all_extractors: bool = False,
     ) -> None:
         self.policy_json = policy_json
         self.policy_version_hash = policy_version_hash
@@ -325,6 +528,8 @@ class ReimbursementOrchestrator:
         self.vision_extractor = (vision_extractor or "donut").strip().lower()
         self.donut_model_id = donut_model_id or "naver-clova-ix/donut-base-finetuned-cord-v2"
         self.layoutlm_model_id = layoutlm_model_id or "nielsr/layoutlmv3-finetuned-cord"
+        self.extraction_strategy = (extraction_strategy or "fusion").strip().lower()
+        self.output_all_extractors = bool(output_all_extractors)
 
     def _trace_id(self) -> str:
         return str(uuid.uuid4())
@@ -363,18 +568,16 @@ class ReimbursementOrchestrator:
         if not path.exists():
             raise FileNotFoundError(f"File not found: {path}")
         tid = trace_id or self._trace_id()
-        pdf = is_pdf if is_pdf is not None else path.suffix.lower() == ".pdf"
         start = time.perf_counter()
+        strategy = (getattr(self, "extraction_strategy", None) or "fusion").strip().lower()
 
-        if pdf:
-            ocr_result = extract_from_pdf(path)
-            image_bytes = _read_file_bytes(path)
+        if strategy == "vision_first":
+            image_bytes = _image_bytes_for_vision(path)
+            ocr_result = None
         else:
-            image_bytes = _read_file_bytes(path)
-            ocr_result = extract_from_bytes(image_bytes, is_pdf=False)
+            ocr_result, image_bytes = _ocr_from_path(path)
 
-        schema, extraction_source, ocr_conf, llm_conf, critical_failure, fusion_metadata = _get_structured_bill(
-            ocr_result,
+        schema, extraction_source, ocr_conf, llm_conf, critical_failure, fusion_metadata, ocr_result_used = _get_structured_bill(
             image_bytes,
             employee_id=employee_id or "",
             expense_type=expense_type or "meal",
@@ -387,7 +590,24 @@ class ReimbursementOrchestrator:
             vision_extractor=self.vision_extractor,
             donut_model_id=self.donut_model_id,
             layoutlm_model_id=self.layoutlm_model_id,
+            extraction_strategy=strategy,
+            ocr_result=ocr_result,
+            path=path,
         )
+
+        all_extractor_outputs: dict[str, Any] = {}
+        if getattr(self, "output_all_extractors", False):
+            import os as _os
+            qwen_model = _os.getenv("QWEN_VL_MODEL") or self.vision_model
+            all_extractor_outputs = _run_all_extractors(
+                path,
+                image_bytes,
+                employee_id or "",
+                expense_type or "meal",
+                self.donut_model_id,
+                self.vision_client,
+                qwen_model,
+            )
 
         # For single-file we don't have running monthly total; use bill amount as placeholder.
         monthly_total = schema.amount if schema else 0.0
@@ -423,6 +643,7 @@ class ReimbursementOrchestrator:
 
         return FinalOutputSchema(
             trace_id=tid,
+            file=path.name,
             policy_version_hash=self.policy_version_hash,
             extraction_source=extraction_source,  # type: ignore[arg-type]
             structured_bill=structured_bill,
@@ -434,8 +655,9 @@ class ReimbursementOrchestrator:
                 processing_time_sec=round(processing_time, 4),
                 explainability_score=expl_score,
             ),
-            ocr_extracted=ocr_result.model_dump(mode="json"),
+            ocr_extracted=(ocr_result_used or OCRExtractionResult()).model_dump(mode="json"),
             fusion_metadata=fusion_metadata,
+            all_extractor_outputs=all_extractor_outputs,
         )
 
     def process_batch_from_folder(
@@ -462,19 +684,23 @@ class ReimbursementOrchestrator:
             self._audit_log(self._trace_id(), "dry_run", {"bill_count": count})
             return []
 
-        # Phase 1: collect all bills with (path, employee_id, expense_type, ..., ocr_result, fusion_metadata)
+        # Phase 1: collect all bills with (path, employee_id, expense_type, ..., ocr_for_output, fusion_metadata)
+        strategy = (getattr(self, "extraction_strategy", None) or "fusion").strip().lower()
         phase1: list[tuple[Path, str, str, ReimbursementSchema | None, str, float | None, float | None, bool, OCRExtractionResult, dict[str, Any]]] = []
         for expense_type, employee_id, file_path in iter_bills(root):
-            try:
-                ocr_result, image_bytes = _ocr_from_path(file_path)
-            except Exception as e:
-                logger.exception("OCR failed for %s: %s", file_path, e)
-                phase1.append((file_path, employee_id, expense_type, None, "fusion", None, None, True, OCRExtractionResult(), {}))
-                continue
+            if strategy == "vision_first":
+                image_bytes = _image_bytes_for_vision(file_path)
+                ocr_result = None
+            else:
+                try:
+                    ocr_result, image_bytes = _ocr_from_path(file_path)
+                except Exception as e:
+                    logger.exception("OCR failed for %s: %s", file_path, e)
+                    phase1.append((file_path, employee_id, expense_type, None, "fusion", None, None, True, OCRExtractionResult(), {}))
+                    continue
 
             tid = self._trace_id()
-            schema, source, ocr_c, llm_c, critical_failure, fusion_metadata = _get_structured_bill(
-                ocr_result,
+            schema, source, ocr_c, llm_c, critical_failure, fusion_metadata, ocr_result_used = _get_structured_bill(
                 image_bytes,
                 employee_id=employee_id,
                 expense_type=expense_type,
@@ -484,11 +710,14 @@ class ReimbursementOrchestrator:
                 max_retries=self.max_retries,
                 retry_delay_sec=self.retry_delay_sec,
                 trace_id=tid,
-            vision_extractor=self.vision_extractor,
-            donut_model_id=self.donut_model_id,
-            layoutlm_model_id=self.layoutlm_model_id,
-        )
-            phase1.append((file_path, employee_id, expense_type, schema, source, ocr_c, llm_c, critical_failure, ocr_result, fusion_metadata))
+                vision_extractor=self.vision_extractor,
+                donut_model_id=self.donut_model_id,
+                layoutlm_model_id=self.layoutlm_model_id,
+                extraction_strategy=strategy,
+                ocr_result=ocr_result,
+                path=file_path,
+            )
+            phase1.append((file_path, employee_id, expense_type, schema, source, ocr_c, llm_c, critical_failure, ocr_result_used or OCRExtractionResult(), fusion_metadata))
 
         # Group by (employee_id, month) for running monthly total
         groups: dict[tuple[str, str], list[tuple[Path, str, str, ReimbursementSchema | None, str, float | None, float | None, bool, OCRExtractionResult, dict[str, Any]]]] = defaultdict(list)
@@ -517,6 +746,7 @@ class ReimbursementOrchestrator:
                 return (bd or "z", amt)
 
             items_sorted = sorted(items, key=_item_sort_key)
+            # Running total for this employee in this month (employee-level; passed to decision LLM)
             monthly_total = 0.0
             for path, emp_id, expense_type, schema, source, ocr_c, llm_c, critical_failure, ocr_result, fusion_metadata in items_sorted:
                 tid = self._trace_id()
@@ -571,9 +801,24 @@ class ReimbursementOrchestrator:
                 if structured_bill.get("bill_date") and hasattr(structured_bill.get("bill_date"), "isoformat"):
                     structured_bill["bill_date"] = str(structured_bill["bill_date"])
 
+                all_extractor_outputs_batch: dict[str, Any] = {}
+                if getattr(self, "output_all_extractors", False):
+                    import os as _os
+                    qwen_model = _os.getenv("QWEN_VL_MODEL") or self.vision_model
+                    all_extractor_outputs_batch = _run_all_extractors(
+                        path,
+                        _image_bytes_for_vision(path),
+                        emp_id,
+                        expense_type,
+                        self.donut_model_id,
+                        self.vision_client,
+                        qwen_model,
+                    )
+
                 results.append(
                     FinalOutputSchema(
                         trace_id=tid,
+                        file=path.name,
                         policy_version_hash=self.policy_version_hash,
                         extraction_source=source,  # type: ignore[arg-type]
                         structured_bill=structured_bill,
@@ -587,6 +832,7 @@ class ReimbursementOrchestrator:
                         ),
                         ocr_extracted=ocr_result.model_dump(mode="json"),
                         fusion_metadata=fusion_metadata,
+                        all_extractor_outputs=all_extractor_outputs_batch,
                     )
                 )
                 self._audit_log(tid, "decision", {"file": str(path), "decision": decision.decision})

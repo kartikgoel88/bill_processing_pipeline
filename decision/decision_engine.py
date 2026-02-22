@@ -44,6 +44,12 @@ def _build_decision_prompt(
     monthly_total: float,
 ) -> str:
     """Build user message: policy JSON + bill JSON + expense type + monthly total."""
+    # Ensure commute uses client_location_allowance as monthly cap (policy: client location allowance = commute only)
+    policy_for_llm = dict(policy_json)
+    if "commute_allowance" not in policy_for_llm and "client_location_allowance" in policy_for_llm:
+        policy_for_llm["commute_allowance"] = dict(policy_for_llm["client_location_allowance"])
+        policy_for_llm["commute_allowance"]["note"] = "Monthly cap for commute (same as client_location_allowance)."
+
     bill_dict = bill.model_dump(mode="json")
     if hasattr(bill_dict.get("bill_date"), "isoformat"):
         bill_dict["bill_date"] = bill.bill_date.isoformat() if bill.bill_date else ""
@@ -51,7 +57,7 @@ def _build_decision_prompt(
         pass
     parts = [
         "## Reimbursement policy JSON",
-        json.dumps(policy_json, indent=2),
+        json.dumps(policy_for_llm, indent=2),
         "",
         "## Extracted bill JSON",
         json.dumps(bill_dict, indent=2),

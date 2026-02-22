@@ -1,1 +1,178 @@
-[{"employee_id":"0000_naveen_unknown_unknown","expense_type":"meal","amount":158,"month":"2025-08","bill_date":"2025-08-18","vendor_name":"Unknown","decision":"APPROVED","approved_amount":125},{"employee_id":"0000_smithau_unknown_unknown","expense_type":"meal","amount":78.75,"month":"2025-07","bill_date":"2025-07-08","vendor_name":"Unknown","decision":"APPROVED","approved_amount":78.75},{"employee_id":"0000_smithau_unknown_unknown","expense_type":"meal","amount":170,"month":"2025-07","bill_date":"2025-07-08","vendor_name":"Unknown","decision":"APPROVED","approved_amount":46.25},{"employee_id":"0000_smithau_unknown_unknown","expense_type":"meal","amount":33.6,"month":"2025-07","bill_date":"2025-07-30","vendor_name":"Unknown","decision":"APPROVED","approved_amount":33.6},{"employee_id":"0000_smithau_unknown_unknown","expense_type":"meal","amount":42,"month":"2025-07","bill_date":"2025-07-30","vendor_name":"Unknown","decision":"APPROVED","approved_amount":42}]
+[
+  {
+    "file": "AugMealReceipts.pdf",
+    "employee_id": "0000_naveen_unknown_unknown",
+    "expense_type": "meal",
+    "amount": 2158.0,
+    "month": "",
+    "bill_date": "",
+    "vendor_name": "Unknown",
+    "decision": "REJECTED",
+    "approved_amount": null
+  },
+  {
+    "file": "31st_Lunch.pdf",
+    "employee_id": "0000_smithau_unknown_unknown",
+    "expense_type": "meal",
+    "amount": 0.0,
+    "month": "",
+    "bill_date": "",
+    "vendor_name": "Unknown",
+    "decision": "REJECTED",
+    "approved_amount": null
+  },
+  {
+    "file": "31st_Lunch_1.pdf",
+    "employee_id": "0000_smithau_unknown_unknown",
+    "expense_type": "meal",
+    "amount": 0.0,
+    "month": "",
+    "bill_date": "",
+    "vendor_name": "Unknown",
+    "decision": "REJECTED",
+    "approved_amount": null
+  },
+  {
+    "file": "July8th_Lunch.pdf",
+    "employee_id": "0000_smithau_unknown_unknown",
+    "expense_type": "meal",
+    "amount": 0.0,
+    "month": "",
+    "bill_date": "",
+    "vendor_name": "Unknown",
+    "decision": "REJECTED",
+    "approved_amount": null
+  },
+  {
+    "file": "July8th_Lunch_1.pdf",
+    "employee_id": "0000_smithau_unknown_unknown",
+    "expense_type": "meal",
+    "amount": 0.0,
+    "month": "",
+    "bill_date": "",
+    "vendor_name": "Unknown",
+    "decision": "REJECTED",
+    "approved_amount": null
+  },
+  {
+    "file": "receipt_9ed71f8b-428d-4d31-8743-c3dda2c2e686.pdf",
+    "employee_id": "kartik",
+    "expense_type": "commute",
+    "amount": 2025.0,
+    "month": "",
+    "bill_date": "",
+    "vendor_name": "Unknown",
+    "decision": "REJECTED",
+    "approved_amount": null
+  },
+  {
+    "file": "AUTO_RECEIPT_RD17313323427215751.pdf",
+    "employee_id": "kartik",
+    "expense_type": "commute",
+    "amount": 11.0,
+    "month": "2024-11",
+    "bill_date": "",
+    "vendor_name": "Unknown",
+    "decision": "APPROVED",
+    "approved_amount": 11.0
+  },
+  {
+    "file": "AUTO_RECEIPT_RD17315579158315167.pdf",
+    "employee_id": "kartik",
+    "expense_type": "commute",
+    "amount": 188.0,
+    "month": "2024-11",
+    "bill_date": "",
+    "vendor_name": "Unknown",
+    "decision": "APPROVED",
+    "approved_amount": 188.0
+  },
+  {
+    "file": "AUTO_RECEIPT_RD17315907206185320.pdf",
+    "employee_id": "kartik",
+    "expense_type": "commute",
+    "amount": 183.0,
+    "month": "2024-11",
+    "bill_date": "",
+    "vendor_name": "Unknown",
+    "decision": "APPROVED",
+    "approved_amount": 183.0
+  },
+  {
+    "file": "AUTO_RECEIPT_RD17321585542843974.pdf",
+    "employee_id": "kartik",
+    "expense_type": "commute",
+    "amount": 147.0,
+    "month": "2024-11",
+    "bill_date": "",
+    "vendor_name": "Unknown",
+    "decision": "APPROVED",
+    "approved_amount": 147.0
+  },
+  {
+    "file": "AUTO_RECEIPT_RD17321854214454215.pdf",
+    "employee_id": "kartik",
+    "expense_type": "commute",
+    "amount": 133.0,
+    "month": "2024-11",
+    "bill_date": "",
+    "vendor_name": "Unknown",
+    "decision": "REJECTED",
+    "approved_amount": null
+  },
+  {
+    "file": "AUTO_RECEIPT_RD17322466992750953.pdf",
+    "employee_id": "kartik",
+    "expense_type": "commute",
+    "amount": 151.0,
+    "month": "2024-11",
+    "bill_date": "",
+    "vendor_name": "Unknown",
+    "decision": "APPROVED",
+    "approved_amount": 151.0
+  },
+  {
+    "file": "AUTO_RECEIPT_RD17327642156571431.pdf",
+    "employee_id": "kartik",
+    "expense_type": "commute",
+    "amount": 152.0,
+    "month": "2024-11",
+    "bill_date": "",
+    "vendor_name": "Unknown",
+    "decision": "APPROVED",
+    "approved_amount": 152.0
+  },
+  {
+    "file": "AUTO_RECEIPT_RD17328020445687517.pdf",
+    "employee_id": "kartik",
+    "expense_type": "commute",
+    "amount": 155.0,
+    "month": "2024-11",
+    "bill_date": "",
+    "vendor_name": "Unknown",
+    "decision": "APPROVED",
+    "approved_amount": 155.0
+  },
+  {
+    "file": "CAB_RECEIP.pdf",
+    "employee_id": "kartik",
+    "expense_type": "commute",
+    "amount": 10.0,
+    "month": "2025-06",
+    "bill_date": "",
+    "vendor_name": "Unknown",
+    "decision": "APPROVED",
+    "approved_amount": 210.0
+  },
+  {
+    "file": "CAB_RECEIPT_RD17506969273550314.pdf",
+    "employee_id": "kartik",
+    "expense_type": "commute",
+    "amount": 10.0,
+    "month": "2025-06",
+    "bill_date": "",
+    "vendor_name": "Unknown",
+    "decision": "APPROVED",
+    "approved_amount": 210.0
+  }
+]

@@ -33,6 +33,11 @@ This directory holds the **expected** normalized outputs used when comparing a p
    ```
    Runs the pipeline only; no comparison.
 
+## Test input layout
+
+- **Full layout:** `test_input/expense_type/employee_id/*.pdf` (e.g. `meal/0000_smithau_.../file.pdf`).
+- **Single expense (no employee subfolder):** `test_input/expense_type/*.pdf` (e.g. `commute/*.pdf`) → `employee_id` is set to `"unknown"`.
+
 ## Comparison rules
 
 - Records are sorted by (employee_id, month, expense_type, amount) before comparison.

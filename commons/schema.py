@@ -184,8 +184,12 @@ class FinalOutputSchema(BaseModel):
     """
 
     trace_id: str = ""
+    file: str = ""  # source file name for easy tracking (e.g. AUTO_RECEIPT_RD17313323427215751.pdf)
     policy_version_hash: str = ""
-    extraction_source: Literal["OCR", "LLM", "fusion"] = "OCR"
+    extraction_source: Literal[
+        "OCR", "LLM", "fusion",
+        "donut", "layoutlm", "vision_llm", "qwen_vl", "ocr_fallback",
+    ] = "OCR"
     structured_bill: dict[str, Any] = Field(default_factory=dict)
     policy_used: dict[str, Any] = Field(default_factory=dict)
     decision: dict[str, Any] = Field(default_factory=dict)  # decision, confidence_score, reasoning, violated_rules
@@ -197,4 +201,8 @@ class FinalOutputSchema(BaseModel):
     fusion_metadata: dict[str, Any] = Field(
         default_factory=dict,
         description="Fusion engine: field_sources, conflicts, final_confidence_score, has_major_numeric_conflict",
+    )
+    all_extractor_outputs: dict[str, Any] = Field(
+        default_factory=dict,
+        description="When OUTPUT_ALL_EXTRACTORS=1: outputs from tesseract, easyocr, donut, qwen_vl (raw_text/confidence/structured or error).",
     )

@@ -35,12 +35,24 @@ def iter_bills(root_folder: str | Path) -> Iterator[tuple[str, str, Path]]:
         logger.warning("Input root is not a directory: %s", root)
         return
 
-    # Check if this is a single expense_type folder (root/employee_id/files)
+    # Check structure under root
     first_dirs = [p for p in sorted(root.iterdir()) if p.is_dir()]
     if first_dirs:
         first_sub = first_dirs[0]
         sub_items = list(first_sub.iterdir())
         has_subdirs = any(p.is_dir() for p in sub_items)
+        # root/expense_type/files (one dir, only files) → expense_type = dir name, employee_id = "unknown"
+        if len(first_dirs) == 1 and not has_subdirs and any(
+            p.is_file() and p.suffix.lower() in BILL_EXTENSIONS for p in sub_items
+        ):
+            expense_type = first_sub.name.strip().lower()
+            if expense_type:
+                for file_path in sorted(first_sub.iterdir()):
+                    if not file_path.is_file() or file_path.suffix.lower() not in BILL_EXTENSIONS:
+                        continue
+                    yield (expense_type, "unknown", file_path)
+                return
+        # root/employee_id/files (multiple dirs or first has only files; expense_type = root name)
         if not has_subdirs and any(
             p.is_file() and p.suffix.lower() in BILL_EXTENSIONS for p in sub_items
         ):

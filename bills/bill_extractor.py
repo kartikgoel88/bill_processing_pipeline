@@ -20,6 +20,22 @@ from bills.numeric_validator import is_valid_amount
 
 logger = logging.getLogger(__name__)
 
+# Year range: reject as amount when it appears in date context (e.g. "Nov 14th 2024")
+YEAR_AMOUNT_MIN, YEAR_AMOUNT_MAX = 2000, 2030
+
+
+def _text_has_year_in_date_context(raw_text: str, value: float) -> bool:
+    """True if value is a year (2000-2030) and appears in raw_text in a date-like pattern."""
+    if value != int(value) or not (YEAR_AMOUNT_MIN <= value <= YEAR_AMOUNT_MAX):
+        return False
+    year_str = str(int(value))
+    # "Nov 14th 2024", "14th 2024", "2024,", " 2024 "
+    if re.search(r"(?:st|nd|rd|th)\s*" + re.escape(year_str) + r"\b", raw_text, re.IGNORECASE):
+        return True
+    if re.search(r"(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+\d{1,2}\s*" + re.escape(year_str), raw_text, re.IGNORECASE):
+        return True
+    return False
+
 MONTH_PATTERN = re.compile(r"\b(20\d{2})[-/]?(0[1-9]|1[0-2])\b")
 DATE_FORMATS = [
     "%Y-%m-%d", "%d/%m/%Y", "%m/%d/%Y", "%d-%m-%Y", "%Y/%m/%d",
@@ -39,8 +55,20 @@ TOTAL_AMOUNT_PATTERN = re.compile(
 # Fallback: last amount-like number on a line containing "Total" (handles "Total 8 70.00" OCR)
 TOTAL_LINE_LAST_NUMBER = re.compile(r"(\d+(?:\.\d{2})?)")
 # Payment/UPI lines often have the final amount (e.g. "Paytm UPI % 170.00", "Payment Summary 170.00")
+# Include ride/commute receipt phrases: Selected Price, Price, Fare
 PAYMENT_LINE_KEYWORDS = re.compile(
-    r"\b(?:Payment\s+Summary|Payable|UPI|Paid|Total)\b",
+    r"\b(?:Payment\s+Summary|Payable|UPI|Paid|Total|Selected\s+Price|Price|Fare)\b",
+    re.IGNORECASE,
+)
+# Ride receipt date: "Time of Ride Nov 11th 2024" or "Nov 14th 2024"
+RIDE_DATE_PATTERN = re.compile(
+    r"(?:Time\s+of\s+Ride|Date)\s*[:\s]*"
+    r"(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+\d{1,2}(?:st|nd|rd|th)?\s+(20\d{2})",
+    re.IGNORECASE,
+)
+# Fallback: month name + day + year anywhere (e.g. "Nov 11th 2024")
+MONTH_NAME_YEAR_PATTERN = re.compile(
+    r"\b(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+\d{1,2}(?:st|nd|rd|th)?\s+(20\d{2})\b",
     re.IGNORECASE,
 )
 # First line after "Bill To:" is typically the merchant/vendor name on GST invoices
@@ -86,7 +114,19 @@ def _parse_date(value: Any) -> str | None:
 
 def _find_month_in_text(text: str) -> str | None:
     m = MONTH_PATTERN.search(text)
-    return f"{m.group(1)}-{m.group(2)}" if m else None
+    if m:
+        return f"{m.group(1)}-{m.group(2)}"
+    # Ride-style: "Time of Ride Nov 11th 2024" or "Nov 14th 2024"
+    for pattern in (RIDE_DATE_PATTERN, MONTH_NAME_YEAR_PATTERN):
+        ride = pattern.search(text)
+        if ride:
+            month_name, year = ride.group(1), ride.group(2)
+            try:
+                dt = datetime.strptime(f"{month_name} 1 {year}", "%b %d %Y")
+                return dt.strftime("%Y-%m")
+            except ValueError:
+                pass
+    return None
 
 
 def _extract_amount_from_payment_lines(raw_text: str, max_amount: float = 1_000_000.0) -> list[float]:
@@ -165,7 +205,7 @@ def _extract_amount_from_total_lines_with_cap(raw_text: str, max_amount: float) 
     if max_amount <= 0:
         return 0.0
     amount_keywords = re.compile(
-        r"\b(Total|Grand\s+Total|Amount|Paid|Payable|Payment\s+Summary|Payment|UPI|₹|Rs\.?|INR)\b",
+        r"\b(Total|Grand\s+Total|Amount|Paid|Payable|Payment\s+Summary|Payment|UPI|₹|Rs\.?|INR|Selected\s+Price|Price|Fare)\b",
         re.IGNORECASE,
     )
     candidates: list[float] = []
@@ -236,6 +276,13 @@ def parse_structured_from_ocr(
     amount = _extract_amount_gst_style(text)
     # Rupee symbol (₹) often read as leading "2": e.g. ₹78.75 → 278.75; correct when XX.XX appears in text
     amount = _correct_rupee_read_as_leading_2(text, amount)
+    # Reject year (2000-2030) when it appears in date context (e.g. "Nov 14th 2024" → 2024 is year, not fare)
+    if amount >= YEAR_AMOUNT_MIN and amount <= YEAR_AMOUNT_MAX and _text_has_year_in_date_context(text, amount):
+        logger.info(
+            "Bill amount %.0f rejected (year in date context); using 0",
+            amount,
+        )
+        amount = 0.0
     # Numeric guardrails: reject amounts that appear only near Invoice No, GST, etc. or embedded in IDs
     if amount > 0 and not is_valid_amount(text, amount):
         alt = _extract_amount_from_total_lines_with_cap(
@@ -277,6 +324,19 @@ def parse_structured_from_ocr(
                     amount = cand
                     break
             if amount == 0.0 and "amount" in lower and ":" in line:
+                cand = _parse_float(line.split(":", 1)[-1])
+                if cand > 0 and is_valid_amount(text, cand):
+                    amount = cand
+                    break
+            if amount == 0.0 and ("selected price" in lower or ("price" in lower and "fare" in lower)):
+                for num_str in TOTAL_LINE_LAST_NUMBER.findall(line):
+                    cand = _parse_float(num_str)
+                    if 0 < cand < 1_000_000 and is_valid_amount(text, cand):
+                        amount = cand
+                        break
+                if amount > 0:
+                    break
+            if amount == 0.0 and "price" in lower and ":" in line:
                 cand = _parse_float(line.split(":", 1)[-1])
                 if cand > 0 and is_valid_amount(text, cand):
                     amount = cand

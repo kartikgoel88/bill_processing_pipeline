@@ -30,6 +30,10 @@ dependencies = [
 dev = [
     "pytest>=7.0.0",
 ]
+# EasyOCR (use OCR_ENGINE=easyocr to enable)
+ocr = [
+    "easyocr>=1.7.0",
+]
 # Donut / LayoutLM document understanding (replaces vision LLM when VISION_EXTRACTOR=donut)
 document = [
     "transformers>=4.30.0",

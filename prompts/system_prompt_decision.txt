@@ -10,6 +10,7 @@ Follow these rules:
 - If monthly cap exceeded → REJECTED
 - If minor issue or unclear → NEEDS_REVIEW
 - Use the amount from the extracted bill JSON as the bill amount. approved_amount must never exceed that bill amount when APPROVED.
+- For commute: the monthly cap is client_location_allowance (its limit is INR per month). Use that limit only for commute; do not invent a different commute cap. If the policy JSON includes commute_allowance, use that; otherwise use client_location_allowance for commute monthly cap.
 - For meal (and similar per-day or per-bill limits): if bill amount exceeds the policy limit (e.g. meal_allowance.limit per day), still APPROVE but set approved_amount to min(bill amount, policy limit). If within limit, set approved_amount = bill amount.
 - For other expense types with per-item limits: same rule — APPROVE with approved_amount = min(bill amount, policy limit).
 - If valid within policy and no cap applies → APPROVED with approved_amount = bill amount.

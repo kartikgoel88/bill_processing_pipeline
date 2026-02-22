@@ -16,6 +16,8 @@ Requires-Dist: python-dotenv>=1.0.0
 Requires-Dist: httpx>=0.25.0
 Provides-Extra: dev
 Requires-Dist: pytest>=7.0.0; extra == "dev"
+Provides-Extra: ocr
+Requires-Dist: easyocr>=1.7.0; extra == "ocr"
 Provides-Extra: document
 Requires-Dist: transformers>=4.30.0; extra == "document"
 Requires-Dist: torch>=2.0.0; extra == "document"
@@ -132,7 +134,7 @@ python scripts/run_self_test.py --update-expected
 | `policy/policy_pipeline_allowances.py` | PDF → OCR → LLM → policy_allowances.json |
 | `prompts/system_prompt_policy_allowances.txt` | System prompt for allowances shape |
 | `bills/bill_folder_reader.py` | Traverse root → (expense_type, employee_id, path) |
-| `bills/ocr_engine.py` | Tesseract OCR on PDF/images |
+| `bills/ocr_engine.py` | Tesseract or EasyOCR on PDF/images (set `OCR_ENGINE=easyocr`; install with `pip install .[ocr]`) |
 | `bills/bill_extractor.py` | Parse OCR/LLM into ReimbursementSchema |
 | `decision/validator.py` | Critical (amount, month) + validate_structured_bill |
 | `llm_client.py` | OpenAI-compatible API; retry; vision |
@@ -160,6 +162,7 @@ It returns strict JSON: `decision`, `confidence_score`, `reasoning`, `violated_r
 - **LLM:** `LLM_BASE_URL` (default `http://localhost:11434/v1`), `LLM_API_KEY`, `LLM_VISION_MODEL`, `LLM_DECISION_MODEL`. Decision model supports e.g. `llama3.2`, `gpt-4o-mini`, Qwen3 (`qwen3:1.7b`, `qwen3:4b`).
 - **Paths:** `POLICY_PDF_PATH`, `INPUT_ROOT`, `POLICY_ALLOWANCES_OUTPUT_PATH` (default `policy_allowances.json`), `AUDIT_LOG_PATH`, `OUTPUT_JSON_PATH`, `OUTPUT_CSV_PATH`.
 - **Thresholds:** `OCR_CONFIDENCE_THRESHOLD`, `LLM_MAX_RETRIES`, `MAX_WORKERS`.
+- **OCR:** `OCR_ENGINE` = `tesseract` (default) or `easyocr`. For EasyOCR install: `pip install .[ocr]`.
 
 ## Programmatic usage
 

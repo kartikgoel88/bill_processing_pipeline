@@ -55,7 +55,11 @@ class PipelineConfig:
     llm_vision_model: str = field(
         default_factory=lambda: os.getenv("LLM_VISION_MODEL", "llava")
     )
-    # Vision/document extraction: "vision_llm" (default) | "donut" | "layoutlm"
+    # Extraction strategy: "fusion" = OCR + vision then fuse; "vision_first" = try vision/document first, Tesseract only as fallback
+    extraction_strategy: str = field(
+        default_factory=lambda: (os.getenv("EXTRACTION_STRATEGY", "fusion").strip().lower())
+    )
+    # Vision/document extraction: "vision_llm" | "donut" | "layoutlm" | "qwen_vl"
     vision_extractor: str = field(
         default_factory=lambda: (os.getenv("VISION_EXTRACTOR", "donut").strip().lower())
     )
@@ -87,6 +91,7 @@ class PipelineConfig:
     submission_window_days: int = field(
         default_factory=lambda: int(os.getenv("SUBMISSION_WINDOW_DAYS", "30"))
     )
+    # Max reimbursable per employee per month (employee-level cap). Batch flow groups by (employee_id, month) and passes running monthly_total to decision LLM.
     monthly_total_cap: float = field(
         default_factory=lambda: float(os.getenv("MONTHLY_TOTAL_CAP", "5000.0"))
     )
@@ -153,6 +158,11 @@ class PipelineConfig:
         default_factory=lambda: int(os.getenv("MAX_WORKERS", "1"))  # 1 = sequential; >1 for multiprocessing
     )
 
+    # Compare extractors: when True, run tesseract, easyocr, donut, qwen_vl and add all_extractor_outputs to each bill result
+    output_all_extractors: bool = field(
+        default_factory=lambda: os.getenv("OUTPUT_ALL_EXTRACTORS", "false").lower() in ("1", "true", "yes")
+    )
+
     # Logging
     log_level: str = field(
         default_factory=lambda: os.getenv("LOG_LEVEL", "INFO")
@@ -175,6 +185,7 @@ class PipelineConfig:
             "llm_decision_base_url": os.getenv("LLM_DECISION_BASE_URL") or None,
             "llm_decision_api_key": os.getenv("LLM_DECISION_API_KEY") or None,
             "llm_vision_model": os.getenv("LLM_VISION_MODEL", "llava"),
+            "extraction_strategy": (os.getenv("EXTRACTION_STRATEGY", "fusion") or "fusion").strip().lower(),
             "vision_extractor": (os.getenv("VISION_EXTRACTOR", "donut") or "donut").strip().lower(),
             "donut_model_id": os.getenv("DONUT_MODEL_ID", "naver-clova-ix/donut-base-finetuned-cord-v2"),
             "layoutlm_model_id": os.getenv("LAYOUTLM_MODEL_ID", "nielsr/layoutlmv3-finetuned-cord"),
@@ -202,6 +213,7 @@ class PipelineConfig:
             "policy_allowances_prompt_path": os.getenv("POLICY_ALLOWANCES_PROMPT_PATH", "prompts/system_prompt_policy_allowances.txt"),
             "audit_log_path": os.getenv("AUDIT_LOG_PATH", "audit_trail.log"),
             "max_workers": int(os.getenv("MAX_WORKERS", "1")),
+            "output_all_extractors": _bool(os.getenv("OUTPUT_ALL_EXTRACTORS", "false")),
             "log_level": os.getenv("LOG_LEVEL", "INFO"),
             "dry_run": _bool(os.getenv("DRY_RUN", "false")),
         }
