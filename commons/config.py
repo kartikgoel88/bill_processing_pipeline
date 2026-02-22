@@ -63,6 +63,18 @@ class PipelineConfig:
     vision_extractor: str = field(
         default_factory=lambda: (os.getenv("VISION_EXTRACTOR", "donut").strip().lower())
     )
+    # When VISION_EXTRACTOR=qwen_vl: "ollama" (Ollama/OpenAI API) | "huggingface" (local) | "hf_api" (HF Inference API with token)
+    vision_backend: str = field(
+        default_factory=lambda: (os.getenv("VISION_BACKEND", "ollama").strip().lower())
+    )
+    # Hugging Face model id for Qwen-VL when VISION_BACKEND=huggingface or hf_api
+    qwen_vl_hf_model: str = field(
+        default_factory=lambda: os.getenv("QWEN_VL_HF_MODEL", "Qwen/Qwen2.5-VL-7B-Instruct")
+    )
+    # Hugging Face token for VISION_BACKEND=hf_api (and optional for Donut/LayoutLM downloads)
+    hf_token: str | None = field(
+        default_factory=lambda: os.getenv("HF_TOKEN") or None
+    )
     donut_model_id: str = field(
         default_factory=lambda: os.getenv("DONUT_MODEL_ID", "naver-clova-ix/donut-base-finetuned-cord-v2"))
     layoutlm_model_id: str = field(
@@ -187,6 +199,9 @@ class PipelineConfig:
             "llm_vision_model": os.getenv("LLM_VISION_MODEL", "llava"),
             "extraction_strategy": (os.getenv("EXTRACTION_STRATEGY", "fusion") or "fusion").strip().lower(),
             "vision_extractor": (os.getenv("VISION_EXTRACTOR", "donut") or "donut").strip().lower(),
+            "vision_backend": (os.getenv("VISION_BACKEND", "ollama") or "ollama").strip().lower(),
+            "qwen_vl_hf_model": os.getenv("QWEN_VL_HF_MODEL", "Qwen/Qwen2.5-VL-7B-Instruct"),
+            "hf_token": os.getenv("HF_TOKEN") or None,
             "donut_model_id": os.getenv("DONUT_MODEL_ID", "naver-clova-ix/donut-base-finetuned-cord-v2"),
             "layoutlm_model_id": os.getenv("LAYOUTLM_MODEL_ID", "nielsr/layoutlmv3-finetuned-cord"),
             "llm_decision_model": os.getenv("LLM_DECISION_MODEL", "llama3.2"),

@@ -12,6 +12,7 @@ bills/document_extractor.py
 bills/fusion_engine.py
 bills/numeric_validator.py
 bills/ocr_engine.py
+bills/qwen_hf_extractor.py
 commons/__init__.py
 commons/config.py
 commons/exceptions.py

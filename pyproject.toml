@@ -24,6 +24,8 @@ dependencies = [
     "python-dotenv>=1.0.0",
     # Optional: async HTTP
     "httpx>=0.25.0",
+    # Hugging Face Inference API (VISION_BACKEND=hf_api)
+    "huggingface_hub>=0.20.0",
 ]
 
 [project.optional-dependencies]

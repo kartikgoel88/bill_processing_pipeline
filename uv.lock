@@ -45,6 +45,7 @@ version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "httpx" },
+    { name = "huggingface-hub" },
     { name = "numpy", version = "2.2.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
     { name = "numpy", version = "2.4.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
     { name = "opencv-python-headless" },
@@ -74,6 +75,7 @@ ocr = [
 requires-dist = [
     { name = "easyocr", marker = "extra == 'ocr'", specifier = ">=1.7.0" },
     { name = "httpx", specifier = ">=0.25.0" },
+    { name = "huggingface-hub", specifier = ">=0.20.0" },
     { name = "numpy", specifier = ">=1.24.0" },
     { name = "opencv-python-headless", specifier = ">=4.8.0" },
     { name = "pdf2image", specifier = ">=1.16.3" },

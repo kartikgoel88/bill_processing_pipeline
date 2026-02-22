@@ -151,7 +151,7 @@ It returns strict JSON: `decision`, `confidence_score`, `reasoning`, `violated_r
 ## Configuration
 
 - **Extraction strategy:** `EXTRACTION_STRATEGY` = `fusion` (default) or `vision_first`. With `vision_first`, Donut/LayoutLMv3/Qwen-VL/vision_llm is tried first; Tesseract (keyword proximity + bounding box + numeric validation) is used only as fallback.
-- **Vision/document:** `VISION_EXTRACTOR` = `donut` | `layoutlm` | `vision_llm` | `qwen_vl`. Use `qwen_vl` with `QWEN_VL_MODEL=qwen2.5vl` for Qwen2.5-VL in Ollama (`ollama pull qwen2.5vl`); or set `LLM_VISION_MODEL` to use another vision model.
+- **Vision/document:** `VISION_EXTRACTOR` = `donut` | `layoutlm` | `vision_llm` | `qwen_vl`. For `qwen_vl`: set `VISION_BACKEND` = `ollama` (default; use API with `QWEN_VL_MODEL`), `huggingface` (run Qwen-VL locally; requires `pip install -e ".[document]"`), or `hf_api` (Hugging Face Inference API with `HF_TOKEN`; no local download).
 - **LLM:** `LLM_BASE_URL` (default `http://localhost:11434/v1`), `LLM_API_KEY`, `LLM_VISION_MODEL`, `LLM_DECISION_MODEL`. Decision model supports e.g. `llama3.2`, `gpt-4o-mini`, Qwen3 (`qwen3:1.7b`, `qwen3:4b`).
 - **Paths:** `POLICY_PDF_PATH`, `INPUT_ROOT`, `POLICY_ALLOWANCES_OUTPUT_PATH` (default `policy_allowances.json`), `AUDIT_LOG_PATH`, `OUTPUT_JSON_PATH`, `OUTPUT_CSV_PATH`.
 - **Thresholds:** `OCR_CONFIDENCE_THRESHOLD`, `LLM_MAX_RETRIES`, `MAX_WORKERS`.

@@ -33,6 +33,7 @@ from bills.bill_extractor import parse_structured_from_ocr
 from bills.bill_extractor import extract_bill_via_llm
 from bills.fusion_engine import fuse_extractions
 from bills.document_extractor import extract_bill_via_donut, extract_bill_via_layoutlm
+from bills.qwen_hf_extractor import extract_bill_via_qwen_hf, extract_bill_via_qwen_hf_api
 from decision.validator import validate_reimbursement, validate_and_parse_ocr
 from decision.decision_engine import (
     DecisionEngine,
@@ -163,10 +164,14 @@ def _run_all_extractors(
     donut_model_id: str,
     llm_client: Any,
     qwen_vl_model: str,
+    vision_backend: str = "ollama",
+    qwen_vl_hf_model: str = "Qwen/Qwen2.5-VL-7B-Instruct",
+    hf_token: str | None = None,
 ) -> dict[str, Any]:
     """
     Run OCR (Tesseract), EasyOCR, Donut, and Qwen-VL and return their outputs.
     Used when OUTPUT_ALL_EXTRACTORS=1 so you can compare all extractors in batch_output.json.
+    Qwen-VL: vision_backend=hf_api (HF Inference API) | huggingface (local) | else API (llm_client).
     Returns dict with keys: tesseract, easyocr, donut, qwen_vl. Each value is
     { raw_text?, confidence, structured } for OCR or { structured, confidence } for vision, or { error: "..." }.
     """
@@ -228,9 +233,28 @@ def _run_all_extractors(
     except Exception as e:
         out["donut"] = {"error": str(e)}
 
-    # 4. Qwen-VL (vision LLM)
+    # 4. Qwen-VL (Hugging Face or vision LLM API)
     try:
-        if image_bytes and llm_client:
+        if not image_bytes:
+            out["qwen_vl"] = {"error": "no image bytes (e.g. pdf2image not available)"}
+        elif (vision_backend or "ollama").strip().lower() == "hf_api":
+            schema_q, conf_q = extract_bill_via_qwen_hf_api(
+                image_bytes,
+                employee_id=employee_id,
+                expense_type=expense_type,
+                model_id=qwen_vl_hf_model or "Qwen/Qwen2.5-VL-7B-Instruct",
+                hf_token=hf_token,
+            )
+            out["qwen_vl"] = {"structured": _schema_to_dict(schema_q), "confidence": conf_q or 0.0}
+        elif (vision_backend or "ollama").strip().lower() == "huggingface":
+            schema_q, conf_q = extract_bill_via_qwen_hf(
+                image_bytes,
+                employee_id=employee_id,
+                expense_type=expense_type,
+                model_id=qwen_vl_hf_model or "Qwen/Qwen2.5-VL-7B-Instruct",
+            )
+            out["qwen_vl"] = {"structured": _schema_to_dict(schema_q), "confidence": conf_q or 0.0}
+        elif llm_client:
             schema_q, conf_q = extract_bill_via_llm(
                 llm_client,
                 image_bytes,
@@ -240,7 +264,7 @@ def _run_all_extractors(
             )
             out["qwen_vl"] = {"structured": _schema_to_dict(schema_q), "confidence": conf_q or 0.0}
         else:
-            out["qwen_vl"] = {"error": "no image bytes or vision client not configured"}
+            out["qwen_vl"] = {"error": "vision client not configured (set LLM_BASE_URL or VISION_BACKEND=huggingface)"}
     except Exception as e:
         out["qwen_vl"] = {"error": str(e)}
 
@@ -258,6 +282,9 @@ def _get_structured_bill(
     retry_delay_sec: float,
     trace_id: str,
     vision_extractor: str = "vision_llm",
+    vision_backend: str = "ollama",
+    qwen_vl_hf_model: str = "Qwen/Qwen2.5-VL-7B-Instruct",
+    hf_token: str | None = None,
     donut_model_id: str = "naver-clova-ix/donut-base-finetuned-cord-v2",
     layoutlm_model_id: str = "nielsr/layoutlmv3-finetuned-cord",
     extraction_strategy: str = "fusion",
@@ -283,11 +310,18 @@ def _get_structured_bill(
     extractor = (vision_extractor or "donut").strip().lower()
     if extractor == "layout":
         extractor = "layoutlm"
-    extractor_name = extractor  # for extraction_source in response (donut, layoutlm, vision_llm, qwen_vl)
-    # Qwen-VL: use vision_llm path; prefer QWEN_VL_MODEL, else use configured vision_model (LLM_VISION_MODEL) so no 404 when qwen2-vl not installed
+    extractor_original = extractor
+    extractor_name = extractor  # for extraction_source (donut, layoutlm, vision_llm, qwen_vl)
+    # Qwen-VL: hf_api (hosted) | huggingface (local) | ollama (vision_llm API)
     if extractor == "qwen_vl":
-        vision_model_actual = _os.getenv("QWEN_VL_MODEL") or vision_model
-        extractor = "vision_llm"
+        backend = (vision_backend or "ollama").strip().lower()
+        if backend == "hf_api":
+            vision_model_actual = vision_model  # unused in hf_api path
+        elif backend == "huggingface":
+            vision_model_actual = vision_model  # unused in HF local path
+        else:
+            vision_model_actual = _os.getenv("QWEN_VL_MODEL") or vision_model
+            extractor = "vision_llm"
     else:
         vision_model_actual = vision_model
 
@@ -299,7 +333,7 @@ def _get_structured_bill(
     }
 
     def _run_vision_extractor() -> tuple[ReimbursementSchema | None, float | None]:
-        """Run Donut, LayoutLM, or vision LLM; return (schema, confidence)."""
+        """Run Donut, LayoutLM, Qwen-VL (HF or API), or vision LLM; return (schema, confidence)."""
         if not image_bytes:
             return None, None
         try:
@@ -322,6 +356,22 @@ def _get_structured_bill(
                     employee_id=employee_id,
                     expense_type=expense_type,
                     model_id=layoutlm_model_id,
+                )
+            backend = (vision_backend or "ollama").strip().lower()
+            if extractor_original == "qwen_vl" and backend == "hf_api":
+                return extract_bill_via_qwen_hf_api(
+                    image_bytes,
+                    employee_id=employee_id,
+                    expense_type=expense_type,
+                    model_id=qwen_vl_hf_model or "Qwen/Qwen2.5-VL-7B-Instruct",
+                    hf_token=hf_token,
+                )
+            if extractor_original == "qwen_vl" and backend == "huggingface":
+                return extract_bill_via_qwen_hf(
+                    image_bytes,
+                    employee_id=employee_id,
+                    expense_type=expense_type,
+                    model_id=qwen_vl_hf_model or "Qwen/Qwen2.5-VL-7B-Instruct",
                 )
             if llm_client and extractor == "vision_llm":
                 return extract_bill_via_llm(
@@ -429,7 +479,7 @@ def _get_structured_bill(
         )
 
     llm_schema, llm_conf = _run_vision_extractor()
-    if extractor not in ("donut", "layoutlm", "vision_llm") and llm_schema is None:
+    if extractor not in ("donut", "layoutlm", "vision_llm", "qwen_vl") and llm_schema is None:
         logger.debug("Vision extractor=%s not run or failed; using OCR only", vision_extractor)
 
     fusion_result = fuse_extractions(
@@ -505,6 +555,9 @@ class ReimbursementOrchestrator:
         retry_delay_sec: float = 2.0,
         audit_log_path: str | Path | None = None,
         vision_extractor: str = "donut",
+        vision_backend: str = "ollama",
+        qwen_vl_hf_model: str = "Qwen/Qwen2.5-VL-7B-Instruct",
+        hf_token: str | None = None,
         donut_model_id: str = "naver-clova-ix/donut-base-finetuned-cord-v2",
         layoutlm_model_id: str = "nielsr/layoutlmv3-finetuned-cord",
         extraction_strategy: str = "fusion",
@@ -526,6 +579,9 @@ class ReimbursementOrchestrator:
         self.retry_delay_sec = retry_delay_sec
         self.audit_log_path = Path(audit_log_path) if audit_log_path else None
         self.vision_extractor = (vision_extractor or "donut").strip().lower()
+        self.vision_backend = (vision_backend or "ollama").strip().lower()
+        self.qwen_vl_hf_model = qwen_vl_hf_model or "Qwen/Qwen2.5-VL-7B-Instruct"
+        self.hf_token = hf_token
         self.donut_model_id = donut_model_id or "naver-clova-ix/donut-base-finetuned-cord-v2"
         self.layoutlm_model_id = layoutlm_model_id or "nielsr/layoutlmv3-finetuned-cord"
         self.extraction_strategy = (extraction_strategy or "fusion").strip().lower()
@@ -588,6 +644,9 @@ class ReimbursementOrchestrator:
             retry_delay_sec=self.retry_delay_sec,
             trace_id=tid,
             vision_extractor=self.vision_extractor,
+            vision_backend=self.vision_backend,
+            qwen_vl_hf_model=self.qwen_vl_hf_model,
+            hf_token=self.hf_token,
             donut_model_id=self.donut_model_id,
             layoutlm_model_id=self.layoutlm_model_id,
             extraction_strategy=strategy,
@@ -607,6 +666,9 @@ class ReimbursementOrchestrator:
                 self.donut_model_id,
                 self.vision_client,
                 qwen_model,
+                vision_backend=getattr(self, "vision_backend", "ollama"),
+                qwen_vl_hf_model=getattr(self, "qwen_vl_hf_model", "Qwen/Qwen2.5-VL-7B-Instruct"),
+                hf_token=getattr(self, "hf_token", None),
             )
 
         # For single-file we don't have running monthly total; use bill amount as placeholder.
@@ -711,6 +773,9 @@ class ReimbursementOrchestrator:
                 retry_delay_sec=self.retry_delay_sec,
                 trace_id=tid,
                 vision_extractor=self.vision_extractor,
+                vision_backend=self.vision_backend,
+                qwen_vl_hf_model=self.qwen_vl_hf_model,
+                hf_token=self.hf_token,
                 donut_model_id=self.donut_model_id,
                 layoutlm_model_id=self.layoutlm_model_id,
                 extraction_strategy=strategy,
@@ -813,6 +878,9 @@ class ReimbursementOrchestrator:
                         self.donut_model_id,
                         self.vision_client,
                         qwen_model,
+                        vision_backend=getattr(self, "vision_backend", "ollama"),
+                        qwen_vl_hf_model=getattr(self, "qwen_vl_hf_model", "Qwen/Qwen2.5-VL-7B-Instruct"),
+                        hf_token=getattr(self, "hf_token", None),
                     )
 
                 results.append(
