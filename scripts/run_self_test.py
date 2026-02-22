@@ -131,23 +131,15 @@ def compare_records(actual: list[dict], expected: list[dict]) -> list[str]:
     return diffs
 
 
-def run_pipeline(input_dir: Path, output_dir: Path, policy_first: bool = True) -> int:
-    """Run main.py with test input/output. Returns exit code."""
+def run_pipeline(input_dir: Path, output_dir: Path) -> int:
+    """Run main.py with test input/output. Policy JSON must exist at output_dir/policy_allowances.json."""
     cmd = [
         sys.executable,
         str(PROJECT_ROOT / "main.py"),
+        "--config", str(PROJECT_ROOT / "config.yaml"),
         "--input", str(input_dir),
         "--output-dir", str(output_dir),
     ]
-    if policy_first:
-        # Ensure policy exists: run policy-allowances if needed
-        policy_path = output_dir / "policy_allowances.json"
-        if not policy_path.exists():
-            subprocess.run(
-                [sys.executable, str(PROJECT_ROOT / "main.py"), "--policy-allowances", "-o", str(output_dir)],
-                cwd=str(PROJECT_ROOT),
-                check=False,
-            )
     result = subprocess.run(cmd, cwd=str(PROJECT_ROOT))
     return result.returncode
 
@@ -160,7 +152,6 @@ def main() -> int:
     parser.add_argument("--run-only", action="store_true", help="Only run pipeline, do not compare")
     parser.add_argument("--compare-only", action="store_true", help="Only compare output-dir to expected-dir (no run)")
     parser.add_argument("--update-expected", action="store_true", help="After run, write normalized output to expected-dir")
-    parser.add_argument("--skip-policy", action="store_true", help="Skip policy-allowances step (use existing)")
     args = parser.parse_args()
 
     if not args.compare_only:
@@ -170,7 +161,10 @@ def main() -> int:
         if not args.input_dir.is_dir():
             print(f"Error: input dir not found: {args.input_dir}", file=sys.stderr)
             return 1
-        code = run_pipeline(args.input_dir, args.output_dir, policy_first=not args.skip_policy)
+        policy_path = args.output_dir / "policy_allowances.json"
+        if not policy_path.exists():
+            print(f"Warning: {policy_path} not found. Create it (e.g. minimal policy JSON) for batch run.", file=sys.stderr)
+        code = run_pipeline(args.input_dir, args.output_dir)
         if code != 0:
             print(f"Pipeline exited with code {code}", file=sys.stderr)
             return code

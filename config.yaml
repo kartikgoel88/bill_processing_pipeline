@@ -1,0 +1,32 @@
+# Example configuration for the refactored bill processing pipeline.
+# Override with env: INPUT_ROOT, OUTPUT_DIR, LLM_PROVIDER, LLM_BASE_URL, LLM_MODEL, etc.
+
+input_root: test_input
+output_dir: test_output
+policy_path: test_output/policy_allowances.json
+audit_log_path: test_output/audit_trail.log
+log_level: INFO
+dry_run: false
+max_workers: 1
+
+llm:
+  provider: ollama          # ollama | openai | huggingface
+  base_url: "http://localhost:11434/v1"
+  api_key: ""
+  model: qwen2.5:7b
+  vision_model: qwen2.5vl:latest
+  decision_model: llama3.2
+  max_retries: 3
+  retry_delay_sec: 2.0
+  timeout_sec: 120
+
+ocr:
+  engine: tesseract         # tesseract (default) | easyocr
+
+extraction:
+  strategy: vision_first          # fusion | vision_first
+  vision_extractor: donut
+  vision_backend: ollama
+  confidence_threshold: 0.6
+  fallback_enabled: true
+  fallback_threshold: 0.6

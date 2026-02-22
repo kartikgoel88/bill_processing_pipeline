@@ -1,17 +1,17 @@
 trace_id,file,policy_version_hash,employee_id,expense_type,amount,approved_amount,month,decision,confidence_score,reasoning,violated_rules,extraction_source,ocr_confidence,processing_time_sec
-a7ff26d1-2fc2-416b-bae6-02f090b41fb1,AugMealReceipts.pdf,allowances,0000_naveen_unknown_unknown,meal,158.0,125.0,2025-08,APPROVED,0.95,The meal expense is within the policy limit.,,qwen_vl,,19.3926
-e878d876-bd52-4b26-84f8-794368b8ac5b,July8th_Lunch.pdf,allowances,0000_smithau_unknown_unknown,meal,78.75,78.75,2025-07,APPROVED,0.95,Expense within meal_allowance limit.,,qwen_vl,,7.3371
-a283bf49-ec66-46eb-84e7-6592afd090a3,July8th_Lunch_1.pdf,allowances,0000_smithau_unknown_unknown,meal,170.0,46.25,2025-07,APPROVED,0.95,The meal expense is within the policy limit.,,qwen_vl,,8.6654
-d254552b-b600-4e62-a98b-f9e743a08e31,31st_Lunch.pdf,allowances,0000_smithau_unknown_unknown,meal,33.6,33.6,2025-07,APPROVED,0.95,Expense within meal_allowance limit.,,qwen_vl,,8.0108
-d9d23ea2-bc5e-4be9-8e43-9c1ec8bea009,31st_Lunch_1.pdf,allowances,0000_smithau_unknown_unknown,meal,42.0,42.0,2025-07,APPROVED,0.95,The meal expense is within the policy limit.,,qwen_vl,,7.4817
-6eb1bfce-0e96-42b9-b9fd-1106ea51229c,AUTO_RECEIPT_RD17321854214454215.pdf,allowances,kartik,commute,133.0,,2024-11,REJECTED,1.0,Monthly cap for commute is exceeded.,monthly cap exceeded,qwen_vl,,6.7507
-1f261032-4875-4182-a5e5-b530f3a0d3ed,AUTO_RECEIPT_RD17313323427215751.pdf,allowances,kartik,commute,160.0,160.0,2024-11,APPROVED,0.95,The commute expense is within the monthly cap.,,qwen_vl,,7.0078
-20db73b3-0118-4f5d-86ea-90c735851003,AUTO_RECEIPT_RD17315907206185320.pdf,allowances,kartik,commute,183.0,183.0,2024-11,APPROVED,0.95,The commute expense is within the monthly cap.,,qwen_vl,,7.0982
-26e09000-cec8-4191-916c-ba4a0332a0bb,AUTO_RECEIPT_RD17315579158315167.pdf,allowances,kartik,commute,188.0,188.0,2024-11,APPROVED,0.95,The commute expense is within the monthly cap.,,qwen_vl,,6.5442
-ef701756-1295-4906-aac4-afd6099b9264,AUTO_RECEIPT_RD17321585542843974.pdf,allowances,kartik,commute,147.0,147.0,2024-11,APPROVED,0.95,The commute expense is within the monthly cap.,,qwen_vl,,6.6972
-ec898218-21d2-44ed-b2c7-6c9ca7410995,AUTO_RECEIPT_RD17322466992750953.pdf,allowances,kartik,commute,151.0,151.0,2024-11,APPROVED,0.95,The commute expense is within the monthly cap.,,qwen_vl,,6.1739
-2af4c93a-57a9-4cd5-a146-407c19f44daa,AUTO_RECEIPT_RD17327642156571431.pdf,allowances,kartik,commute,152.0,152.0,2024-11,APPROVED,0.95,The commute expense is within the monthly cap.,,qwen_vl,,6.939
-d41bb6b7-8230-4cd4-8484-89dac6427d49,AUTO_RECEIPT_RD17328020445687517.pdf,allowances,kartik,commute,155.0,155.0,2024-11,APPROVED,0.95,The commute expense is within the monthly cap.,,qwen_vl,,7.1614
-e51c4d2e-94af-4ce4-90db-fbdd29c8a2ff,CAB_RECEIP.pdf,allowances,kartik,commute,210.0,210.0,2025-06,APPROVED,1.0,The expense is within the commute_allowance limit.,,qwen_vl,,6.7514
-3a387b8c-5d30-455b-962e-4cec9bab096f,CAB_RECEIPT_RD17506969273550314.pdf,allowances,kartik,commute,210.0,210.0,2025-06,APPROVED,0.95,The commute expense is within the monthly cap.,,qwen_vl,,5.518
-a24e0d81-ad60-46d3-baa8-2696c4b57909,receipt_9ed71f8b-428d-4d31-8743-c3dda2c2e686.pdf,allowances,kartik,commute,123.02,,2025-10,REJECTED,1.0,Monthly cap for commute is exceeded.,monthly cap exceeded,qwen_vl,,5.522
+9b4c339d-11fb-4c41-81d8-3d3918083fa4,AugMealReceipts.pdf,allowances,0000_naveen_unknown_unknown,meal,158.0,125.0,2025-08,APPROVED,0.95,Expense within meal_allowance limit.,,qwen_vl,,13.9165
+8ee19244-f90f-4888-864c-a8e9141d259d,July8th_Lunch.pdf,allowances,0000_smithau_unknown_unknown,meal,78.75,78.75,2025-07,APPROVED,0.95,The meal expense is within the policy limit.,,qwen_vl,,6.2477
+89cbb870-53af-4a25-99f4-a7666b64db68,July8th_Lunch_1.pdf,allowances,0000_smithau_unknown_unknown,meal,170.0,46.25,2025-07,APPROVED,0.9,Meal amount is within the policy limit.,,qwen_vl,,6.5895
+2a7264bf-e96b-44a5-9e59-f04eba122075,31st_Lunch.pdf,allowances,0000_smithau_unknown_unknown,meal,33.6,33.6,2025-07,APPROVED,0.9,Expense within meal_allowance limit.,,qwen_vl,,5.8838
+b2a6fdac-7b20-4253-becd-1c372646979d,31st_Lunch_1.pdf,allowances,0000_smithau_unknown_unknown,meal,0.0,,,REJECTED,1.0,Critical validation failed,Critical validation failed,ocr_fallback,0.7840441176470588,0.0001
+82f79622-08b2-4a22-9d45-c0a6fa8ab356,AUTO_RECEIPT_RD17313323427215751.pdf,allowances,kartik,commute,160.0,160.0,2024-11,APPROVED,1.0,The expense is within the commute_allowance limit.,,qwen_vl,,6.0095
+bc658fd0-6ac4-4a6e-ac67-c0466d856add,AUTO_RECEIPT_RD17315907206185320.pdf,allowances,kartik,commute,183.0,183.0,2024-11,APPROVED,0.95,The commute expense is within the monthly cap.,,qwen_vl,,6.5633
+8af09bec-9746-420e-8bf1-a67c47281ba5,AUTO_RECEIPT_RD17315579158315167.pdf,allowances,kartik,commute,188.0,188.0,2024-11,APPROVED,0.95,The commute expense is within the monthly cap.,,qwen_vl,,6.2416
+67e3ad97-783e-4d4c-8a6a-de24d6ac629a,AUTO_RECEIPT_RD17321854214454215.pdf,allowances,kartik,commute,133.0,133.0,2024-11,APPROVED,0.95,The expense is within the commute_allowance limit.,,qwen_vl,,6.4816
+6ff2862e-2175-40ec-9564-d30364a79d71,AUTO_RECEIPT_RD17321585542843974.pdf,allowances,kartik,commute,147.0,147.0,2024-11,APPROVED,0.95,The commute expense is within the monthly cap.,,qwen_vl,,6.6157
+d5dc97ed-f451-4fa0-9c8d-4f57842009ed,AUTO_RECEIPT_RD17322466992750953.pdf,allowances,kartik,commute,151.0,151.0,2024-11,APPROVED,0.95,The commute expense is within the monthly cap.,,qwen_vl,,6.9628
+c3f22ef1-be27-4cf4-895a-f33865003d90,AUTO_RECEIPT_RD17327642156571431.pdf,allowances,kartik,commute,152.0,152.0,2024-11,APPROVED,0.95,The commute expense is within the monthly cap.,,qwen_vl,,6.407
+65d6417e-91dc-41f0-804e-9b6aa108912a,AUTO_RECEIPT_RD17328020445687517.pdf,allowances,kartik,commute,155.0,155.0,2024-11,APPROVED,0.95,The commute expense is within the monthly cap.,,qwen_vl,,6.3089
+870c26a9-22fb-44ac-a950-a64714f93cbf,CAB_RECEIP.pdf,allowances,kartik,commute,210.0,210.0,2025-06,APPROVED,1.0,The expense is within the commute_allowance limit.,,qwen_vl,,6.4378
+4690e383-6404-49fa-bbb3-3c6fa817f7e7,CAB_RECEIPT_RD17506969273550314.pdf,allowances,kartik,commute,210.0,210.0,2025-06,APPROVED,0.95,The commute expense is within the monthly cap.,,qwen_vl,,5.3982
+128b40af-2b7b-4724-9611-00005e4f67bf,receipt_9ed71f8b-428d-4d31-8743-c3dda2c2e686.pdf,allowances,kartik,commute,123.02,,2025-10,REJECTED,1.0,Monthly cap for commute is exceeded.,monthly cap exceeded,qwen_vl,,6.2474

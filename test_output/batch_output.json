@@ -1,16 +1,389 @@
 [
   {
-    "trace_id": "a7ff26d1-2fc2-416b-bae6-02f090b41fb1",
-    "file": "AugMealReceipts.pdf",
-    "policy_version_hash": "allowances",
-    "extraction_source": "qwen_vl",
+    "trace_id": "21dfaf3f-bac8-4a33-8476-a9aa3bbe3a19",
+    "file": "AUTO_RECEIPT_RD17313323427215751.pdf",
+    "extraction_source": "vision_llm",
     "structured_bill": {
-      "employee_id": "0000_naveen_unknown_unknown",
+      "employee_id": "",
+      "expense_type": "meal",
+      "amount": 160.0,
+      "month": "2024-11",
+      "bill_date": "2024-11-11",
+      "vendor_name": "R\u00e1pido",
+      "currency": "INR",
+      "category": "",
+      "line_items": [
+        {
+          "description": "Bill total",
+          "amount": 160.0,
+          "quantity": 1,
+          "code": ""
+        }
+      ]
+    },
+    "decision": {
+      "decision": "APPROVED",
+      "confidence_score": 1.0,
+      "reasoning": "Within meal allowance limit",
+      "violated_rules": [],
+      "approved_amount": 125.0
+    },
+    "metadata": {
+      "ocr_confidence": 0.0,
+      "processing_time_sec": 46.299
+    }
+  },
+  {
+    "trace_id": "2f54c1d1-22cd-4267-866f-58d6b709bfd1",
+    "file": "AUTO_RECEIPT_RD17315579158315167.pdf",
+    "extraction_source": "vision_llm",
+    "structured_bill": {
+      "employee_id": "",
+      "expense_type": "meal",
+      "amount": 188.0,
+      "month": "2024-11",
+      "bill_date": "2024-11-14",
+      "vendor_name": "Unknown",
+      "currency": "INR",
+      "category": "",
+      "line_items": [
+        {
+          "description": "Cab/commute",
+          "amount": 188.0,
+          "quantity": 1,
+          "code": ""
+        }
+      ]
+    },
+    "decision": {
+      "decision": "APPROVED",
+      "confidence_score": 1.0,
+      "reasoning": "Within meal allowance limit",
+      "violated_rules": [],
+      "approved_amount": 125.0
+    },
+    "metadata": {
+      "ocr_confidence": 0.0,
+      "processing_time_sec": 36.3224
+    }
+  },
+  {
+    "trace_id": "1f0f3637-143c-4655-8e11-30273c916fb9",
+    "file": "AUTO_RECEIPT_RD17315907206185320.pdf",
+    "extraction_source": "vision_llm",
+    "structured_bill": {
+      "employee_id": "",
+      "expense_type": "meal",
+      "amount": 183.0,
+      "month": "2024-11",
+      "bill_date": "2024-11-14",
+      "vendor_name": "Unknown",
+      "currency": "INR",
+      "category": "",
+      "line_items": [
+        {
+          "description": "cab/commute",
+          "amount": 183.0,
+          "quantity": 1,
+          "code": ""
+        }
+      ]
+    },
+    "decision": {
+      "decision": "APPROVED",
+      "confidence_score": 1.0,
+      "reasoning": "Within meal allowance limit",
+      "violated_rules": [],
+      "approved_amount": 125.0
+    },
+    "metadata": {
+      "ocr_confidence": 0.0,
+      "processing_time_sec": 36.1331
+    }
+  },
+  {
+    "trace_id": "1d7e52f1-9d62-4e6f-b172-719d27f243fe",
+    "file": "AUTO_RECEIPT_RD17321585542843974.pdf",
+    "extraction_source": "vision_llm",
+    "structured_bill": {
+      "employee_id": "",
+      "expense_type": "meal",
+      "amount": 147.0,
+      "month": "2024-11",
+      "bill_date": "2024-11-21",
+      "vendor_name": "Unknown",
+      "currency": "INR",
+      "category": "",
+      "line_items": [
+        {
+          "description": "Cab commute",
+          "amount": 147.0,
+          "quantity": 1,
+          "code": ""
+        }
+      ]
+    },
+    "decision": {
+      "decision": "APPROVED",
+      "confidence_score": 1.0,
+      "reasoning": "Within meal allowance limit",
+      "violated_rules": [],
+      "approved_amount": 125.0
+    },
+    "metadata": {
+      "ocr_confidence": 0.0,
+      "processing_time_sec": 36.574
+    }
+  },
+  {
+    "trace_id": "19f82a1a-70a0-4f1e-8bb7-d09b2cb96193",
+    "file": "AUTO_RECEIPT_RD17321854214454215.pdf",
+    "extraction_source": "vision_llm",
+    "structured_bill": {
+      "employee_id": "",
+      "expense_type": "meal",
+      "amount": 133.0,
+      "month": "2024-11",
+      "bill_date": "2024-11-21",
+      "vendor_name": "Rapido",
+      "currency": "INR",
+      "category": "",
+      "line_items": [
+        {
+          "description": "Bill total",
+          "amount": 133.0,
+          "quantity": 1,
+          "code": ""
+        }
+      ]
+    },
+    "decision": {
+      "decision": "APPROVED",
+      "confidence_score": 1.0,
+      "reasoning": "Within meal allowance limit",
+      "violated_rules": [],
+      "approved_amount": 125.0
+    },
+    "metadata": {
+      "ocr_confidence": 0.0,
+      "processing_time_sec": 36.7489
+    }
+  },
+  {
+    "trace_id": "ad9e64e2-e677-4c20-aafd-780a39cf9371",
+    "file": "AUTO_RECEIPT_RD17322466992750953.pdf",
+    "extraction_source": "vision_llm",
+    "structured_bill": {
+      "employee_id": "",
+      "expense_type": "meal",
+      "amount": 151.0,
+      "month": "2024-11",
+      "bill_date": "2024-11-22",
+      "vendor_name": "Unknown",
+      "currency": "INR",
+      "category": "",
+      "line_items": [
+        {
+          "description": "Ride",
+          "amount": 151.0,
+          "quantity": 1,
+          "code": ""
+        }
+      ]
+    },
+    "decision": {
+      "decision": "APPROVED",
+      "confidence_score": 1.0,
+      "reasoning": "Within meal allowance limit",
+      "violated_rules": [],
+      "approved_amount": 125.0
+    },
+    "metadata": {
+      "ocr_confidence": 0.0,
+      "processing_time_sec": 37.2501
+    }
+  },
+  {
+    "trace_id": "8a19dc30-c9ed-47dc-9721-0cbde950ff07",
+    "file": "AUTO_RECEIPT_RD17327642156571431.pdf",
+    "extraction_source": "vision_llm",
+    "structured_bill": {
+      "employee_id": "",
+      "expense_type": "meal",
+      "amount": 152.0,
+      "month": "2024-11",
+      "bill_date": "",
+      "vendor_name": "Rapido",
+      "currency": "INR",
+      "category": "",
+      "line_items": [
+        {
+          "description": "Bill total",
+          "amount": 152.0,
+          "quantity": 1,
+          "code": ""
+        }
+      ]
+    },
+    "decision": {
+      "decision": "APPROVED",
+      "confidence_score": 1.0,
+      "reasoning": "Within meal allowance limit",
+      "violated_rules": [],
+      "approved_amount": 125.0
+    },
+    "metadata": {
+      "ocr_confidence": 0.0,
+      "processing_time_sec": 34.8935
+    }
+  },
+  {
+    "trace_id": "fb79474e-cefd-4a54-8be5-e4cd800525cc",
+    "file": "AUTO_RECEIPT_RD17328020445687517.pdf",
+    "extraction_source": "vision_llm",
+    "structured_bill": {
+      "employee_id": "",
+      "expense_type": "meal",
+      "amount": 155.0,
+      "month": "2024-11",
+      "bill_date": "2024-11-28",
+      "vendor_name": "Rapido",
+      "currency": "INR",
+      "category": "",
+      "line_items": [
+        {
+          "description": "Bill total",
+          "amount": 155.0,
+          "quantity": 1,
+          "code": ""
+        }
+      ]
+    },
+    "decision": {
+      "decision": "APPROVED",
+      "confidence_score": 1.0,
+      "reasoning": "Within meal allowance limit",
+      "violated_rules": [],
+      "approved_amount": 125.0
+    },
+    "metadata": {
+      "ocr_confidence": 0.0,
+      "processing_time_sec": 36.5355
+    }
+  },
+  {
+    "trace_id": "fa0114ec-393f-4648-9ae7-07c3562f94a1",
+    "file": "CAB_RECEIP.pdf",
+    "extraction_source": "vision_llm",
+    "structured_bill": {
+      "employee_id": "",
+      "expense_type": "meal",
+      "amount": 210.0,
+      "month": "2025-06",
+      "bill_date": "2025-06-23",
+      "vendor_name": "Rapido",
+      "currency": "INR",
+      "category": "",
+      "line_items": [
+        {
+          "description": "Cab/commute",
+          "amount": 210.0,
+          "quantity": 1,
+          "code": ""
+        }
+      ]
+    },
+    "decision": {
+      "decision": "APPROVED",
+      "confidence_score": 1.0,
+      "reasoning": "Within meal allowance limit",
+      "violated_rules": [],
+      "approved_amount": 125.0
+    },
+    "metadata": {
+      "ocr_confidence": 0.0,
+      "processing_time_sec": 36.5916
+    }
+  },
+  {
+    "trace_id": "a10dea47-27c3-40dc-954d-3b728f9f8bc5",
+    "file": "CAB_RECEIPT_RD17506969273550314.pdf",
+    "extraction_source": "vision_llm",
+    "structured_bill": {
+      "employee_id": "",
+      "expense_type": "meal",
+      "amount": 210.0,
+      "month": "2025-06",
+      "bill_date": "2025-06-23",
+      "vendor_name": "Rapido",
+      "currency": "INR",
+      "category": "",
+      "line_items": [
+        {
+          "description": "Ride",
+          "amount": 210.0,
+          "quantity": 1,
+          "code": ""
+        }
+      ]
+    },
+    "decision": {
+      "decision": "APPROVED",
+      "confidence_score": 1.0,
+      "reasoning": "Within meal allowance limit",
+      "violated_rules": [],
+      "approved_amount": 125.0
+    },
+    "metadata": {
+      "ocr_confidence": 0.0,
+      "processing_time_sec": 36.7141
+    }
+  },
+  {
+    "trace_id": "602c1a60-635c-4728-bcd5-6726d51985a3",
+    "file": "receipt_9ed71f8b-428d-4d31-8743-c3dda2c2e686.pdf",
+    "extraction_source": "vision_llm",
+    "structured_bill": {
+      "employee_id": "",
+      "expense_type": "meal",
+      "amount": 123.02,
+      "month": "2025-10",
+      "bill_date": "2025-10-09",
+      "vendor_name": "Uber",
+      "currency": "INR",
+      "category": "",
+      "line_items": [
+        {
+          "description": "Cab/commute",
+          "amount": 123.02,
+          "quantity": 1,
+          "code": ""
+        }
+      ]
+    },
+    "decision": {
+      "decision": "APPROVED",
+      "confidence_score": 1.0,
+      "reasoning": "Within meal allowance limit",
+      "violated_rules": [],
+      "approved_amount": 123.02
+    },
+    "metadata": {
+      "ocr_confidence": 0.0,
+      "processing_time_sec": 33.3101
+    }
+  },
+  {
+    "trace_id": "d48357b5-2a07-4b32-829a-ab394fcbc41a",
+    "file": "AugMealReceipts.pdf",
+    "extraction_source": "vision_llm",
+    "structured_bill": {
+      "employee_id": "",
       "expense_type": "meal",
       "amount": 158.0,
       "month": "2025-08",
       "bill_date": "2025-08-29",
-      "vendor_name": "Restaurant",
+      "vendor_name": "Unknown",
       "currency": "INR",
       "category": "",
       "line_items": [
@@ -19,143 +392,33 @@
           "amount": 158.0,
           "quantity": 1,
           "code": ""
+        },
+        {
+          "description": "Bill total",
+          "amount": 158.0,
+          "quantity": 1,
+          "code": ""
         }
       ]
     },
     "decision": {
       "decision": "APPROVED",
-      "confidence_score": 0.95,
-      "reasoning": "The meal expense is within the policy limit.",
+      "confidence_score": 1.0,
+      "reasoning": "Within meal allowance limit",
       "violated_rules": [],
       "approved_amount": 125.0
     },
     "metadata": {
-      "ocr_confidence": null,
-      "llm_model": "qwen2.5:7b",
-      "processing_time_sec": 19.3926,
-      "explainability_score": 0.69
-    },
-    "ocr_extracted": {
-      "raw_text": "",
-      "confidence": 0.0
-    },
-    "fusion_metadata": {
-      "field_sources": {},
-      "conflicts": [],
-      "final_confidence_score": 0.0,
-      "has_major_numeric_conflict": false
-    },
-    "all_extractor_outputs": {}
+      "ocr_confidence": 0.0,
+      "processing_time_sec": 34.7964
+    }
   },
   {
-    "trace_id": "e878d876-bd52-4b26-84f8-794368b8ac5b",
-    "file": "July8th_Lunch.pdf",
-    "policy_version_hash": "allowances",
-    "extraction_source": "qwen_vl",
-    "structured_bill": {
-      "employee_id": "0000_smithau_unknown_unknown",
-      "expense_type": "meal",
-      "amount": 78.75,
-      "month": "2025-07",
-      "bill_date": "2025-07-08",
-      "vendor_name": "Hungerbox",
-      "currency": "INR",
-      "category": "",
-      "line_items": [
-        {
-          "description": "Meal",
-          "amount": 75.01,
-          "quantity": 1,
-          "code": ""
-        },
-        {
-          "description": "Tax Paytm UPI",
-          "amount": 3.74,
-          "quantity": 1,
-          "code": "Paytm UPI"
-        }
-      ]
-    },
-    "decision": {
-      "decision": "APPROVED",
-      "confidence_score": 0.95,
-      "reasoning": "Expense within meal_allowance limit.",
-      "violated_rules": [],
-      "approved_amount": 78.75
-    },
-    "metadata": {
-      "ocr_confidence": null,
-      "llm_model": "qwen2.5:7b",
-      "processing_time_sec": 7.3371,
-      "explainability_score": 0.69
-    },
-    "ocr_extracted": {
-      "raw_text": "",
-      "confidence": 0.0
-    },
-    "fusion_metadata": {
-      "field_sources": {},
-      "conflicts": [],
-      "final_confidence_score": 0.0,
-      "has_major_numeric_conflict": false
-    },
-    "all_extractor_outputs": {}
-  },
-  {
-    "trace_id": "a283bf49-ec66-46eb-84e7-6592afd090a3",
-    "file": "July8th_Lunch_1.pdf",
-    "policy_version_hash": "allowances",
-    "extraction_source": "qwen_vl",
-    "structured_bill": {
-      "employee_id": "0000_smithau_unknown_unknown",
-      "expense_type": "meal",
-      "amount": 170.0,
-      "month": "2025-07",
-      "bill_date": "2025-07-08",
-      "vendor_name": "Eatgood Technologies Pvt Ltd (HungerBox)",
-      "currency": "INR",
-      "category": "",
-      "line_items": [
-        {
-          "description": "Butter Cashew Cookie",
-          "amount": 170.0,
-          "quantity": 1,
-          "code": ""
-        }
-      ]
-    },
-    "decision": {
-      "decision": "APPROVED",
-      "confidence_score": 0.95,
-      "reasoning": "The meal expense is within the policy limit.",
-      "violated_rules": [],
-      "approved_amount": 46.25
-    },
-    "metadata": {
-      "ocr_confidence": null,
-      "llm_model": "qwen2.5:7b",
-      "processing_time_sec": 8.6654,
-      "explainability_score": 0.69
-    },
-    "ocr_extracted": {
-      "raw_text": "",
-      "confidence": 0.0
-    },
-    "fusion_metadata": {
-      "field_sources": {},
-      "conflicts": [],
-      "final_confidence_score": 0.0,
-      "has_major_numeric_conflict": false
-    },
-    "all_extractor_outputs": {}
-  },
-  {
-    "trace_id": "d254552b-b600-4e62-a98b-f9e743a08e31",
+    "trace_id": "5457d6f5-4c78-49ff-9baf-e25c321863a9",
     "file": "31st_Lunch.pdf",
-    "policy_version_hash": "allowances",
-    "extraction_source": "qwen_vl",
+    "extraction_source": "vision_llm",
     "structured_bill": {
-      "employee_id": "0000_smithau_unknown_unknown",
+      "employee_id": "",
       "expense_type": "meal",
       "amount": 33.6,
       "month": "2025-07",
@@ -174,41 +437,27 @@
     },
     "decision": {
       "decision": "APPROVED",
-      "confidence_score": 0.95,
-      "reasoning": "Expense within meal_allowance limit.",
+      "confidence_score": 1.0,
+      "reasoning": "Within meal allowance limit",
       "violated_rules": [],
       "approved_amount": 33.6
     },
     "metadata": {
-      "ocr_confidence": null,
-      "llm_model": "qwen2.5:7b",
-      "processing_time_sec": 8.0108,
-      "explainability_score": 0.69
-    },
-    "ocr_extracted": {
-      "raw_text": "",
-      "confidence": 0.0
-    },
-    "fusion_metadata": {
-      "field_sources": {},
-      "conflicts": [],
-      "final_confidence_score": 0.0,
-      "has_major_numeric_conflict": false
-    },
-    "all_extractor_outputs": {}
+      "ocr_confidence": 0.0,
+      "processing_time_sec": 32.9559
+    }
   },
   {
-    "trace_id": "d9d23ea2-bc5e-4be9-8e43-9c1ec8bea009",
+    "trace_id": "b7a0740d-78c9-4f16-8608-5c8bb14401ca",
     "file": "31st_Lunch_1.pdf",
-    "policy_version_hash": "allowances",
-    "extraction_source": "qwen_vl",
+    "extraction_source": "vision_llm",
     "structured_bill": {
-      "employee_id": "0000_smithau_unknown_unknown",
+      "employee_id": "",
       "expense_type": "meal",
       "amount": 42.0,
       "month": "2025-07",
       "bill_date": "2025-07-30",
-      "vendor_name": "Eatingood Technologies Pvt Ltd (HungerBox)",
+      "vendor_name": "Eatgood Technologies Pvt Ltd (HungerBox)",
       "currency": "INR",
       "category": "",
       "line_items": [
@@ -216,439 +465,39 @@
           "description": "Ragi Masala Dosa",
           "amount": 42.0,
           "quantity": 1,
-          "code": ""
+          "code": "996333"
         }
       ]
     },
     "decision": {
       "decision": "APPROVED",
-      "confidence_score": 0.95,
-      "reasoning": "The meal expense is within the policy limit.",
+      "confidence_score": 1.0,
+      "reasoning": "Within meal allowance limit of INR 125 per day.",
       "violated_rules": [],
       "approved_amount": 42.0
     },
     "metadata": {
-      "ocr_confidence": null,
-      "llm_model": "qwen2.5:7b",
-      "processing_time_sec": 7.4817,
-      "explainability_score": 0.69
-    },
-    "ocr_extracted": {
-      "raw_text": "",
-      "confidence": 0.0
-    },
-    "fusion_metadata": {
-      "field_sources": {},
-      "conflicts": [],
-      "final_confidence_score": 0.0,
-      "has_major_numeric_conflict": false
-    },
-    "all_extractor_outputs": {}
+      "ocr_confidence": 0.0,
+      "processing_time_sec": 35.3003
+    }
   },
   {
-    "trace_id": "6eb1bfce-0e96-42b9-b9fd-1106ea51229c",
-    "file": "AUTO_RECEIPT_RD17321854214454215.pdf",
-    "policy_version_hash": "allowances",
-    "extraction_source": "qwen_vl",
+    "trace_id": "5fc01b87-9af8-4935-bfdf-e421315ad69f",
+    "file": "July8th_Lunch.pdf",
+    "extraction_source": "vision_llm",
     "structured_bill": {
-      "employee_id": "kartik",
-      "expense_type": "commute",
-      "amount": 133.0,
-      "month": "2024-11",
-      "bill_date": "2024-11-01",
-      "vendor_name": "Unknown",
+      "employee_id": "",
+      "expense_type": "meal",
+      "amount": 78.75,
+      "month": "2025-07",
+      "bill_date": "2025-07-08",
+      "vendor_name": "HungerBox",
       "currency": "INR",
       "category": "",
       "line_items": [
         {
-          "description": "Bill total",
-          "amount": 133.0,
-          "quantity": 1,
-          "code": ""
-        }
-      ]
-    },
-    "decision": {
-      "decision": "REJECTED",
-      "confidence_score": 1.0,
-      "reasoning": "Monthly cap for commute is exceeded.",
-      "violated_rules": [
-        "monthly cap exceeded"
-      ],
-      "approved_amount": null
-    },
-    "metadata": {
-      "ocr_confidence": null,
-      "llm_model": "qwen2.5:7b",
-      "processing_time_sec": 6.7507,
-      "explainability_score": 1.0
-    },
-    "ocr_extracted": {
-      "raw_text": "",
-      "confidence": 0.0
-    },
-    "fusion_metadata": {
-      "field_sources": {},
-      "conflicts": [],
-      "final_confidence_score": 0.0,
-      "has_major_numeric_conflict": false
-    },
-    "all_extractor_outputs": {}
-  },
-  {
-    "trace_id": "1f261032-4875-4182-a5e5-b530f3a0d3ed",
-    "file": "AUTO_RECEIPT_RD17313323427215751.pdf",
-    "policy_version_hash": "allowances",
-    "extraction_source": "qwen_vl",
-    "structured_bill": {
-      "employee_id": "kartik",
-      "expense_type": "commute",
-      "amount": 160.0,
-      "month": "2024-11",
-      "bill_date": "2024-11-11",
-      "vendor_name": "unknown",
-      "currency": "INR",
-      "category": "",
-      "line_items": [
-        {
-          "description": "Ride cost",
-          "amount": 160.0,
-          "quantity": 1,
-          "code": ""
-        }
-      ]
-    },
-    "decision": {
-      "decision": "APPROVED",
-      "confidence_score": 0.95,
-      "reasoning": "The commute expense is within the monthly cap.",
-      "violated_rules": [],
-      "approved_amount": 160.0
-    },
-    "metadata": {
-      "ocr_confidence": null,
-      "llm_model": "qwen2.5:7b",
-      "processing_time_sec": 7.0078,
-      "explainability_score": 0.69
-    },
-    "ocr_extracted": {
-      "raw_text": "",
-      "confidence": 0.0
-    },
-    "fusion_metadata": {
-      "field_sources": {},
-      "conflicts": [],
-      "final_confidence_score": 0.0,
-      "has_major_numeric_conflict": false
-    },
-    "all_extractor_outputs": {}
-  },
-  {
-    "trace_id": "20db73b3-0118-4f5d-86ea-90c735851003",
-    "file": "AUTO_RECEIPT_RD17315907206185320.pdf",
-    "policy_version_hash": "allowances",
-    "extraction_source": "qwen_vl",
-    "structured_bill": {
-      "employee_id": "kartik",
-      "expense_type": "commute",
-      "amount": 183.0,
-      "month": "2024-11",
-      "bill_date": "2024-11-14",
-      "vendor_name": "Rapido",
-      "currency": "INR",
-      "category": "",
-      "line_items": [
-        {
-          "description": "Auto",
-          "amount": 183.0,
-          "quantity": 1,
-          "code": ""
-        }
-      ]
-    },
-    "decision": {
-      "decision": "APPROVED",
-      "confidence_score": 0.95,
-      "reasoning": "The commute expense is within the monthly cap.",
-      "violated_rules": [],
-      "approved_amount": 183.0
-    },
-    "metadata": {
-      "ocr_confidence": null,
-      "llm_model": "qwen2.5:7b",
-      "processing_time_sec": 7.0982,
-      "explainability_score": 0.69
-    },
-    "ocr_extracted": {
-      "raw_text": "",
-      "confidence": 0.0
-    },
-    "fusion_metadata": {
-      "field_sources": {},
-      "conflicts": [],
-      "final_confidence_score": 0.0,
-      "has_major_numeric_conflict": false
-    },
-    "all_extractor_outputs": {}
-  },
-  {
-    "trace_id": "26e09000-cec8-4191-916c-ba4a0332a0bb",
-    "file": "AUTO_RECEIPT_RD17315579158315167.pdf",
-    "policy_version_hash": "allowances",
-    "extraction_source": "qwen_vl",
-    "structured_bill": {
-      "employee_id": "kartik",
-      "expense_type": "commute",
-      "amount": 188.0,
-      "month": "2024-11",
-      "bill_date": "2024-11-14",
-      "vendor_name": "Unknown",
-      "currency": "INR",
-      "category": "",
-      "line_items": [
-        {
-          "description": "Bill total",
-          "amount": 188.0,
-          "quantity": 1,
-          "code": ""
-        }
-      ]
-    },
-    "decision": {
-      "decision": "APPROVED",
-      "confidence_score": 0.95,
-      "reasoning": "The commute expense is within the monthly cap.",
-      "violated_rules": [],
-      "approved_amount": 188.0
-    },
-    "metadata": {
-      "ocr_confidence": null,
-      "llm_model": "qwen2.5:7b",
-      "processing_time_sec": 6.5442,
-      "explainability_score": 0.69
-    },
-    "ocr_extracted": {
-      "raw_text": "",
-      "confidence": 0.0
-    },
-    "fusion_metadata": {
-      "field_sources": {},
-      "conflicts": [],
-      "final_confidence_score": 0.0,
-      "has_major_numeric_conflict": false
-    },
-    "all_extractor_outputs": {}
-  },
-  {
-    "trace_id": "ef701756-1295-4906-aac4-afd6099b9264",
-    "file": "AUTO_RECEIPT_RD17321585542843974.pdf",
-    "policy_version_hash": "allowances",
-    "extraction_source": "qwen_vl",
-    "structured_bill": {
-      "employee_id": "kartik",
-      "expense_type": "commute",
-      "amount": 147.0,
-      "month": "2024-11",
-      "bill_date": "2024-11-21",
-      "vendor_name": "Unknown",
-      "currency": "INR",
-      "category": "",
-      "line_items": [
-        {
-          "description": "Ride",
-          "amount": 147.0,
-          "quantity": 1,
-          "code": ""
-        }
-      ]
-    },
-    "decision": {
-      "decision": "APPROVED",
-      "confidence_score": 0.95,
-      "reasoning": "The commute expense is within the monthly cap.",
-      "violated_rules": [],
-      "approved_amount": 147.0
-    },
-    "metadata": {
-      "ocr_confidence": null,
-      "llm_model": "qwen2.5:7b",
-      "processing_time_sec": 6.6972,
-      "explainability_score": 0.69
-    },
-    "ocr_extracted": {
-      "raw_text": "",
-      "confidence": 0.0
-    },
-    "fusion_metadata": {
-      "field_sources": {},
-      "conflicts": [],
-      "final_confidence_score": 0.0,
-      "has_major_numeric_conflict": false
-    },
-    "all_extractor_outputs": {}
-  },
-  {
-    "trace_id": "ec898218-21d2-44ed-b2c7-6c9ca7410995",
-    "file": "AUTO_RECEIPT_RD17322466992750953.pdf",
-    "policy_version_hash": "allowances",
-    "extraction_source": "qwen_vl",
-    "structured_bill": {
-      "employee_id": "kartik",
-      "expense_type": "commute",
-      "amount": 151.0,
-      "month": "2024-11",
-      "bill_date": "2024-11-22",
-      "vendor_name": "Rapido",
-      "currency": "INR",
-      "category": "",
-      "line_items": [
-        {
-          "description": "Booking Fee",
-          "amount": 151.0,
-          "quantity": 1,
-          "code": ""
-        }
-      ]
-    },
-    "decision": {
-      "decision": "APPROVED",
-      "confidence_score": 0.95,
-      "reasoning": "The commute expense is within the monthly cap.",
-      "violated_rules": [],
-      "approved_amount": 151.0
-    },
-    "metadata": {
-      "ocr_confidence": null,
-      "llm_model": "qwen2.5:7b",
-      "processing_time_sec": 6.1739,
-      "explainability_score": 0.69
-    },
-    "ocr_extracted": {
-      "raw_text": "",
-      "confidence": 0.0
-    },
-    "fusion_metadata": {
-      "field_sources": {},
-      "conflicts": [],
-      "final_confidence_score": 0.0,
-      "has_major_numeric_conflict": false
-    },
-    "all_extractor_outputs": {}
-  },
-  {
-    "trace_id": "2af4c93a-57a9-4cd5-a146-407c19f44daa",
-    "file": "AUTO_RECEIPT_RD17327642156571431.pdf",
-    "policy_version_hash": "allowances",
-    "extraction_source": "qwen_vl",
-    "structured_bill": {
-      "employee_id": "kartik",
-      "expense_type": "commute",
-      "amount": 152.0,
-      "month": "2024-11",
-      "bill_date": "2024-11-28",
-      "vendor_name": "Rapido",
-      "currency": "INR",
-      "category": "",
-      "line_items": [
-        {
-          "description": "Ride",
-          "amount": 152.0,
-          "quantity": 1,
-          "code": ""
-        }
-      ]
-    },
-    "decision": {
-      "decision": "APPROVED",
-      "confidence_score": 0.95,
-      "reasoning": "The commute expense is within the monthly cap.",
-      "violated_rules": [],
-      "approved_amount": 152.0
-    },
-    "metadata": {
-      "ocr_confidence": null,
-      "llm_model": "qwen2.5:7b",
-      "processing_time_sec": 6.939,
-      "explainability_score": 0.69
-    },
-    "ocr_extracted": {
-      "raw_text": "",
-      "confidence": 0.0
-    },
-    "fusion_metadata": {
-      "field_sources": {},
-      "conflicts": [],
-      "final_confidence_score": 0.0,
-      "has_major_numeric_conflict": false
-    },
-    "all_extractor_outputs": {}
-  },
-  {
-    "trace_id": "d41bb6b7-8230-4cd4-8484-89dac6427d49",
-    "file": "AUTO_RECEIPT_RD17328020445687517.pdf",
-    "policy_version_hash": "allowances",
-    "extraction_source": "qwen_vl",
-    "structured_bill": {
-      "employee_id": "kartik",
-      "expense_type": "commute",
-      "amount": 155.0,
-      "month": "2024-11",
-      "bill_date": "2024-11-28",
-      "vendor_name": "Unknown",
-      "currency": "INR",
-      "category": "",
-      "line_items": [
-        {
-          "description": "Bill total",
-          "amount": 155.0,
-          "quantity": 1,
-          "code": ""
-        }
-      ]
-    },
-    "decision": {
-      "decision": "APPROVED",
-      "confidence_score": 0.95,
-      "reasoning": "The commute expense is within the monthly cap.",
-      "violated_rules": [],
-      "approved_amount": 155.0
-    },
-    "metadata": {
-      "ocr_confidence": null,
-      "llm_model": "qwen2.5:7b",
-      "processing_time_sec": 7.1614,
-      "explainability_score": 0.69
-    },
-    "ocr_extracted": {
-      "raw_text": "",
-      "confidence": 0.0
-    },
-    "fusion_metadata": {
-      "field_sources": {},
-      "conflicts": [],
-      "final_confidence_score": 0.0,
-      "has_major_numeric_conflict": false
-    },
-    "all_extractor_outputs": {}
-  },
-  {
-    "trace_id": "e51c4d2e-94af-4ce4-90db-fbdd29c8a2ff",
-    "file": "CAB_RECEIP.pdf",
-    "policy_version_hash": "allowances",
-    "extraction_source": "qwen_vl",
-    "structured_bill": {
-      "employee_id": "kartik",
-      "expense_type": "commute",
-      "amount": 210.0,
-      "month": "2025-06",
-      "bill_date": "2025-06-23",
-      "vendor_name": "Rapido",
-      "currency": "INR",
-      "category": "",
-      "line_items": [
-        {
-          "description": "Ride",
-          "amount": 210.0,
+          "description": "Meal",
+          "amount": 78.75,
           "quantity": 1,
           "code": ""
         }
@@ -657,46 +506,32 @@
     "decision": {
       "decision": "APPROVED",
       "confidence_score": 1.0,
-      "reasoning": "The expense is within the commute_allowance limit.",
+      "reasoning": "Within meal allowance limit",
       "violated_rules": [],
-      "approved_amount": 210.0
+      "approved_amount": 78.75
     },
     "metadata": {
-      "ocr_confidence": null,
-      "llm_model": "qwen2.5:7b",
-      "processing_time_sec": 6.7514,
-      "explainability_score": 0.7
-    },
-    "ocr_extracted": {
-      "raw_text": "",
-      "confidence": 0.0
-    },
-    "fusion_metadata": {
-      "field_sources": {},
-      "conflicts": [],
-      "final_confidence_score": 0.0,
-      "has_major_numeric_conflict": false
-    },
-    "all_extractor_outputs": {}
+      "ocr_confidence": 0.0,
+      "processing_time_sec": 33.4216
+    }
   },
   {
-    "trace_id": "3a387b8c-5d30-455b-962e-4cec9bab096f",
-    "file": "CAB_RECEIPT_RD17506969273550314.pdf",
-    "policy_version_hash": "allowances",
-    "extraction_source": "qwen_vl",
+    "trace_id": "32708d8d-2943-467f-9022-39baeb6c25d2",
+    "file": "July8th_Lunch_1.pdf",
+    "extraction_source": "vision_llm",
     "structured_bill": {
-      "employee_id": "kartik",
-      "expense_type": "commute",
-      "amount": 210.0,
-      "month": "2025-06",
-      "bill_date": "2025-06-23",
-      "vendor_name": "Rapido",
+      "employee_id": "",
+      "expense_type": "meal",
+      "amount": 170.0,
+      "month": "2025-07",
+      "bill_date": "2025-07-08",
+      "vendor_name": "HungerBox",
       "currency": "INR",
       "category": "",
       "line_items": [
         {
-          "description": "Ride",
-          "amount": 210.0,
+          "description": "Butter Cashew Cookie",
+          "amount": 170.0,
           "quantity": 1,
           "code": ""
         }
@@ -704,77 +539,14 @@
     },
     "decision": {
       "decision": "APPROVED",
-      "confidence_score": 0.95,
-      "reasoning": "The commute expense is within the monthly cap.",
-      "violated_rules": [],
-      "approved_amount": 210.0
-    },
-    "metadata": {
-      "ocr_confidence": null,
-      "llm_model": "qwen2.5:7b",
-      "processing_time_sec": 5.518,
-      "explainability_score": 0.69
-    },
-    "ocr_extracted": {
-      "raw_text": "",
-      "confidence": 0.0
-    },
-    "fusion_metadata": {
-      "field_sources": {},
-      "conflicts": [],
-      "final_confidence_score": 0.0,
-      "has_major_numeric_conflict": false
-    },
-    "all_extractor_outputs": {}
-  },
-  {
-    "trace_id": "a24e0d81-ad60-46d3-baa8-2696c4b57909",
-    "file": "receipt_9ed71f8b-428d-4d31-8743-c3dda2c2e686.pdf",
-    "policy_version_hash": "allowances",
-    "extraction_source": "qwen_vl",
-    "structured_bill": {
-      "employee_id": "kartik",
-      "expense_type": "commute",
-      "amount": 123.02,
-      "month": "2025-10",
-      "bill_date": "2025-10-09",
-      "vendor_name": "Uber",
-      "currency": "INR",
-      "category": "",
-      "line_items": [
-        {
-          "description": "Cab fare",
-          "amount": 123.02,
-          "quantity": 1,
-          "code": ""
-        }
-      ]
-    },
-    "decision": {
-      "decision": "REJECTED",
       "confidence_score": 1.0,
-      "reasoning": "Monthly cap for commute is exceeded.",
-      "violated_rules": [
-        "monthly cap exceeded"
-      ],
-      "approved_amount": null
+      "reasoning": "Within meal allowance limit",
+      "violated_rules": [],
+      "approved_amount": 125.0
     },
     "metadata": {
-      "ocr_confidence": null,
-      "llm_model": "qwen2.5:7b",
-      "processing_time_sec": 5.522,
-      "explainability_score": 1.0
-    },
-    "ocr_extracted": {
-      "raw_text": "",
-      "confidence": 0.0
-    },
-    "fusion_metadata": {
-      "field_sources": {},
-      "conflicts": [],
-      "final_confidence_score": 0.0,
-      "has_major_numeric_conflict": false
-    },
-    "all_extractor_outputs": {}
+      "ocr_confidence": 0.0,
+      "processing_time_sec": 34.5244
+    }
   }
 ]

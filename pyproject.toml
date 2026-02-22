@@ -24,8 +24,10 @@ dependencies = [
     "python-dotenv>=1.0.0",
     # Optional: async HTTP
     "httpx>=0.25.0",
-    # Hugging Face Inference API (VISION_BACKEND=hf_api)
+    # Optional: Hugging Face (for HF provider)
     "huggingface_hub>=0.20.0",
+    # Config YAML (refactored pipeline)
+    "PyYAML>=6.0",
 ]
 
 [project.optional-dependencies]
@@ -36,7 +38,7 @@ dev = [
 ocr = [
     "easyocr>=1.7.0",
 ]
-# Donut / LayoutLM document understanding (replaces vision LLM when VISION_EXTRACTOR=donut)
+# Optional: document understanding (e.g. Donut/LayoutLM) if added later
 document = [
     "transformers>=4.30.0",
     "torch>=2.0.0",
@@ -45,7 +47,7 @@ document = [
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["llm*", "bills*", "policy*", "commons*", "prompts*", "decision*"]
+include = ["extraction*", "prompts*", "core*", "services*", "providers*", "pipeline*", "utils*"]
 
 [tool.uv]
 dev-dependencies = []
