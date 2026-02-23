@@ -192,9 +192,12 @@ def _minimal_image_path(tmp_path: Path) -> Path:
 
 
 def test_pipeline_process_returns_bill_result(tmp_path: Path, pipeline: BillProcessingPipeline) -> None:
-    """Pipeline.process() returns BillResult with expected fields."""
+    """Pipeline.process() returns list of BillResult with expected fields."""
     bill_file = _minimal_image_path(tmp_path)
-    result = pipeline.process(bill_file)
+    results = pipeline.process(bill_file)
+    assert isinstance(results, list)
+    assert len(results) >= 1
+    result = results[0]
     assert isinstance(result, BillResult)
     assert result.trace_id
     assert result.file_name == bill_file.name
@@ -219,8 +222,9 @@ def test_pipeline_fallback_when_vision_low_confidence(tmp_path: Path, policy_jso
         fallback_enabled=True,
     )
     bill_file = _minimal_image_path(tmp_path)
-    result = pipeline.process(bill_file)
-    assert result.extraction_source == "ocr_fallback"
+    results = pipeline.process(bill_file)
+    assert len(results) >= 1
+    assert results[0].extraction_source == "ocr_fallback"
 
 
 def test_batch_processor_collects_metrics(tmp_path: Path, pipeline: BillProcessingPipeline) -> None:

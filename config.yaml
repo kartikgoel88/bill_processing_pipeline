@@ -24,7 +24,7 @@ ocr:
   engine: tesseract         # tesseract (default) | easyocr
 
 extraction:
-  strategy: vision_first          # fusion | vision_first
+  strategy: fusion          # fusion | vision_first
   vision_extractor: donut
   vision_backend: ollama
   confidence_threshold: 0.6

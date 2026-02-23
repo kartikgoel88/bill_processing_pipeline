@@ -19,7 +19,7 @@ from core.interfaces import (
     IPostProcessingService,
 )
 from core.models import BillResult, ExtractionResult
-from utils.image_utils import image_bytes_from_path_for_vision
+from utils.image_utils import image_bytes_from_path_for_vision, image_bytes_list_from_path_for_vision
 
 logger = logging.getLogger(__name__)
 
@@ -75,6 +75,15 @@ def _validate_critical(structured_bill: dict[str, Any]) -> bool:
     return bool(month)
 
 
+def _bills_from_extraction(extraction: ExtractionResult) -> list[dict[str, Any]]:
+    """One or more structured bills from extraction (multiple when structured_bills is set)."""
+    if extraction.structured_bills:
+        return list(extraction.structured_bills)
+    if extraction.structured_bill:
+        return [extraction.structured_bill]
+    return []
+
+
 class BillProcessingPipeline:
     """
     Production pipeline: process(file_path) -> BillResult.
@@ -108,11 +117,10 @@ class BillProcessingPipeline:
         self._expense_type = expense_type
         self._employee_id = employee_id
 
-    def process(self, file_path: str | Path) -> BillResult:
+    def process(self, file_path: str | Path) -> list[BillResult]:
         """
-        Run full pipeline for one file.
-        vision_first: vision only, then OCR fallback if needed (no initial OCR).
-        fusion: OCR first, then vision, then OCR fallback if low confidence.
+        Run full pipeline for one file. Returns one BillResult per extracted bill
+        (one for single bill, multiple when vision returns multiple bills on one page).
         """
         path = Path(file_path)
         if not path.exists():
@@ -124,7 +132,7 @@ class BillProcessingPipeline:
             "expense_type": self._expense_type,
         }
 
-        # 1) OCR only when strategy is fusion (run both); vision_first skips OCR until fallback
+        # 1) OCR only when strategy is fusion
         ocr_text, ocr_conf = "", 0.0
         if self._strategy == "fusion":
             try:
@@ -155,52 +163,191 @@ class BillProcessingPipeline:
 
         logger.info("Extraction source: %s (confidence=%.2f)", extraction.source, extraction.confidence)
 
-        # OCR fields for result: from initial OCR (fusion) or from fallback
         if extraction.source == "ocr_fallback":
             ocr_text = extraction.ocr_raw_text
             ocr_conf = extraction.ocr_confidence
 
-        if extraction.critical_validation_failed or not _validate_critical(extraction.structured_bill):
-            decision = {
-                "decision": "REJECTED",
-                "confidence_score": 1.0,
-                "reasoning": "Critical validation failed",
-                "violated_rules": ["Critical validation failed"],
-                "approved_amount": None,
-            }
-        else:
-            monthly_total = float(extraction.structured_bill.get("amount") or 0)
-            decision = self._decision.get_decision(
-                extraction.structured_bill,
-                self._policy,
-                self._expense_type,
-                monthly_total,
-                trace_id,
-            )
-            decision = self._post.apply(
-                decision,
-                extraction.structured_bill,
-                self._policy,
-                self._expense_type,
-                remaining_day_cap=None,
-            )
+        bills_to_process = _bills_from_extraction(extraction)
+        if not bills_to_process:
+            elapsed = time.perf_counter() - start
+            return [
+                BillResult(
+                    trace_id=trace_id,
+                    file_name=path.name,
+                    extraction_source=extraction.source,
+                    structured_bill={},
+                    decision={
+                        "decision": "REJECTED",
+                        "confidence_score": 1.0,
+                        "reasoning": "No bill extracted",
+                        "violated_rules": [],
+                        "approved_amount": None,
+                    },
+                    policy_version_hash=self._policy_hash,
+                    metadata={"processing_time_sec": round(elapsed, 4)},
+                    ocr_extracted={"raw_text": ocr_text, "confidence": ocr_conf},
+                    fusion_metadata=extraction.fusion_metadata,
+                )
+            ]
 
-        elapsed = time.perf_counter() - start
-        structured_bill_out = dict(extraction.structured_bill)
-        if structured_bill_out.get("bill_date") and hasattr(structured_bill_out["bill_date"], "isoformat"):
-            structured_bill_out["bill_date"] = str(structured_bill_out["bill_date"])
+        results: list[BillResult] = []
+        for structured_bill in bills_to_process:
+            if extraction.critical_validation_failed or not _validate_critical(structured_bill):
+                decision = {
+                    "decision": "REJECTED",
+                    "confidence_score": 1.0,
+                    "reasoning": "Critical validation failed",
+                    "violated_rules": ["Critical validation failed"],
+                    "approved_amount": None,
+                }
+            else:
+                monthly_total = float(structured_bill.get("amount") or 0)
+                decision = self._decision.get_decision(
+                    structured_bill,
+                    self._policy,
+                    self._expense_type,
+                    monthly_total,
+                    trace_id,
+                )
+                decision = self._post.apply(
+                    decision,
+                    structured_bill,
+                    self._policy,
+                    self._expense_type,
+                    remaining_day_cap=None,
+                )
+            elapsed = time.perf_counter() - start
+            structured_bill_out = dict(structured_bill)
+            if structured_bill_out.get("bill_date") and hasattr(structured_bill_out["bill_date"], "isoformat"):
+                structured_bill_out["bill_date"] = str(structured_bill_out["bill_date"])
+            results.append(
+                BillResult(
+                    trace_id=trace_id,
+                    file_name=path.name,
+                    extraction_source=extraction.source,
+                    structured_bill=structured_bill_out,
+                    decision=decision,
+                    policy_version_hash=self._policy_hash,
+                    metadata={
+                        "ocr_confidence": extraction.ocr_confidence,
+                        "processing_time_sec": round(elapsed, 4),
+                    },
+                    ocr_extracted={"raw_text": ocr_text, "confidence": ocr_conf},
+                    fusion_metadata=extraction.fusion_metadata,
+                )
+            )
+        return results
 
-        return BillResult(
-            trace_id=trace_id,
-            file_name=path.name,
-            extraction_source=extraction.source,
-            structured_bill=structured_bill_out,
-            decision=decision,
-            policy_version_hash=self._policy_hash,
-            metadata={
-                "ocr_confidence": extraction.ocr_confidence,
-                "processing_time_sec": round(elapsed, 4),
-            },
-            ocr_extracted={"raw_text": ocr_text, "confidence": ocr_conf},
-            fusion_metadata=extraction.fusion_metadata,
-        )
+    def process_multi(self, file_path: str | Path) -> list[BillResult]:
+        """
+        Process a file that may contain multiple bills (e.g. multi-page PDF).
+        Runs vision extraction per page and returns one BillResult per page.
+        Use for PDFs where each page is a separate bill.
+        """
+        path = Path(file_path)
+        if not path.exists():
+            raise FileNotFoundError(f"File not found: {path}")
+        trace_id = str(uuid.uuid4())
+        context = {
+            "employee_id": self._employee_id,
+            "expense_type": self._expense_type,
+        }
+        page_images = image_bytes_list_from_path_for_vision(path)
+        if not page_images:
+            logger.warning("No images for multi-page vision: %s", path)
+            return []
+        results: list[BillResult] = []
+        for page_index, image_bytes in enumerate(page_images):
+            start = time.perf_counter()
+            try:
+                extraction = self._vision.extract(image_bytes, context)
+            except Exception as e:
+                logger.warning("Vision extraction failed for page %s: %s", page_index + 1, e)
+                extraction = ExtractionResult(
+                    structured_bill={},
+                    confidence=0.0,
+                    source="vision_llm",
+                    critical_validation_failed=True,
+                )
+            if (
+                self._fallback_enabled
+                and extraction.confidence < self._fallback_threshold
+                and extraction.source != "ocr_fallback"
+            ):
+                extraction = _ocr_fallback(self._ocr, path, context)
+
+            bills_to_process = _bills_from_extraction(extraction)
+            if not bills_to_process:
+                elapsed = time.perf_counter() - start
+                results.append(
+                    BillResult(
+                        trace_id=trace_id,
+                        file_name=path.name,
+                        extraction_source=extraction.source,
+                        structured_bill={},
+                        decision={
+                            "decision": "REJECTED",
+                            "confidence_score": 1.0,
+                            "reasoning": "No bill extracted",
+                            "violated_rules": [],
+                            "approved_amount": None,
+                        },
+                        policy_version_hash=self._policy_hash,
+                        metadata={
+                            "page_index": page_index,
+                            "total_pages": len(page_images),
+                            "processing_time_sec": round(elapsed, 4),
+                        },
+                        ocr_extracted={},
+                        fusion_metadata=extraction.fusion_metadata,
+                    )
+                )
+                continue
+
+            for structured_bill in bills_to_process:
+                if extraction.critical_validation_failed or not _validate_critical(structured_bill):
+                    decision = {
+                        "decision": "REJECTED",
+                        "confidence_score": 1.0,
+                        "reasoning": "Critical validation failed",
+                        "violated_rules": ["Critical validation failed"],
+                        "approved_amount": None,
+                    }
+                else:
+                    monthly_total = float(structured_bill.get("amount") or 0)
+                    decision = self._decision.get_decision(
+                        structured_bill,
+                        self._policy,
+                        self._expense_type,
+                        monthly_total,
+                        trace_id,
+                    )
+                    decision = self._post.apply(
+                        decision,
+                        structured_bill,
+                        self._policy,
+                        self._expense_type,
+                        remaining_day_cap=None,
+                    )
+                elapsed = time.perf_counter() - start
+                structured_bill_out = dict(structured_bill)
+                if structured_bill_out.get("bill_date") and hasattr(structured_bill_out["bill_date"], "isoformat"):
+                    structured_bill_out["bill_date"] = str(structured_bill_out["bill_date"])
+                results.append(
+                    BillResult(
+                        trace_id=trace_id,
+                        file_name=path.name,
+                        extraction_source=extraction.source,
+                        structured_bill=structured_bill_out,
+                        decision=decision,
+                        policy_version_hash=self._policy_hash,
+                        metadata={
+                            "page_index": page_index,
+                            "total_pages": len(page_images),
+                            "processing_time_sec": round(elapsed, 4),
+                        },
+                        ocr_extracted={},
+                        fusion_metadata=extraction.fusion_metadata,
+                    )
+                )
+        return results

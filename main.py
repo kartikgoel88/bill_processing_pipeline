@@ -114,20 +114,47 @@ def main() -> int:
     pipeline = _build_pipeline(config, policy_json, policy_hash)
 
     if args.file:
-        result = pipeline.process(args.file)
         out_dir = Path(config.output_dir)
         out_dir.mkdir(parents=True, exist_ok=True)
         out_path = out_dir / "single_output.json"
-        with open(out_path, "w") as f:
-            json.dump({
-                "trace_id": result.trace_id,
-                "file": result.file_name,
-                "extraction_source": result.extraction_source,
-                "structured_bill": result.structured_bill,
-                "decision": result.decision,
-                "metadata": result.metadata,
-            }, f, indent=2)
-        logger.info("Single file result: %s -> %s", args.file, out_path)
+        file_path = Path(args.file)
+        # Multi-page PDF: extract one bill per page via process_multi
+        if file_path.suffix.lower() == ".pdf":
+            results = pipeline.process_multi(args.file)
+            with open(out_path, "w") as f:
+                json.dump({
+                    "file": file_path.name,
+                    "trace_id": results[0].trace_id if results else "",
+                    "bill_count": len(results),
+                    "bills": [
+                        {
+                            "extraction_source": r.extraction_source,
+                            "structured_bill": r.structured_bill,
+                            "decision": r.decision,
+                            "metadata": r.metadata,
+                        }
+                        for r in results
+                    ],
+                }, f, indent=2)
+            logger.info("Multi-page PDF: %s -> %s bills -> %s", args.file, len(results), out_path)
+        else:
+            results = pipeline.process(args.file)
+            with open(out_path, "w") as f:
+                json.dump({
+                    "file": file_path.name,
+                    "trace_id": results[0].trace_id if results else "",
+                    "bill_count": len(results),
+                    "bills": [
+                        {
+                            "extraction_source": r.extraction_source,
+                            "structured_bill": r.structured_bill,
+                            "decision": r.decision,
+                            "metadata": r.metadata,
+                        }
+                        for r in results
+                    ],
+                }, f, indent=2)
+            logger.info("Single file result: %s -> %s bills -> %s", args.file, len(results), out_path)
         return 0
 
     input_root = Path(args.input or config.input_root)

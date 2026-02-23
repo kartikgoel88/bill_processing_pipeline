@@ -1,3 +1,8 @@
-The following image is a receipt or bill. Extract the reimbursement fields from it using the instructions above.
+List every receipt or bill visible on this page. Include all of them—small receipts, corner receipts, and every distinct bill with its own total. When in doubt, include it: better to include every receipt than to miss one. Then output each receipt exactly once (no duplicates). If multiple bills are on the page, list them in reading order (top to bottom, or left to right). If unsure whether two regions are one bill or two, treat each clearly separate receipt as its own bill. Extract the reimbursement fields for each bill using the instructions above.
 
-Return only one valid JSON object (amount, month, bill_date, vendor_name, currency, line_items). No markdown, no explanation, no text before or after the JSON. Start with { and end with }.
+If there is a single bill, return a JSON array with one object: [{"amount": ..., "month": ..., "bill_date": ..., "vendor_name": ..., "currency": ..., "line_items": [...]}].
+If there are multiple bills on the page, return a JSON array with one object per bill, in the same format, in reading order.
+Each object must include: amount, month, bill_date, vendor_name, currency, line_items.
+For amount: use the bill's Grand Total / Net Payable / final total as printed on the receipt. Do not use a subtotal or partial sum. Read the printed total carefully (e.g. 392, not 190.5).
+
+Return only a valid JSON array. No markdown, no explanation, no text before or after. Start with [ and end with ].

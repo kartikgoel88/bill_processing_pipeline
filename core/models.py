@@ -21,7 +21,7 @@ class LLMResponse:
 
 @dataclass
 class ExtractionResult:
-    """Result of vision/OCR extraction for one bill."""
+    """Result of vision/OCR extraction for one or more bills."""
 
     structured_bill: dict[str, Any]
     confidence: float
@@ -30,6 +30,8 @@ class ExtractionResult:
     ocr_confidence: float = 0.0
     fusion_metadata: dict[str, Any] = field(default_factory=dict)
     critical_validation_failed: bool = False
+    # When non-empty, one bill per image (multiple bills on same page). Pipeline uses this list.
+    structured_bills: list[dict[str, Any]] = field(default_factory=list)
 
 
 @dataclass

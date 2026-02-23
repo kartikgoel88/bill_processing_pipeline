@@ -71,7 +71,7 @@ class BytesImageReader(IImageReader):
         data: bytes,
         *,
         is_pdf: bool,
-        dpi: int = 300,
+        dpi: int = 250,
     ) -> None:
         self.data = data
         self.is_pdf = is_pdf

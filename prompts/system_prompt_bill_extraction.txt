@@ -11,7 +11,7 @@ From the attached image, extract exactly one reimbursement record. Return a sing
 
 Fields (exact keys; use null when not found or uncertain):
 
-- amount: number only. Total bill/receipt amount — the actual payable total (e.g. Total, Grand Total, Net Payable). Do NOT extract invoice number, order ID, or reference number as amount. Amount must correspond to actual payable total. No currency symbols, no commas. If unreadable or ambiguous → null (caller may use 0).
+- amount: number only. The Grand Total / Net Payable / final total as printed on the receipt. Do NOT use a subtotal or line-item sum. Do NOT extract invoice number, order ID, or reference number. Read the printed total carefully (e.g. 392 not 190.5). No currency symbols, no commas. If unreadable or ambiguous → null (caller may use 0).
 - month: string in format "YYYY-MM" (e.g. "2025-02"). Derive from bill date or header. If only day/month/year are separate, combine to YYYY-MM. If not parseable → null.
 - bill_date: string in format "YYYY-MM-DD" (e.g. "2025-02-15"). Date of the bill or transaction. If only partial (e.g. month-year), use first day of month or null. If not parseable → null.
 - vendor_name: string. Merchant, outlet, or service provider name (e.g. restaurant, petrol pump, Ola/Uber). Empty or unclear → null (caller may use "Unknown").

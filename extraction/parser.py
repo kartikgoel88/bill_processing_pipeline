@@ -445,6 +445,42 @@ def _extract_json_from_response(text: str) -> dict[str, Any]:
     return json.loads(sanitized)
 
 
+def _extract_json_array_or_object_from_response(text: str) -> list[dict[str, Any]]:
+    """
+    Parse LLM response as either a single bill object {...} or an array of bills [{...}, ...].
+    Returns a list of dicts (one element for single object, N for array).
+    """
+    stripped = text.strip()
+    sanitized = _sanitize_llm_json_string(stripped)
+    # Prefer array if response starts with [
+    start_arr = sanitized.find("[")
+    start_obj = sanitized.find("{")
+    if start_arr >= 0 and (start_obj < 0 or start_arr < start_obj):
+        depth = 0
+        for i in range(start_arr, len(sanitized)):
+            if sanitized[i] == "[":
+                depth += 1
+            elif sanitized[i] == "]":
+                depth -= 1
+                if depth == 0:
+                    parsed = json.loads(sanitized[start_arr : i + 1])
+                    if not isinstance(parsed, list):
+                        return [parsed] if isinstance(parsed, dict) else []
+                    return [x for x in parsed if isinstance(x, dict)]
+        # Unbalanced brackets: fall through to single-object extraction
+    if start_obj >= 0:
+        depth = 0
+        for i in range(start_obj, len(sanitized)):
+            if sanitized[i] == "{":
+                depth += 1
+            elif sanitized[i] == "}":
+                depth -= 1
+                if depth == 0:
+                    single = json.loads(sanitized[start_obj : i + 1])
+                    return [single] if isinstance(single, dict) else []
+    return []
+
+
 def _normalize_llm_bill_json(
     data: dict[str, Any],
     *,
@@ -498,6 +534,11 @@ def _normalize_llm_bill_json(
     if not out["line_items"] and out["amount"] > 0:
         out["line_items"] = [LineItemSchema(description="Bill total", amount=out["amount"], quantity=1)]
 
+    # Ensure line_items are plain dicts so structured_bill is JSON-serializable (e.g. for decision service)
+    out["line_items"] = [
+        item.model_dump(mode="json") if hasattr(item, "model_dump") else item
+        for item in out["line_items"]
+    ]
     return out
 
 
@@ -517,5 +558,35 @@ def parse_llm_extraction(
         return ReimbursementSchema(**normalized)
     except PydanticValidationError as e:
         raise BillExtractionError(f"Bill schema validation failed: {e}") from e
+
+
+def parse_llm_extraction_multi(
+    raw_response: str,
+    *,
+    employee_id: str = "",
+    expense_type: str = "",
+) -> list[dict[str, Any]]:
+    """
+    Parse LLM JSON response as one or more bills. Accepts single {...} or array [{...}, ...].
+    Returns list of normalized bill dicts (suitable for structured_bill or structured_bills).
+    """
+    try:
+        raw_list = _extract_json_array_or_object_from_response(raw_response)
+    except json.JSONDecodeError as e:
+        raise BillExtractionError(f"Invalid JSON from bill LLM: {e}") from e
+    if not raw_list:
+        return []
+    normalized_list: list[dict[str, Any]] = []
+    for data in raw_list:
+        if not isinstance(data, dict):
+            continue
+        try:
+            norm = _normalize_llm_bill_json(
+                data, employee_id=employee_id, expense_type=expense_type
+            )
+            normalized_list.append(norm)
+        except Exception:
+            continue
+    return normalized_list
 
 

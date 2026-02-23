@@ -11,6 +11,7 @@ core/models.py
 core/schema.py
 extraction/__init__.py
 extraction/discovery.py
+extraction/image_io.py
 extraction/numeric_validator.py
 extraction/ocr.py
 extraction/parser.py

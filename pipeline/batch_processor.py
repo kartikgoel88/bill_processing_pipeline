@@ -57,9 +57,13 @@ class BatchProcessor:
                 metrics.failed_count += 1
                 continue
             try:
-                result = self._pipeline.process(p)
-                results.append(result)
-                _update_metrics(metrics, result)
+                if p.suffix.lower() == ".pdf":
+                    page_results = self._pipeline.process_multi(p)
+                else:
+                    page_results = self._pipeline.process(p)
+                for result in page_results:
+                    results.append(result)
+                    _update_metrics(metrics, result)
             except Exception as e:
                 metrics.failed_count += 1
                 logger.exception("Batch item failed %s: %s", p, e)
