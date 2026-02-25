@@ -69,7 +69,7 @@ class OCRConfig:
 class ExtractionConfig:
     """Extraction strategy and thresholds."""
 
-    strategy: str = "fusion"  # fusion | vision_first
+    strategy: str = "fusion"  # ocr_only | fusion | vision_first
     vision_extractor: str = "donut"  # donut | layoutlm | qwen_vl | vision_llm
     vision_backend: str = "ollama"
     confidence_threshold: float = 0.6

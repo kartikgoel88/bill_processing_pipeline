@@ -1,7 +1,7 @@
 {
   "file": "foodbills.pdf",
-  "trace_id": "ef997f01-8f6a-44bd-a093-4fbee6f301da",
-  "bill_count": 11,
+  "trace_id": "4fe5a51e-bab3-4a4c-a169-05e2a4543c93",
+  "bill_count": 9,
   "bills": [
     {
       "extraction_source": "vision_llm",
@@ -15,7 +15,7 @@
         "currency": "INR",
         "line_items": [
           {
-            "description": "Bill total",
+            "description": "Meal",
             "amount": 178.0,
             "quantity": 1,
             "code": ""
@@ -32,7 +32,7 @@
       "metadata": {
         "page_index": 0,
         "total_pages": 3,
-        "processing_time_sec": 86.6268
+        "processing_time_sec": 49.5103
       }
     },
     {
@@ -47,15 +47,9 @@
         "currency": "INR",
         "line_items": [
           {
-            "description": "Filter Coffee",
-            "amount": 49.0,
-            "quantity": 2,
-            "code": ""
-          },
-          {
-            "description": "Idly",
-            "amount": 49.0,
-            "quantity": 2,
+            "description": "Meal",
+            "amount": 98.0,
+            "quantity": 1,
             "code": ""
           }
         ]
@@ -70,7 +64,7 @@
       "metadata": {
         "page_index": 0,
         "total_pages": 3,
-        "processing_time_sec": 89.3433
+        "processing_time_sec": 51.7635
       }
     },
     {
@@ -85,21 +79,9 @@
         "currency": "INR",
         "line_items": [
           {
-            "description": "Uddin Vada",
-            "amount": 30.0,
-            "quantity": 3,
-            "code": ""
-          },
-          {
-            "description": "Filter Coffee",
-            "amount": 20.0,
-            "quantity": 2,
-            "code": ""
-          },
-          {
-            "description": "Idly",
-            "amount": 49.0,
-            "quantity": 2,
+            "description": "Meal",
+            "amount": 130.0,
+            "quantity": 1,
             "code": ""
           }
         ]
@@ -107,14 +89,14 @@
       "decision": {
         "decision": "APPROVED",
         "confidence_score": 1.0,
-        "reasoning": "Bill amount within meal allowance limit.",
+        "reasoning": "Within meal allowance limit",
         "violated_rules": [],
         "approved_amount": 125.0
       },
       "metadata": {
         "page_index": 0,
         "total_pages": 3,
-        "processing_time_sec": 92.5325
+        "processing_time_sec": 54.0161
       }
     },
     {
@@ -129,15 +111,9 @@
         "currency": "INR",
         "line_items": [
           {
-            "description": "Idly (Vada)",
-            "amount": 49.0,
-            "quantity": 2,
-            "code": ""
-          },
-          {
-            "description": "Filter Coffee",
-            "amount": 40.0,
-            "quantity": 2,
+            "description": "Meal",
+            "amount": 187.0,
+            "quantity": 1,
             "code": ""
           }
         ]
@@ -145,14 +121,14 @@
       "decision": {
         "decision": "APPROVED",
         "confidence_score": 1.0,
-        "reasoning": "Within meal allowance limit of INR 125 per day.",
+        "reasoning": "Within meal allowance limit",
         "violated_rules": [],
         "approved_amount": 125.0
       },
       "metadata": {
         "page_index": 0,
         "total_pages": 3,
-        "processing_time_sec": 95.3546
+        "processing_time_sec": 56.2806
       }
     },
     {
@@ -161,9 +137,9 @@
         "employee_id": "",
         "expense_type": "meal",
         "amount": 129.5,
-        "month": "2025-02",
-        "bill_date": "2025-02-16",
-        "vendor_name": "BANGALORE DOSA",
+        "month": "2024-02",
+        "bill_date": "2024-02-05",
+        "vendor_name": "Bangalore Dosa",
         "currency": "INR",
         "line_items": [
           {
@@ -184,7 +160,7 @@
       "metadata": {
         "page_index": 1,
         "total_pages": 3,
-        "processing_time_sec": 45.1541
+        "processing_time_sec": 51.257
       }
     },
     {
@@ -193,30 +169,36 @@
         "employee_id": "",
         "expense_type": "meal",
         "amount": 207.0,
-        "month": "2025-02",
-        "bill_date": "2025-02-15",
-        "vendor_name": "BANGALORE DOSA",
+        "month": "2024-02",
+        "bill_date": "2024-02-06",
+        "vendor_name": "Bangalore Dosa",
         "currency": "INR",
         "line_items": [
+          {
+            "description": "Tilly",
+            "amount": 47.0,
+            "quantity": 1,
+            "code": "(A)"
+          },
           {
             "description": "Filter Coffee",
             "amount": 60.0,
             "quantity": 1,
-            "code": ""
+            "code": "(E)"
           }
         ]
       },
       "decision": {
         "decision": "APPROVED",
         "confidence_score": 1.0,
-        "reasoning": "Within meal allowance limit",
+        "reasoning": "Within meal allowance limit of INR 125 per day.",
         "violated_rules": [],
         "approved_amount": 125.0
       },
       "metadata": {
         "page_index": 1,
         "total_pages": 3,
-        "processing_time_sec": 47.7115
+        "processing_time_sec": 53.98
       }
     },
     {
@@ -225,8 +207,8 @@
         "employee_id": "",
         "expense_type": "meal",
         "amount": 195.0,
-        "month": "2025-02",
-        "bill_date": "2025-02-19",
+        "month": "2024-02",
+        "bill_date": "2024-02-06",
         "vendor_name": "California Burrito",
         "currency": "INR",
         "line_items": [
@@ -234,7 +216,7 @@
             "description": "California Burrito",
             "amount": 195.0,
             "quantity": 1,
-            "code": ""
+            "code": "5517"
           }
         ]
       },
@@ -248,7 +230,7 @@
       "metadata": {
         "page_index": 1,
         "total_pages": 3,
-        "processing_time_sec": 50.1335
+        "processing_time_sec": 56.2402
       }
     },
     {
@@ -257,9 +239,9 @@
         "employee_id": "",
         "expense_type": "meal",
         "amount": 20.0,
-        "month": "2025-02",
-        "bill_date": "2025-02-18",
-        "vendor_name": "BANGALORE DOSA",
+        "month": "2024-02",
+        "bill_date": "2024-02-06",
+        "vendor_name": "Bangalore Dosa",
         "currency": "INR",
         "line_items": [
           {
@@ -280,7 +262,7 @@
       "metadata": {
         "page_index": 1,
         "total_pages": 3,
-        "processing_time_sec": 52.5191
+        "processing_time_sec": 58.5153
       }
     },
     {
@@ -289,77 +271,25 @@
         "employee_id": "",
         "expense_type": "meal",
         "amount": 525.0,
-        "month": "2025-02",
-        "bill_date": "2025-02-16",
-        "vendor_name": "The Recreation Hub",
+        "month": "2023-02",
+        "bill_date": "2023-01-25",
+        "vendor_name": "BANGALORE DOSA",
         "currency": "INR",
         "line_items": [
           {
-            "description": "Mobbing Breaktea",
-            "amount": 250.0,
+            "description": "Morbiing Breaka",
+            "amount": 500.0,
             "quantity": 1,
             "code": ""
-          }
-        ]
-      },
-      "decision": {
-        "decision": "APPROVED",
-        "confidence_score": 1.0,
-        "reasoning": "Within meal allowance limit",
-        "violated_rules": [],
-        "approved_amount": 125.0
-      },
-      "metadata": {
-        "page_index": 2,
-        "total_pages": 3,
-        "processing_time_sec": 44.0814
-      }
-    },
-    {
-      "extraction_source": "vision_llm",
-      "structured_bill": {
-        "employee_id": "",
-        "expense_type": "meal",
-        "amount": 49.0,
-        "month": "2025-02",
-        "bill_date": "2025-02-16",
-        "vendor_name": "Bangalore Dosa",
-        "currency": "INR",
-        "line_items": [
+          },
           {
-            "description": "Idly 2p, Vada",
+            "description": "Idly 2pc",
             "amount": 49.0,
             "quantity": 1,
             "code": ""
-          }
-        ]
-      },
-      "decision": {
-        "decision": "APPROVED",
-        "confidence_score": 1.0,
-        "reasoning": "Within meal allowance limit",
-        "violated_rules": [],
-        "approved_amount": 49.0
-      },
-      "metadata": {
-        "page_index": 2,
-        "total_pages": 3,
-        "processing_time_sec": 46.5381
-      }
-    },
-    {
-      "extraction_source": "vision_llm",
-      "structured_bill": {
-        "employee_id": "",
-        "expense_type": "meal",
-        "amount": 138.0,
-        "month": "2025-02",
-        "bill_date": "2025-02-16",
-        "vendor_name": "Bangalore Dosa",
-        "currency": "INR",
-        "line_items": [
+          },
           {
-            "description": "Idly1, Vada1",
+            "description": "Idly(1)+Vada(1)",
             "amount": 49.0,
             "quantity": 1,
             "code": ""
@@ -375,14 +305,14 @@
       "decision": {
         "decision": "APPROVED",
         "confidence_score": 1.0,
-        "reasoning": "Within meal allowance limit",
+        "reasoning": "Within meal allowance limit of INR 125 per day.",
         "violated_rules": [],
         "approved_amount": 125.0
       },
       "metadata": {
         "page_index": 2,
         "total_pages": 3,
-        "processing_time_sec": 48.9493
+        "processing_time_sec": 30.6597
       }
     }
   ]

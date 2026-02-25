@@ -102,6 +102,7 @@ class BillProcessingPipeline:
         fallback_threshold: float = 0.6,
         fallback_enabled: bool = True,
         extraction_strategy: str = "fusion",
+        vision_if_ocr_below: float = 0.6,
         expense_type: str = "meal",
         employee_id: str = "",
     ) -> None:
@@ -114,6 +115,7 @@ class BillProcessingPipeline:
         self._fallback_threshold = fallback_threshold
         self._fallback_enabled = fallback_enabled
         self._strategy = (extraction_strategy or "fusion").strip().lower()
+        self._vision_if_ocr_below = vision_if_ocr_below
         self._expense_type = expense_type
         self._employee_id = employee_id
 
@@ -132,25 +134,46 @@ class BillProcessingPipeline:
             "expense_type": self._expense_type,
         }
 
-        # 1) OCR only when strategy is fusion
+        # 1) OCR: run for ocr_only and fusion (needed to decide whether to call vision)
         ocr_text, ocr_conf = "", 0.0
-        if self._strategy == "fusion":
+        if self._strategy in ("ocr_only", "fusion"):
             try:
                 ocr_text, ocr_conf = self._ocr.extract_from_path(path)
             except Exception as e:
                 logger.exception("OCR failed for %s: %s", path, e)
 
-        # 2) Vision extraction
-        image_bytes = image_bytes_from_path_for_vision(path)
-        if not image_bytes:
-            logger.warning("No image bytes for vision (e.g. pdf2image missing or failed); using OCR only")
-        try:
-            if image_bytes:
-                logger.info("Running vision model for extraction: %s", path.name)
-            extraction = self._vision.extract(image_bytes, context)
-        except Exception as e:
-            logger.warning("Vision extraction failed: %s; using OCR fallback", e)
+        # 2) OCR-only mode: use OCR result and skip vision entirely
+        if self._strategy == "ocr_only":
             extraction = _ocr_fallback(self._ocr, path, context)
+            if extraction.source == "ocr_fallback":
+                ocr_text = extraction.ocr_raw_text
+                ocr_conf = extraction.ocr_confidence
+        else:
+            # 3) Vision: for fusion, only call vision when OCR confidence is below threshold
+            use_vision = True
+            if self._strategy == "fusion" and ocr_conf >= self._vision_if_ocr_below:
+                use_vision = False
+                logger.info("OCR confidence %.2f >= threshold %.2f; skipping vision LLM", ocr_conf, self._vision_if_ocr_below)
+                extraction = _ocr_fallback(self._ocr, path, context)
+                ocr_text = extraction.ocr_raw_text
+                ocr_conf = extraction.ocr_confidence
+
+            if use_vision:
+                image_bytes = image_bytes_from_path_for_vision(path)
+                if not image_bytes:
+                    logger.warning("No image bytes for vision (e.g. pdf2image missing or failed); using OCR only")
+                    extraction = _ocr_fallback(self._ocr, path, context)
+                    ocr_text = extraction.ocr_raw_text
+                    ocr_conf = extraction.ocr_confidence
+                else:
+                    try:
+                        logger.info("Running vision model for extraction: %s", path.name)
+                        extraction = self._vision.extract(image_bytes, context)
+                    except Exception as e:
+                        logger.warning("Vision extraction failed: %s; using OCR fallback", e)
+                        extraction = _ocr_fallback(self._ocr, path, context)
+                        ocr_text = extraction.ocr_raw_text
+                        ocr_conf = extraction.ocr_confidence
 
         # 3) Fallback: if confidence < threshold and fallback enabled, use OCR only
         if (
@@ -243,6 +266,7 @@ class BillProcessingPipeline:
         Process a file that may contain multiple bills (e.g. multi-page PDF).
         Runs vision extraction per page and returns one BillResult per page.
         Use for PDFs where each page is a separate bill.
+        In ocr_only mode, runs OCR once on the whole file and returns one BillResult.
         """
         path = Path(file_path)
         if not path.exists():
@@ -252,11 +276,142 @@ class BillProcessingPipeline:
             "employee_id": self._employee_id,
             "expense_type": self._expense_type,
         }
+
+        if self._strategy == "ocr_only":
+            extraction = _ocr_fallback(self._ocr, path, context)
+            bills_to_process = _bills_from_extraction(extraction)
+            start = time.perf_counter()
+            if not bills_to_process:
+                return [
+                    BillResult(
+                        trace_id=trace_id,
+                        file_name=path.name,
+                        extraction_source=extraction.source,
+                        structured_bill={},
+                        decision={
+                            "decision": "REJECTED",
+                            "confidence_score": 1.0,
+                            "reasoning": "No bill extracted",
+                            "violated_rules": [],
+                            "approved_amount": None,
+                        },
+                        policy_version_hash=self._policy_hash,
+                        metadata={"processing_time_sec": 0},
+                        ocr_extracted={"raw_text": extraction.ocr_raw_text, "confidence": extraction.ocr_confidence},
+                        fusion_metadata=extraction.fusion_metadata,
+                    )
+                ]
+            results: list[BillResult] = []
+            for structured_bill in bills_to_process:
+                if extraction.critical_validation_failed or not _validate_critical(structured_bill):
+                    decision = {
+                        "decision": "REJECTED",
+                        "confidence_score": 1.0,
+                        "reasoning": "Critical validation failed",
+                        "violated_rules": ["Critical validation failed"],
+                        "approved_amount": None,
+                    }
+                else:
+                    monthly_total = float(structured_bill.get("amount") or 0)
+                    decision = self._decision.get_decision(
+                        structured_bill, self._policy, self._expense_type, monthly_total, trace_id,
+                    )
+                    decision = self._post.apply(
+                        decision, structured_bill, self._policy, self._expense_type, remaining_day_cap=None,
+                    )
+                elapsed = time.perf_counter() - start
+                structured_bill_out = dict(structured_bill)
+                if structured_bill_out.get("bill_date") and hasattr(structured_bill_out["bill_date"], "isoformat"):
+                    structured_bill_out["bill_date"] = str(structured_bill_out["bill_date"])
+                results.append(
+                    BillResult(
+                        trace_id=trace_id,
+                        file_name=path.name,
+                        extraction_source=extraction.source,
+                        structured_bill=structured_bill_out,
+                        decision=decision,
+                        policy_version_hash=self._policy_hash,
+                        metadata={"processing_time_sec": round(elapsed, 4)},
+                        ocr_extracted={"raw_text": extraction.ocr_raw_text, "confidence": extraction.ocr_confidence},
+                        fusion_metadata=extraction.fusion_metadata,
+                    )
+                )
+            return results
+
+        # fusion with high OCR confidence: use OCR once for whole file (one result)
+        ocr_text, ocr_conf = "", 0.0
+        if self._strategy == "fusion":
+            try:
+                ocr_text, ocr_conf = self._ocr.extract_from_path(path)
+            except Exception as e:
+                logger.exception("OCR failed for %s: %s", path, e)
+            if ocr_conf >= self._vision_if_ocr_below:
+                logger.info("OCR confidence %.2f >= threshold %.2f; skipping vision for multi-page", ocr_conf, self._vision_if_ocr_below)
+                extraction = _ocr_fallback(self._ocr, path, context)
+                bills_to_process = _bills_from_extraction(extraction)
+                start = time.perf_counter()
+                if not bills_to_process:
+                    return [
+                        BillResult(
+                            trace_id=trace_id,
+                            file_name=path.name,
+                            extraction_source=extraction.source,
+                            structured_bill={},
+                            decision={
+                                "decision": "REJECTED",
+                                "confidence_score": 1.0,
+                                "reasoning": "No bill extracted",
+                                "violated_rules": [],
+                                "approved_amount": None,
+                            },
+                            policy_version_hash=self._policy_hash,
+                            metadata={"processing_time_sec": 0},
+                            ocr_extracted={"raw_text": extraction.ocr_raw_text, "confidence": extraction.ocr_confidence},
+                            fusion_metadata=extraction.fusion_metadata,
+                        )
+                    ]
+                results = []
+                for structured_bill in bills_to_process:
+                    if extraction.critical_validation_failed or not _validate_critical(structured_bill):
+                        decision = {
+                            "decision": "REJECTED",
+                            "confidence_score": 1.0,
+                            "reasoning": "Critical validation failed",
+                            "violated_rules": ["Critical validation failed"],
+                            "approved_amount": None,
+                        }
+                    else:
+                        monthly_total = float(structured_bill.get("amount") or 0)
+                        decision = self._decision.get_decision(
+                            structured_bill, self._policy, self._expense_type, monthly_total, trace_id,
+                        )
+                        decision = self._post.apply(
+                            decision, structured_bill, self._policy, self._expense_type, remaining_day_cap=None,
+                        )
+                    elapsed = time.perf_counter() - start
+                    structured_bill_out = dict(structured_bill)
+                    if structured_bill_out.get("bill_date") and hasattr(structured_bill_out["bill_date"], "isoformat"):
+                        structured_bill_out["bill_date"] = str(structured_bill_out["bill_date"])
+                    results.append(
+                        BillResult(
+                            trace_id=trace_id,
+                            file_name=path.name,
+                            extraction_source=extraction.source,
+                            structured_bill=structured_bill_out,
+                            decision=decision,
+                            policy_version_hash=self._policy_hash,
+                            metadata={"processing_time_sec": round(elapsed, 4)},
+                            ocr_extracted={"raw_text": extraction.ocr_raw_text, "confidence": extraction.ocr_confidence},
+                            fusion_metadata=extraction.fusion_metadata,
+                        )
+                    )
+                return results
+
         page_images = image_bytes_list_from_path_for_vision(path)
         if not page_images:
             logger.warning("No images for multi-page vision: %s", path)
             return []
-        results: list[BillResult] = []
+        results = []
         for page_index, image_bytes in enumerate(page_images):
             start = time.perf_counter()
             try:

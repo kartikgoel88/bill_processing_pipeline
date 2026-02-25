@@ -170,6 +170,8 @@ def pipeline(policy_json: dict) -> BillProcessingPipeline:
         policy_version_hash="test_hash",
         fallback_threshold=0.6,
         fallback_enabled=True,
+        extraction_strategy="fusion",
+        vision_if_ocr_below=0.9,  # OCR 0.85 < 0.9 so vision still runs in this fixture
         expense_type="meal",
         employee_id="E1",
     )
@@ -220,11 +222,61 @@ def test_pipeline_fallback_when_vision_low_confidence(tmp_path: Path, policy_jso
         policy=policy_json,
         fallback_threshold=0.6,
         fallback_enabled=True,
+        vision_if_ocr_below=0.6,  # OCR 0.7 >= 0.6 so we skip vision and use OCR (ocr_fallback)
     )
     bill_file = _minimal_image_path(tmp_path)
     results = pipeline.process(bill_file)
     assert len(results) >= 1
     assert results[0].extraction_source == "ocr_fallback"
+
+
+def test_pipeline_ocr_only_mode(tmp_path: Path, policy_json: dict) -> None:
+    """OCR-only mode uses OCR only; vision is never called (extraction_source is ocr_fallback)."""
+    ocr = FakeOCRService(raw_text="Total 50.00\nDate 2024-01-10", confidence=0.8)
+    vision = FakeVisionService(confidence=0.9)
+    decision = FakeDecisionService(decision="APPROVED", approved_amount=50.0)
+    post = FakePostProcessingService()
+    pipeline = BillProcessingPipeline(
+        ocr,
+        vision,
+        decision,
+        post,
+        policy=policy_json,
+        fallback_threshold=0.6,
+        fallback_enabled=True,
+        extraction_strategy="ocr_only",
+        vision_if_ocr_below=0.6,
+    )
+    bill_file = _minimal_image_path(tmp_path)
+    results = pipeline.process(bill_file)
+    assert len(results) >= 1
+    assert results[0].extraction_source == "ocr_fallback"
+    # Vision was skipped; result comes from OCR parsing
+    assert "50" in str(results[0].structured_bill.get("amount", ""))
+
+
+def test_pipeline_fusion_skips_vision_when_ocr_confident(tmp_path: Path, policy_json: dict) -> None:
+    """Fusion: when OCR confidence >= vision_if_ocr_below, vision LLM is skipped."""
+    ocr = FakeOCRService(raw_text="Total 60.00\n2024-04", confidence=0.95)
+    vision = FakeVisionService(confidence=0.9)
+    decision = FakeDecisionService(decision="APPROVED", approved_amount=60.0)
+    post = FakePostProcessingService()
+    pipeline = BillProcessingPipeline(
+        ocr,
+        vision,
+        decision,
+        post,
+        policy=policy_json,
+        fallback_threshold=0.6,
+        fallback_enabled=True,
+        extraction_strategy="fusion",
+        vision_if_ocr_below=0.6,
+    )
+    bill_file = _minimal_image_path(tmp_path)
+    results = pipeline.process(bill_file)
+    assert len(results) >= 1
+    assert results[0].extraction_source == "ocr_fallback"
+    # Vision was skipped because OCR confidence 0.95 >= 0.6
 
 
 def test_batch_processor_collects_metrics(tmp_path: Path, pipeline: BillProcessingPipeline) -> None:
