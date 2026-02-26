@@ -10,15 +10,17 @@ dry_run: false
 max_workers: 1
 
 llm:
-  provider: ollama          # ollama | openai | huggingface
+  provider: ollama          # ollama | openai | huggingface (default for vision & decision)
+  # Optional: separate provider/URL for vision or decision (e.g. ollama for vision, openai for decision)
+  # vision_provider: ollama
+  decision_provider: openai  # use OpenAI for decision when decision_base_url is OpenAI
   base_url: "http://localhost:11434/v1"
-  # Optional: separate URLs for vision and decision (default: both use base_url)
   # vision_base_url: "http://vision-host:11434/v1"
-  # decision_base_url: "http://decision-host:11434/v1"
-  api_key: ""
+  decision_base_url: "https://api.openai.com/v1"
+  api_key: ""   # set in .env as LLM_API_KEY or OPENAI_API_KEY when using OpenAI
   model: qwen2.5:7b
   vision_model: qwen2.5vl:latest
-  decision_model: llama3.2
+  decision_model: gpt-4o-mini
   max_retries: 3
   retry_delay_sec: 2.0
   timeout_sec: 120

@@ -48,6 +48,8 @@ class LLMConfig:
     """LLM endpoint and model configuration."""
 
     provider: str = "ollama"
+    vision_provider: str = ""  # if set, overrides provider for vision LLM (e.g. openai)
+    decision_provider: str = ""  # if set, overrides provider for decision LLM (e.g. openai)
     base_url: str = "http://localhost:11434/v1"
     vision_base_url: str = ""  # if set, overrides base_url for vision LLM
     decision_base_url: str = ""  # if set, overrides base_url for decision LLM
@@ -162,6 +164,8 @@ def _config_from_dict(data: dict[str, Any]) -> AppConfig:
         max_workers=_coerce_int(data.get("max_workers", 1)),
         llm=LLMConfig(
             provider=str(llm_data.get("provider", "ollama")),
+            vision_provider=str(llm_data.get("vision_provider", "")),
+            decision_provider=str(llm_data.get("decision_provider", "")),
             base_url=str(llm_data.get("base_url", "http://localhost:11434/v1")),
             vision_base_url=str(llm_data.get("vision_base_url", "")),
             decision_base_url=str(llm_data.get("decision_base_url", "")),
@@ -214,14 +218,20 @@ def load_config(config_path: str | Path | None = None) -> AppConfig:
     model = os.getenv("LLM_MODEL")
     vision_base_url = os.getenv("LLM_VISION_BASE_URL")
     decision_base_url = os.getenv("LLM_DECISION_BASE_URL")
-    if provider or base_url or model or vision_base_url or decision_base_url:
+    vision_provider = os.getenv("LLM_VISION_PROVIDER")
+    decision_provider = os.getenv("LLM_DECISION_PROVIDER")
+    api_key = os.getenv("LLM_API_KEY") or os.getenv("OPENAI_API_KEY") or cfg.llm.api_key
+    env_has_llm = bool(provider or base_url or model or vision_base_url or decision_base_url or vision_provider or decision_provider or os.getenv("LLM_API_KEY") or os.getenv("OPENAI_API_KEY"))
+    if env_has_llm:
         llm = cfg.llm
         overrides["llm"] = LLMConfig(
             provider=provider or llm.provider,
+            vision_provider=vision_provider if vision_provider is not None else llm.vision_provider,
+            decision_provider=decision_provider if decision_provider is not None else llm.decision_provider,
             base_url=base_url or llm.base_url,
             vision_base_url=vision_base_url if vision_base_url is not None else llm.vision_base_url,
             decision_base_url=decision_base_url if decision_base_url is not None else llm.decision_base_url,
-            api_key=os.getenv("LLM_API_KEY", llm.api_key),
+            api_key=api_key,
             model=model or llm.model,
             vision_model=os.getenv("LLM_VISION_MODEL", llm.vision_model),
             decision_model=os.getenv("LLM_DECISION_MODEL", llm.decision_model),

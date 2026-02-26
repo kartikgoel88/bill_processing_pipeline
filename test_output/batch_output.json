@@ -1,7 +1,7 @@
 [
   {
     "source_folder": "commute/kartik",
-    "trace_id": "471ccd36-a544-49e7-893c-1ca92d74b64e",
+    "trace_id": "bf73d48e-33af-4973-964d-d943d210b509",
     "file": "AUTO_RECEIPT_RD17313323427215751.pdf",
     "extraction_source": "ocr_fallback",
     "structured_bill": {
@@ -30,7 +30,7 @@
       "approved_amount": 11.0
     },
     "metadata": {
-      "processing_time_sec": 2.4114
+      "processing_time_sec": 5.4389
     },
     "ocr_extracted": {
       "raw_text": "Booking History\n\nrapido\n\nCustomer Name\n\nAshwini\n\nRide ID\n\nRD17313323427215751\n\nDriver name\n\nJAYARAMU KN\n\nVehicle Number\n\nKA05AM7914\n\nMode of Vehicle\n\nAuto\n\nTime of Ride\n\nNov 11th 2024, 7:11 PM\n\nSelected Price\n\n= 160\n\n\u00b0 Gate, Tesco,Vydehi Signal, Vijayanagar, Nallurhalli, Whitefield, Bengaluru, Karnataka\n\n560066, India\n\no> Service Rd, CKB Layout, Chandra Layout, Marathahalli, Bengaluru, Karnataka\n\n560037, India\n\ninvoices to the passengers under this segment. The document may be used for all official / reimbursement purposes.\n\nThis document is issued on request by the passenger. Rapido does not collect any fee/commission from passengers and shall not issue tax\n\n*Selected Price refers to the initial price decided between User and Drivers from the estimated price range",
@@ -39,7 +39,7 @@
   },
   {
     "source_folder": "commute/kartik",
-    "trace_id": "177f7803-cf99-4ff0-9227-ce5ee7fece9a",
+    "trace_id": "00b7208e-5e3a-432e-bad8-da48dd37cc7f",
     "file": "AUTO_RECEIPT_RD17315579158315167.pdf",
     "extraction_source": "ocr_fallback",
     "structured_bill": {
@@ -68,7 +68,7 @@
       "approved_amount": 125.0
     },
     "metadata": {
-      "processing_time_sec": 2.2806
+      "processing_time_sec": 2.5453
     },
     "ocr_extracted": {
       "raw_text": "Booking History\n\nrapido\n\nCustomer Name\n\nAshwini\n\nRide ID\n\nRD17315579158315167\n\nDriver name\n\nKranthi Kumar\n\nVehicle Number\n\nKA05AH2830\n\nMode of Vehicle\n\nAuto\n\nTime of Ride\n\nNov 14th 2024, 10:00 AM\n\nSelected Price\n\n< 188\n\n\u00a9 503/2, Chandra Layout, Marathahalli, Bengaluru, Karnataka 560036, India\n\no Vydehi Signal, Vijayanagar, Nallurhalli, Whitefield, Bengaluru, Karnataka 560066,\n\nIndia\n\nThis document is issued on request by the passenger. Rapido does not collect any fee/commission from passengers and shall not issue tax\n\ninvoices to the passengers under this segment. The document may be used for all official / reimbursement purposes.\n\n*Selected Price refers to the initial price decided between User and Drivers from the estimated price range",
@@ -77,7 +77,7 @@
   },
   {
     "source_folder": "commute/kartik",
-    "trace_id": "e6fee43a-313c-4a41-98ae-249be3a70d8d",
+    "trace_id": "f46e3b15-16a3-4fe3-8b07-3ad1169804f7",
     "file": "AUTO_RECEIPT_RD17315907206185320.pdf",
     "extraction_source": "ocr_fallback",
     "structured_bill": {
@@ -106,7 +106,7 @@
       "approved_amount": 125.0
     },
     "metadata": {
-      "processing_time_sec": 2.3009
+      "processing_time_sec": 2.3772
     },
     "ocr_extracted": {
       "raw_text": "Booking History\n\nrapido\n\nCustomer Name\n\nAshwini\n\nRide ID\n\nRD17315907206185320\n\nDriver name\n\nVikeshMahto\n\nVehicle Number\n\nKA03AK0875\n\nMode of Vehicle\n\nAuto\n\nTime of Ride\n\nNov 14th 2024, 7:02 PM\n\nSelected Price\n\n<~ 183\n\n\u00a9 Gate, Tesco,\n\nXP22+G2], Service Rd, CKB Layout, Chandra Layout, Marathahalli, Bengaluru,\n\nKarnataka 560037, India\n\nThis document is issued on request by the passenger. Rapido does not collect any fee/commission from passengers and shall not issue tax\n\ninvoices to the passengers under this segment. The document may be used for all official / reimbursement purposes.\n\n*Selected Price refers to the initial price decided between User and Drivers from the estimated price range",
@@ -115,7 +115,7 @@
   },
   {
     "source_folder": "commute/kartik",
-    "trace_id": "0cd5eaf2-ea5f-4a42-a89e-60a085edddd5",
+    "trace_id": "945f95a2-4e71-45f3-8858-d7229d197164",
     "file": "AUTO_RECEIPT_RD17321585542843974.pdf",
     "extraction_source": "ocr_fallback",
     "structured_bill": {
@@ -144,7 +144,7 @@
       "approved_amount": 125.0
     },
     "metadata": {
-      "processing_time_sec": 2.2471
+      "processing_time_sec": 2.3121
     },
     "ocr_extracted": {
       "raw_text": "Booking History\n\nrapido\n\nCustomer Name\n\nAshwini\n\nRide ID\n\nRD17321585542843974\n\nDriver name\n\nParashuram Patil\n\nVehicle Number\n\nKA05AN7447\n\nMode of Vehicle\n\nAuto\n\nTime of Ride\n\nNov 21st 2024, 8:46 AM\n\nSelected Price\n\n= 147\n\n560, Marathahalli - Sarjapur Outer Ring Rd, Kaverappa Layout, Kadubeesanahalli,\n\nMarathahalli, Bengaluru, Karnataka 560037, India\n\noO 104, Tesco Campus Rd, Vijayanagar, EPIP Zone, Whitefield, Bengaluru, Karnataka\n\n560066, India\n\nThis document is issued on request by the passenger. Rapido does not collect any fee/commission from passengers and shall not issue tax\n\ninvoices to the passengers under this segment. The document may be used for all official / reimbursement purposes.\n\n*Selected Price refers to the initial price decided between User and Drivers from the estimated price range",
@@ -153,7 +153,7 @@
   },
   {
     "source_folder": "commute/kartik",
-    "trace_id": "18b397b7-fe0f-40f7-a3a3-50904219e417",
+    "trace_id": "238843ba-c2e5-425b-83df-717a9dd9229c",
     "file": "AUTO_RECEIPT_RD17321854214454215.pdf",
     "extraction_source": "ocr_fallback",
     "structured_bill": {
@@ -182,7 +182,7 @@
       "approved_amount": 125.0
     },
     "metadata": {
-      "processing_time_sec": 2.2785
+      "processing_time_sec": 2.3294
     },
     "ocr_extracted": {
       "raw_text": "Booking History\n\nrapido\n\nCustomer Name\n\nAshwini\n\nRide ID\n\nRD17321854214454215\n\nDriver name\n\nSyedYousuf\n\nVehicle Number\n\nKA03AH2692\n\nMode of Vehicle\n\nAuto\n\nTime of Ride\n\nNov 21st 2024, 4:09 PM\n\nSelected Price\n\n< 133\n\n\u00a9 Gate, Tesco,5, Nallurhalli, Whitefield, Bengaluru, Karnataka 560066, India\n\noO? Service Rd, CKB Layout, Chandra Layout, Marathahalli, Bengaluru, Karnataka\n\n560037, India\n\nThis document is issued on request by the passenger. Rapido does not collect any fee/commission from passengers and shall not issue tax\n\ninvoices to the passengers under this segment. The document may be used for all official / reimbursement purposes.\n\n*Selected Price refers to the initial price decided between User and Drivers from the estimated price range",
@@ -191,7 +191,7 @@
   },
   {
     "source_folder": "commute/kartik",
-    "trace_id": "d150bbd1-c15d-45f1-b876-8c3ce28e16c1",
+    "trace_id": "eebb7a78-5f3a-4ff9-9eb0-370536ae276f",
     "file": "AUTO_RECEIPT_RD17322466992750953.pdf",
     "extraction_source": "ocr_fallback",
     "structured_bill": {
@@ -220,7 +220,7 @@
       "approved_amount": 125.0
     },
     "metadata": {
-      "processing_time_sec": 2.2811
+      "processing_time_sec": 2.2835
     },
     "ocr_extracted": {
       "raw_text": "Booking History\n\nrapido\n\nCustomer Name\n\nAshwini\n\nRide ID\n\nRD17322466992750953\n\nDriver name\n\nRamanappa Gowda B\n\nVehicle Number\n\nKA03AL9256\n\nMode of Vehicle\n\nAuto\n\nTime of Ride\n\nNov 22nd 2024, 9:10 AM\n\nSelected Price\n\n= 151\n\n\u00a9 560, Outer Ring Rd, Chandra Layout, HSR Layout, Bengaluru, Karnataka 560035, India\n\no 104, Tesco Campus Rd, Vijayanagar, EPIP Zone, Whitefield, Bengaluru, Karnataka\n\n560066, India\n\nThis document is issued on request by the passenger. Rapido does not collect any fee/commission from passengers and shall not issue tax\n\ninvoices to the passengers under this segment. The document may be used for all official / reimbursement purposes.\n\n*Selected Price refers to the initial price decided between User and Drivers from the estimated price range",
@@ -229,7 +229,7 @@
   },
   {
     "source_folder": "commute/kartik",
-    "trace_id": "a1bcdb02-42ea-414d-89a4-ad2940ede0c4",
+    "trace_id": "c49d2c18-ce65-4021-882a-f5089dfd9559",
     "file": "AUTO_RECEIPT_RD17327642156571431.pdf",
     "extraction_source": "ocr_fallback",
     "structured_bill": {
@@ -258,7 +258,7 @@
       "approved_amount": 125.0
     },
     "metadata": {
-      "processing_time_sec": 2.436
+      "processing_time_sec": 2.5559
     },
     "ocr_extracted": {
       "raw_text": "Booking History\n\nrapido\n\nCustomer Name\n\nAshwini\n\nRide ID\n\nRD17327642156571431\n\nDriver name\n\nManju Manju N\n\nVehicle Number\n\nKAO03AL0414\n\nMode of Vehicle\n\nAuto\n\nTime of Ride\n\nNov 28th 2024, 9:03 AM\n\nSelected Price\n\n= 152\n\n\u00a9 560, Outer Ring Rd, Chandra Layout, HSR Layout, Bengaluru, Karnataka 560035, India\n\no 104, Tesco Campus Rd, Vijayanagar, EPIP Zone, Whitefield, Bengaluru, Karnataka\n\n560066, India\n\nThis document is issued on request by the passenger. Rapido does not collect any fee/commission from passengers and shall not issue tax\n\ninvoices to the passengers under this segment. The document may be used for all official / reimbursement purposes.\n\n*Selected Price refers to the initial price decided between User and Drivers from the estimated price range",
@@ -267,7 +267,7 @@
   },
   {
     "source_folder": "commute/kartik",
-    "trace_id": "54ca54f1-cd6c-4fc1-ba19-21cd79917dc5",
+    "trace_id": "fa7b0eff-6c01-424f-99d8-7a2c6ebfa4f9",
     "file": "AUTO_RECEIPT_RD17328020445687517.pdf",
     "extraction_source": "ocr_fallback",
     "structured_bill": {
@@ -296,7 +296,7 @@
       "approved_amount": 125.0
     },
     "metadata": {
-      "processing_time_sec": 2.2758
+      "processing_time_sec": 2.3753
     },
     "ocr_extracted": {
       "raw_text": "Booking History\n\nrapido\n\nCustomer Name\n\nAshwini\n\nRide ID\n\nRD17328020445687517\n\nDriver name\n\nSanju Sanjaya\n\nVehicle Number\n\nKAOS5KY2761\n\nMode of Vehicle\n\nAuto\n\nTime of Ride\n\nNov 28th 2024, 7:31 PM\n\nSelected Price\n\n<155\n\n\u00b0 Gate, Tesco,Vydehi Signal, Vijayanagar, Nallurhalli, Whitefield, Bengaluru, Karnataka\n\n560066, India\n\n\u00b0 864, Service Rd, PR Layout, Chandra Layout, Marathahalli, Bengaluru, Karnataka\n\n560037, India\n\nThis document is issued on request by the passenger. Rapido does not collect any fee/commission from passengers and shall not issue tax\n\ninvoices to the passengers under this segment. The document may be used for all official / reimbursement purposes.\n\n*Selected Price refers to the initial price decided between User and Drivers from the estimated price range",
@@ -305,7 +305,7 @@
   },
   {
     "source_folder": "commute/kartik",
-    "trace_id": "55f78bd8-53e0-459c-b3f3-5f1ce9835865",
+    "trace_id": "24a3690e-a9e3-4d81-a42d-39a58c737292",
     "file": "CAB_RECEIP.pdf",
     "extraction_source": "ocr_fallback",
     "structured_bill": {
@@ -334,7 +334,7 @@
       "approved_amount": 125.0
     },
     "metadata": {
-      "processing_time_sec": 2.3033
+      "processing_time_sec": 2.4435
     },
     "ocr_extracted": {
       "raw_text": "Booking History\n\nrapido\n\nCustomer Name\n\nAshwini\n\nRide ID\n\nRD17506969273550314\n\nDriver name\n\nprasad\n\nVehicle Number\n\nKA07B5736\n\nMode of Vehicle\n\nCar\n\nTime of Ride\n\nJun 23rd 2025, 7:30 PM\n\nSelected Price\n\n= 210\n\nSSC Block, Tesco HSC, Tesco Campus Rd, Nallurhalli, Whitefield, Bengaluru, Karnataka\n\n\u00a9 560066, India\n\n96, Tulsi Theater Rd, Manjunatha Layout, Marathahalli Village, Marathahalli,\n\nBengaluru, Karnataka 560037, India\n\nThis document is issued on request by the passenger. Rapido does not collect any fee/commission from passengers and shall not issue tax\n\ninvoices to the passengers under this segment. The document may be used for all official / reimbursement purposes.\n\n*Selected Price refers to the initial price decided between User and Drivers from the estimated price range",
@@ -343,7 +343,7 @@
   },
   {
     "source_folder": "commute/kartik",
-    "trace_id": "0f83b880-db01-446d-8118-a1089a51f2f6",
+    "trace_id": "2eae47aa-aaeb-4594-875d-a9f0ed1cb3bf",
     "file": "CAB_RECEIPT_RD17506969273550314.pdf",
     "extraction_source": "ocr_fallback",
     "structured_bill": {
@@ -372,7 +372,7 @@
       "approved_amount": 125.0
     },
     "metadata": {
-      "processing_time_sec": 1.8754
+      "processing_time_sec": 1.9654
     },
     "ocr_extracted": {
       "raw_text": "Booking History\n\nrapido\n\nCustomer Name\n\nAshwini\n\nRide ID\n\nRD17506969273550314\n\nDriver name\n\nprasad\n\nVehicle Number\n\nKA07B5736\n\nMode of Vehicle\n\nCar\n\nTime of Ride\n\nJun 23rd 2025, 10:17 PM\n\nSelected Price\n\n=~ 210\n\nGate 1, Forum Shantiniketan Mall,FORUM SHANTINIKETAN MALL, PRESTIGE\n\n\u00a9 SHANTINIKETAN, Whitefield Main Rd, Thigalarapalya, Krishnarajapuram, Bengaluru,\n\nKarnataka 560067, India\n\n96, Tulsi Theater Rd, Manjunatha Layout, Marathahalli Village, Marathahalli,\n\nBengaluru, Karnataka 560037, India\n\nThis document is issued on request by the passenger. Rapido does not collect any fee/commission from passengers and shall not issue tax\n\ninvoices to the passengers under this segment. The document may be used for all official / reimbursement purposes.\n\n*Selected Price refers to the initial price decided between User and Drivers from the estimated price range",
@@ -381,7 +381,7 @@
   },
   {
     "source_folder": "commute/kartik",
-    "trace_id": "36dbfcad-a000-4271-a204-c4d824fcda27",
+    "trace_id": "8e888be8-5c20-4b18-aeeb-0a2c745bc68e",
     "file": "receipt_9ed71f8b-428d-4d31-8743-c3dda2c2e686.pdf",
     "extraction_source": "ocr_fallback",
     "structured_bill": {
@@ -405,9 +405,9 @@
     "decision": {
       "decision": "REJECTED",
       "confidence_score": 1.0,
-      "reasoning": "Critical validation failed",
+      "reasoning": "Critical validation failed: month missing",
       "violated_rules": [
-        "Critical validation failed"
+        "Critical validation failed: month missing"
       ],
       "approved_amount": null
     },
@@ -421,7 +421,7 @@
   },
   {
     "source_folder": "meal/0000_naveen_unknown_unknown",
-    "trace_id": "96294c71-eded-4d0c-826c-c93bb2a80682",
+    "trace_id": "da8ca9a4-3b91-4202-99aa-73d8fc4a918c",
     "file": "AugMealReceipts.pdf",
     "extraction_source": "ocr_fallback",
     "structured_bill": {
@@ -445,9 +445,9 @@
     "decision": {
       "decision": "REJECTED",
       "confidence_score": 1.0,
-      "reasoning": "Critical validation failed",
+      "reasoning": "Critical validation failed: month missing",
       "violated_rules": [
-        "Critical validation failed"
+        "Critical validation failed: month missing"
       ],
       "approved_amount": null
     },
@@ -461,7 +461,7 @@
   },
   {
     "source_folder": "meal/0000_smithau_unknown_unknown",
-    "trace_id": "5501c282-9e4b-4cb5-a499-cf2acd80d396",
+    "trace_id": "cfad9b60-99fa-413f-9647-6f30c08227e9",
     "file": "31st_Lunch.pdf",
     "extraction_source": "ocr_fallback",
     "structured_bill": {
@@ -478,9 +478,9 @@
     "decision": {
       "decision": "REJECTED",
       "confidence_score": 1.0,
-      "reasoning": "Critical validation failed",
+      "reasoning": "Critical validation failed: amount is zero or negative; month missing",
       "violated_rules": [
-        "Critical validation failed"
+        "Critical validation failed: amount is zero or negative; month missing"
       ],
       "approved_amount": null
     },
@@ -494,7 +494,7 @@
   },
   {
     "source_folder": "meal/0000_smithau_unknown_unknown",
-    "trace_id": "a93b7a83-2eef-451f-bb96-fa572b482e85",
+    "trace_id": "1f525be3-e20c-4ad4-aaa6-12a6b7d3fb86",
     "file": "31st_Lunch_1.pdf",
     "extraction_source": "ocr_fallback",
     "structured_bill": {
@@ -511,9 +511,9 @@
     "decision": {
       "decision": "REJECTED",
       "confidence_score": 1.0,
-      "reasoning": "Critical validation failed",
+      "reasoning": "Critical validation failed: amount is zero or negative; month missing",
       "violated_rules": [
-        "Critical validation failed"
+        "Critical validation failed: amount is zero or negative; month missing"
       ],
       "approved_amount": null
     },
@@ -527,7 +527,7 @@
   },
   {
     "source_folder": "meal/0000_smithau_unknown_unknown",
-    "trace_id": "d123e4c5-18b9-4a2d-9e67-96ab5f3e5551",
+    "trace_id": "8893a000-1890-4030-9033-2478b4588665",
     "file": "July8th_Lunch.pdf",
     "extraction_source": "ocr_fallback",
     "structured_bill": {
@@ -544,9 +544,9 @@
     "decision": {
       "decision": "REJECTED",
       "confidence_score": 1.0,
-      "reasoning": "Critical validation failed",
+      "reasoning": "Critical validation failed: amount is zero or negative; month missing",
       "violated_rules": [
-        "Critical validation failed"
+        "Critical validation failed: amount is zero or negative; month missing"
       ],
       "approved_amount": null
     },
@@ -560,7 +560,7 @@
   },
   {
     "source_folder": "meal/0000_smithau_unknown_unknown",
-    "trace_id": "4da8676a-1726-42d4-9820-eb1eb2ae5824",
+    "trace_id": "6ad4b121-fd2e-4d1f-9b46-b819d4b44303",
     "file": "July8th_Lunch_1.pdf",
     "extraction_source": "ocr_fallback",
     "structured_bill": {
@@ -577,9 +577,9 @@
     "decision": {
       "decision": "REJECTED",
       "confidence_score": 1.0,
-      "reasoning": "Critical validation failed",
+      "reasoning": "Critical validation failed: amount is zero or negative; month missing",
       "violated_rules": [
-        "Critical validation failed"
+        "Critical validation failed: amount is zero or negative; month missing"
       ],
       "approved_amount": null
     },
@@ -593,7 +593,7 @@
   },
   {
     "source_folder": "meal/0000_smithau_unknown_unknown",
-    "trace_id": "3c8e0472-1c0a-4ee6-8317-014b229fdb5a",
+    "trace_id": "7775dada-407c-4390-b148-f8da522e84df",
     "file": "foodbill1.pdf",
     "extraction_source": "ocr_fallback",
     "structured_bill": {
@@ -610,9 +610,9 @@
     "decision": {
       "decision": "REJECTED",
       "confidence_score": 1.0,
-      "reasoning": "Critical validation failed",
+      "reasoning": "Critical validation failed: amount is zero or negative; month missing",
       "violated_rules": [
-        "Critical validation failed"
+        "Critical validation failed: amount is zero or negative; month missing"
       ],
       "approved_amount": null
     },
@@ -626,7 +626,7 @@
   },
   {
     "source_folder": "meal/0000_smithau_unknown_unknown",
-    "trace_id": "b31de206-b939-4e88-acf3-623b0d98bc83",
+    "trace_id": "01ffefa6-5204-49dd-a1a0-67deb57ccc11",
     "file": "foodbills.pdf",
     "extraction_source": "ocr_fallback",
     "structured_bill": {
@@ -650,9 +650,9 @@
     "decision": {
       "decision": "REJECTED",
       "confidence_score": 1.0,
-      "reasoning": "Critical validation failed",
+      "reasoning": "Critical validation failed: month missing",
       "violated_rules": [
-        "Critical validation failed"
+        "Critical validation failed: month missing"
       ],
       "approved_amount": null
     },
@@ -666,7 +666,7 @@
   },
   {
     "source_folder": "meal/0000_smithau_unknown_unknown",
-    "trace_id": "63c2f29f-e666-4117-9480-1851c7348f81",
+    "trace_id": "c3e4df44-a8aa-429e-89b7-448c9aadd7a5",
     "file": "hotel bill.pdf",
     "extraction_source": "ocr_fallback",
     "structured_bill": {
@@ -690,9 +690,9 @@
     "decision": {
       "decision": "REJECTED",
       "confidence_score": 1.0,
-      "reasoning": "Critical validation failed",
+      "reasoning": "Critical validation failed: month missing",
       "violated_rules": [
-        "Critical validation failed"
+        "Critical validation failed: month missing"
       ],
       "approved_amount": null
     },

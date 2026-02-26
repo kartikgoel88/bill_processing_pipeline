@@ -1,20 +1,20 @@
 source_folder,trace_id,file,policy_version_hash,employee_id,expense_type,amount,approved_amount,month,decision,confidence_score,reasoning,violated_rules,extraction_source,ocr_confidence,processing_time_sec
-commute/kartik,471ccd36-a544-49e7-893c-1ca92d74b64e,AUTO_RECEIPT_RD17313323427215751.pdf,v1,,meal,11.0,11.0,2024-11,APPROVED,1.0,Within meal allowance limit,,ocr_fallback,,2.4114
-commute/kartik,177f7803-cf99-4ff0-9227-ce5ee7fece9a,AUTO_RECEIPT_RD17315579158315167.pdf,v1,,meal,188.0,125.0,2024-11,APPROVED,1.0,Within meal allowance limit,,ocr_fallback,,2.2806
-commute/kartik,e6fee43a-313c-4a41-98ae-249be3a70d8d,AUTO_RECEIPT_RD17315907206185320.pdf,v1,,meal,183.0,125.0,2024-11,APPROVED,1.0,Within meal allowance limit,,ocr_fallback,,2.3009
-commute/kartik,0cd5eaf2-ea5f-4a42-a89e-60a085edddd5,AUTO_RECEIPT_RD17321585542843974.pdf,v1,,meal,147.0,125.0,2024-11,APPROVED,1.0,Within meal allowance limit,,ocr_fallback,,2.2471
-commute/kartik,18b397b7-fe0f-40f7-a3a3-50904219e417,AUTO_RECEIPT_RD17321854214454215.pdf,v1,,meal,133.0,125.0,2024-11,APPROVED,1.0,Within meal allowance limit,,ocr_fallback,,2.2785
-commute/kartik,d150bbd1-c15d-45f1-b876-8c3ce28e16c1,AUTO_RECEIPT_RD17322466992750953.pdf,v1,,meal,151.0,125.0,2024-11,APPROVED,1.0,Within meal allowance limit,,ocr_fallback,,2.2811
-commute/kartik,a1bcdb02-42ea-414d-89a4-ad2940ede0c4,AUTO_RECEIPT_RD17327642156571431.pdf,v1,,meal,152.0,125.0,2024-11,APPROVED,1.0,Within meal allowance limit,,ocr_fallback,,2.436
-commute/kartik,54ca54f1-cd6c-4fc1-ba19-21cd79917dc5,AUTO_RECEIPT_RD17328020445687517.pdf,v1,,meal,155.0,125.0,2024-11,APPROVED,1.0,Within meal allowance limit,,ocr_fallback,,2.2758
-commute/kartik,55f78bd8-53e0-459c-b3f3-5f1ce9835865,CAB_RECEIP.pdf,v1,,meal,210.0,125.0,2025-06,APPROVED,1.0,Within meal allowance limit,,ocr_fallback,,2.3033
-commute/kartik,0f83b880-db01-446d-8118-a1089a51f2f6,CAB_RECEIPT_RD17506969273550314.pdf,v1,,meal,210.0,125.0,2025-06,APPROVED,1.0,Within meal allowance limit,,ocr_fallback,,1.8754
-commute/kartik,36dbfcad-a000-4271-a204-c4d824fcda27,receipt_9ed71f8b-428d-4d31-8743-c3dda2c2e686.pdf,v1,,meal,2025.0,,,REJECTED,1.0,Critical validation failed,Critical validation failed,ocr_fallback,,0.0
-meal/0000_naveen_unknown_unknown,96294c71-eded-4d0c-826c-c93bb2a80682,AugMealReceipts.pdf,v1,,meal,2158.0,,,REJECTED,1.0,Critical validation failed,Critical validation failed,ocr_fallback,,0.0
-meal/0000_smithau_unknown_unknown,5501c282-9e4b-4cb5-a499-cf2acd80d396,31st_Lunch.pdf,v1,,meal,0.0,,,REJECTED,1.0,Critical validation failed,Critical validation failed,ocr_fallback,,0.0
-meal/0000_smithau_unknown_unknown,a93b7a83-2eef-451f-bb96-fa572b482e85,31st_Lunch_1.pdf,v1,,meal,0.0,,,REJECTED,1.0,Critical validation failed,Critical validation failed,ocr_fallback,,0.0
-meal/0000_smithau_unknown_unknown,d123e4c5-18b9-4a2d-9e67-96ab5f3e5551,July8th_Lunch.pdf,v1,,meal,0.0,,,REJECTED,1.0,Critical validation failed,Critical validation failed,ocr_fallback,,0.0
-meal/0000_smithau_unknown_unknown,4da8676a-1726-42d4-9820-eb1eb2ae5824,July8th_Lunch_1.pdf,v1,,meal,0.0,,,REJECTED,1.0,Critical validation failed,Critical validation failed,ocr_fallback,,0.0
-meal/0000_smithau_unknown_unknown,3c8e0472-1c0a-4ee6-8317-014b229fdb5a,foodbill1.pdf,v1,,meal,0.0,,,REJECTED,1.0,Critical validation failed,Critical validation failed,ocr_fallback,,0.0
-meal/0000_smithau_unknown_unknown,b31de206-b939-4e88-acf3-623b0d98bc83,foodbills.pdf,v1,,meal,1.0,,,REJECTED,1.0,Critical validation failed,Critical validation failed,ocr_fallback,,0.0
-meal/0000_smithau_unknown_unknown,63c2f29f-e666-4117-9480-1851c7348f81,hotel bill.pdf,v1,,meal,2.0,,,REJECTED,1.0,Critical validation failed,Critical validation failed,ocr_fallback,,0.0
+commute/kartik,bf73d48e-33af-4973-964d-d943d210b509,AUTO_RECEIPT_RD17313323427215751.pdf,v1,,meal,11.0,11.0,2024-11,APPROVED,1.0,Within meal allowance limit,,ocr_fallback,,5.4389
+commute/kartik,00b7208e-5e3a-432e-bad8-da48dd37cc7f,AUTO_RECEIPT_RD17315579158315167.pdf,v1,,meal,188.0,125.0,2024-11,APPROVED,1.0,Within meal allowance limit,,ocr_fallback,,2.5453
+commute/kartik,f46e3b15-16a3-4fe3-8b07-3ad1169804f7,AUTO_RECEIPT_RD17315907206185320.pdf,v1,,meal,183.0,125.0,2024-11,APPROVED,1.0,Within meal allowance limit,,ocr_fallback,,2.3772
+commute/kartik,945f95a2-4e71-45f3-8858-d7229d197164,AUTO_RECEIPT_RD17321585542843974.pdf,v1,,meal,147.0,125.0,2024-11,APPROVED,1.0,Within meal allowance limit,,ocr_fallback,,2.3121
+commute/kartik,238843ba-c2e5-425b-83df-717a9dd9229c,AUTO_RECEIPT_RD17321854214454215.pdf,v1,,meal,133.0,125.0,2024-11,APPROVED,1.0,Within meal allowance limit,,ocr_fallback,,2.3294
+commute/kartik,eebb7a78-5f3a-4ff9-9eb0-370536ae276f,AUTO_RECEIPT_RD17322466992750953.pdf,v1,,meal,151.0,125.0,2024-11,APPROVED,1.0,Within meal allowance limit,,ocr_fallback,,2.2835
+commute/kartik,c49d2c18-ce65-4021-882a-f5089dfd9559,AUTO_RECEIPT_RD17327642156571431.pdf,v1,,meal,152.0,125.0,2024-11,APPROVED,1.0,Within meal allowance limit,,ocr_fallback,,2.5559
+commute/kartik,fa7b0eff-6c01-424f-99d8-7a2c6ebfa4f9,AUTO_RECEIPT_RD17328020445687517.pdf,v1,,meal,155.0,125.0,2024-11,APPROVED,1.0,Within meal allowance limit,,ocr_fallback,,2.3753
+commute/kartik,24a3690e-a9e3-4d81-a42d-39a58c737292,CAB_RECEIP.pdf,v1,,meal,210.0,125.0,2025-06,APPROVED,1.0,Within meal allowance limit,,ocr_fallback,,2.4435
+commute/kartik,2eae47aa-aaeb-4594-875d-a9f0ed1cb3bf,CAB_RECEIPT_RD17506969273550314.pdf,v1,,meal,210.0,125.0,2025-06,APPROVED,1.0,Within meal allowance limit,,ocr_fallback,,1.9654
+commute/kartik,8e888be8-5c20-4b18-aeeb-0a2c745bc68e,receipt_9ed71f8b-428d-4d31-8743-c3dda2c2e686.pdf,v1,,meal,2025.0,,,REJECTED,1.0,Critical validation failed: month missing,Critical validation failed: month missing,ocr_fallback,,0.0
+meal/0000_naveen_unknown_unknown,da8ca9a4-3b91-4202-99aa-73d8fc4a918c,AugMealReceipts.pdf,v1,,meal,2158.0,,,REJECTED,1.0,Critical validation failed: month missing,Critical validation failed: month missing,ocr_fallback,,0.0
+meal/0000_smithau_unknown_unknown,cfad9b60-99fa-413f-9647-6f30c08227e9,31st_Lunch.pdf,v1,,meal,0.0,,,REJECTED,1.0,Critical validation failed: amount is zero or negative; month missing,Critical validation failed: amount is zero or negative; month missing,ocr_fallback,,0.0
+meal/0000_smithau_unknown_unknown,1f525be3-e20c-4ad4-aaa6-12a6b7d3fb86,31st_Lunch_1.pdf,v1,,meal,0.0,,,REJECTED,1.0,Critical validation failed: amount is zero or negative; month missing,Critical validation failed: amount is zero or negative; month missing,ocr_fallback,,0.0
+meal/0000_smithau_unknown_unknown,8893a000-1890-4030-9033-2478b4588665,July8th_Lunch.pdf,v1,,meal,0.0,,,REJECTED,1.0,Critical validation failed: amount is zero or negative; month missing,Critical validation failed: amount is zero or negative; month missing,ocr_fallback,,0.0
+meal/0000_smithau_unknown_unknown,6ad4b121-fd2e-4d1f-9b46-b819d4b44303,July8th_Lunch_1.pdf,v1,,meal,0.0,,,REJECTED,1.0,Critical validation failed: amount is zero or negative; month missing,Critical validation failed: amount is zero or negative; month missing,ocr_fallback,,0.0
+meal/0000_smithau_unknown_unknown,7775dada-407c-4390-b148-f8da522e84df,foodbill1.pdf,v1,,meal,0.0,,,REJECTED,1.0,Critical validation failed: amount is zero or negative; month missing,Critical validation failed: amount is zero or negative; month missing,ocr_fallback,,0.0
+meal/0000_smithau_unknown_unknown,01ffefa6-5204-49dd-a1a0-67deb57ccc11,foodbills.pdf,v1,,meal,1.0,,,REJECTED,1.0,Critical validation failed: month missing,Critical validation failed: month missing,ocr_fallback,,0.0
+meal/0000_smithau_unknown_unknown,c3e4df44-a8aa-429e-89b7-448c9aadd7a5,hotel bill.pdf,v1,,meal,2.0,,,REJECTED,1.0,Critical validation failed: month missing,Critical validation failed: month missing,ocr_fallback,,0.0

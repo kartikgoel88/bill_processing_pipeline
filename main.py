@@ -16,6 +16,13 @@ import json
 import sys
 from pathlib import Path
 
+# Load .env before config so OPENAI_API_KEY / LLM_API_KEY are available
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
+
 from core.models import BillResult
 from utils.config import load_config
 from utils.logger import setup_logging, get_logger
@@ -42,19 +49,34 @@ def _load_policy(path: Path) -> tuple[dict, str]:
 
 def _build_pipeline(config, policy: dict, policy_hash: str) -> BillProcessingPipeline:
     llm_config = config.llm
+    vision_provider = (llm_config.vision_provider or llm_config.provider).strip() or "ollama"
+    decision_provider = (llm_config.decision_provider or llm_config.provider).strip() or "ollama"
     vision_url = (llm_config.vision_base_url or llm_config.base_url).strip()
     decision_url = (llm_config.decision_base_url or llm_config.base_url).strip()
+    api_key = (llm_config.api_key or "").strip()
+    if decision_provider == "openai" and not api_key:
+        logger.error(
+            "OpenAI is configured for the decision LLM but no API key is set. "
+            "Set OPENAI_API_KEY or LLM_API_KEY in .env (or export in your shell)."
+        )
+        raise ValueError("OpenAI API key required for decision_provider=openai. Set OPENAI_API_KEY or LLM_API_KEY.")
+    if vision_provider == "openai" and not api_key:
+        logger.error(
+            "OpenAI is configured for the vision LLM but no API key is set. "
+            "Set OPENAI_API_KEY or LLM_API_KEY in .env (or export in your shell)."
+        )
+        raise ValueError("OpenAI API key required for vision_provider=openai. Set OPENAI_API_KEY or LLM_API_KEY.")
     vision_llm = create_provider(
-        llm_config.provider,
+        vision_provider,
         base_url=vision_url,
-        api_key=llm_config.api_key,
+        api_key=api_key,
         model=llm_config.vision_model,
         timeout_sec=llm_config.timeout_sec,
     )
     decision_llm = create_provider(
-        llm_config.provider,
+        decision_provider,
         base_url=decision_url,
-        api_key=llm_config.api_key,
+        api_key=api_key,
         model=llm_config.decision_model,
         timeout_sec=llm_config.timeout_sec,
     )
