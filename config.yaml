@@ -12,6 +12,9 @@ max_workers: 1
 llm:
   provider: ollama          # ollama | openai | huggingface
   base_url: "http://localhost:11434/v1"
+  # Optional: separate URLs for vision and decision (default: both use base_url)
+  # vision_base_url: "http://vision-host:11434/v1"
+  # decision_base_url: "http://decision-host:11434/v1"
   api_key: ""
   model: qwen2.5:7b
   vision_model: qwen2.5vl:latest
@@ -24,7 +27,7 @@ ocr:
   engine: tesseract         # tesseract (default) | easyocr
 
 extraction:
-  strategy: fusion          # ocr_only | fusion | vision_first
+  strategy: ocr_only          # ocr_only | fusion | vision_first
   vision_extractor: donut
   vision_backend: ollama
   confidence_threshold: 0.6  # when fusion: only call vision LLM when OCR confidence < this

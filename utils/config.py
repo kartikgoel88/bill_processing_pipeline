@@ -49,6 +49,8 @@ class LLMConfig:
 
     provider: str = "ollama"
     base_url: str = "http://localhost:11434/v1"
+    vision_base_url: str = ""  # if set, overrides base_url for vision LLM
+    decision_base_url: str = ""  # if set, overrides base_url for decision LLM
     api_key: str = ""
     model: str = "llama3.2"
     vision_model: str = "llava"
@@ -161,6 +163,8 @@ def _config_from_dict(data: dict[str, Any]) -> AppConfig:
         llm=LLMConfig(
             provider=str(llm_data.get("provider", "ollama")),
             base_url=str(llm_data.get("base_url", "http://localhost:11434/v1")),
+            vision_base_url=str(llm_data.get("vision_base_url", "")),
+            decision_base_url=str(llm_data.get("decision_base_url", "")),
             api_key=str(llm_data.get("api_key", "")),
             model=str(llm_data.get("model", "llama3.2")),
             vision_model=str(llm_data.get("vision_model", "llava")),
@@ -208,11 +212,15 @@ def load_config(config_path: str | Path | None = None) -> AppConfig:
     provider = os.getenv("LLM_PROVIDER")
     base_url = os.getenv("LLM_BASE_URL")
     model = os.getenv("LLM_MODEL")
-    if provider or base_url or model:
+    vision_base_url = os.getenv("LLM_VISION_BASE_URL")
+    decision_base_url = os.getenv("LLM_DECISION_BASE_URL")
+    if provider or base_url or model or vision_base_url or decision_base_url:
         llm = cfg.llm
         overrides["llm"] = LLMConfig(
             provider=provider or llm.provider,
             base_url=base_url or llm.base_url,
+            vision_base_url=vision_base_url if vision_base_url is not None else llm.vision_base_url,
+            decision_base_url=decision_base_url if decision_base_url is not None else llm.decision_base_url,
             api_key=os.getenv("LLM_API_KEY", llm.api_key),
             model=model or llm.model,
             vision_model=os.getenv("LLM_VISION_MODEL", llm.vision_model),

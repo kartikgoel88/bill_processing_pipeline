@@ -11,10 +11,12 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import csv
 import json
 import sys
 from pathlib import Path
 
+from core.models import BillResult
 from utils.config import load_config
 from utils.logger import setup_logging, get_logger
 from providers.factory import create_provider
@@ -40,16 +42,18 @@ def _load_policy(path: Path) -> tuple[dict, str]:
 
 def _build_pipeline(config, policy: dict, policy_hash: str) -> BillProcessingPipeline:
     llm_config = config.llm
+    vision_url = (llm_config.vision_base_url or llm_config.base_url).strip()
+    decision_url = (llm_config.decision_base_url or llm_config.base_url).strip()
     vision_llm = create_provider(
         llm_config.provider,
-        base_url=llm_config.base_url,
+        base_url=vision_url,
         api_key=llm_config.api_key,
         model=llm_config.vision_model,
         timeout_sec=llm_config.timeout_sec,
     )
     decision_llm = create_provider(
         llm_config.provider,
-        base_url=llm_config.base_url,
+        base_url=decision_url,
         api_key=llm_config.api_key,
         model=llm_config.decision_model,
         timeout_sec=llm_config.timeout_sec,
@@ -83,9 +87,80 @@ def _build_pipeline(config, policy: dict, policy_hash: str) -> BillProcessingPip
     )
 
 
-def _discover_bills(root: Path) -> list[Path]:
+def _discover_bills(root: Path) -> list[tuple[str, Path]]:
+    """
+    Discover bill files under root. Returns list of (source_folder, path).
+    Deduplicates by (source_folder, filename), keeping the first occurrence.
+    source_folder is the path relative to root (e.g. 'commute/kartik').
+    """
     from extraction.discovery import iter_bills
-    return [p for _, _, p in iter_bills(root)]
+    root_resolved = root.resolve()
+    seen: set[tuple[str, str]] = set()
+    out: list[tuple[str, Path]] = []
+    for _, _, path in iter_bills(root):
+        path = path.resolve()
+        try:
+            folder = str(path.parent.relative_to(root_resolved))
+        except ValueError:
+            folder = path.parent.name or "."
+        key = (folder, path.name)
+        if key in seen:
+            logger.debug("Skipping duplicate in folder %s: %s", folder, path.name)
+            continue
+        seen.add(key)
+        out.append((folder, path))
+    return out
+
+
+DECISIONS_CSV_COLUMNS = [
+    "source_folder", "trace_id", "file", "policy_version_hash", "employee_id", "expense_type",
+    "amount", "approved_amount", "month", "decision", "confidence_score",
+    "reasoning", "violated_rules", "extraction_source", "ocr_confidence",
+    "processing_time_sec",
+]
+
+
+def _bill_result_to_csv_row(r: BillResult, source_folder: str = "") -> dict[str, str]:
+    """Map BillResult to a flat dict for decisions CSV."""
+    sb = r.structured_bill
+    dec = r.decision
+    meta = r.metadata or {}
+    vr = dec.get("violated_rules") or []
+    violated = ",".join(str(x) for x in vr) if isinstance(vr, list) else str(vr)
+    return {
+        "source_folder": source_folder,
+        "trace_id": r.trace_id,
+        "file": r.file_name,
+        "policy_version_hash": r.policy_version_hash or "",
+        "employee_id": str(sb.get("employee_id", "")),
+        "expense_type": str(sb.get("expense_type", "")),
+        "amount": str(sb.get("amount", "")),
+        "approved_amount": str(dec.get("approved_amount") if dec.get("approved_amount") is not None else ""),
+        "month": str(sb.get("month", "")),
+        "decision": str(dec.get("decision", "")),
+        "confidence_score": str(dec.get("confidence_score", "")),
+        "reasoning": str(dec.get("reasoning", "")),
+        "violated_rules": violated,
+        "extraction_source": r.extraction_source or "",
+        "ocr_confidence": str(meta.get("ocr_confidence", "")),
+        "processing_time_sec": str(meta.get("processing_time_sec", "")),
+    }
+
+
+def _write_decisions_csv(
+    results: list[BillResult] | list[tuple[str, BillResult]],
+    path: Path,
+) -> None:
+    """Overwrite decisions CSV with one row per bill result. Results may be (source_folder, BillResult) tuples."""
+    with open(path, "w", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=DECISIONS_CSV_COLUMNS)
+        writer.writeheader()
+        for item in results:
+            if isinstance(item, tuple):
+                folder, r = item
+                writer.writerow(_bill_result_to_csv_row(r, source_folder=folder))
+            else:
+                writer.writerow(_bill_result_to_csv_row(item))
 
 
 def main() -> int:
@@ -133,6 +208,7 @@ def main() -> int:
                             "structured_bill": r.structured_bill,
                             "decision": r.decision,
                             "metadata": r.metadata,
+                            "ocr_extracted": r.ocr_extracted,
                         }
                         for r in results
                     ],
@@ -151,6 +227,7 @@ def main() -> int:
                             "structured_bill": r.structured_bill,
                             "decision": r.decision,
                             "metadata": r.metadata,
+                            "ocr_extracted": r.ocr_extracted,
                         }
                         for r in results
                     ],
@@ -162,12 +239,12 @@ def main() -> int:
     if not input_root.is_dir():
         logger.error("Input root is not a directory: %s", input_root)
         return 1
-    files = _discover_bills(input_root)
-    if not files:
+    files_with_folders = _discover_bills(input_root)
+    if not files_with_folders:
         logger.warning("No bills found under %s", input_root)
         return 0
     batch = BatchProcessor(pipeline)
-    results, metrics = batch.process_batch(files, stop_on_first_error=False)
+    results_with_folders, metrics = batch.process_batch(files_with_folders, stop_on_first_error=False)
     out_dir = Path(config.output_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     out_path = out_dir / "batch_output.json"
@@ -175,20 +252,25 @@ def main() -> int:
         json.dump(
             [
                 {
+                    "source_folder": folder,
                     "trace_id": r.trace_id,
                     "file": r.file_name,
                     "extraction_source": r.extraction_source,
                     "structured_bill": r.structured_bill,
                     "decision": r.decision,
                     "metadata": r.metadata,
+                    "ocr_extracted": r.ocr_extracted,
                 }
-                for r in results
+                for folder, r in results_with_folders
             ],
             f,
             indent=2,
         )
+    decisions_path = out_dir / "decisions.csv"
+    _write_decisions_csv(results_with_folders, decisions_path)
     logger.info("Batch complete: %s", metrics.to_dict())
     logger.info("Output: %s", out_path)
+    logger.info("Decisions CSV: %s", decisions_path)
     return 0
 
 

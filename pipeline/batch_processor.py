@@ -39,18 +39,30 @@ class BatchProcessor:
 
     def process_batch(
         self,
-        file_paths: list[str | Path],
+        file_paths: list[str | Path] | list[tuple[str, str | Path]],
         *,
         stop_on_first_error: bool = False,
-    ) -> tuple[list[BillResult], BatchMetrics]:
+    ) -> tuple[list[BillResult], BatchMetrics] | tuple[list[tuple[str, BillResult]], BatchMetrics]:
         """
         Run pipeline.process() for each file. Returns (results, metrics).
+        If file_paths is list of (source_folder, path), returns (list of (source_folder, BillResult), metrics).
+        Otherwise returns (list of BillResult, metrics).
         On error: if stop_on_first_error, re-raise; else log and continue, increment failed_count.
         """
+        with_folders = bool(
+            file_paths
+            and isinstance(file_paths[0], (list, tuple))
+            and len(file_paths[0]) == 2
+        )
         results: list[BillResult] = []
+        results_with_folders: list[tuple[str, BillResult]] = []
         metrics = BatchMetrics()
         start = time.perf_counter()
-        for path in file_paths:
+        for item in file_paths:
+            if with_folders:
+                source_folder, path = item[0], item[1]
+            else:
+                source_folder, path = "", item
             p = Path(path)
             if not p.exists():
                 logger.warning("Skip missing file: %s", p)
@@ -63,6 +75,8 @@ class BatchProcessor:
                     page_results = self._pipeline.process(p)
                 for result in page_results:
                     results.append(result)
+                    if with_folders:
+                        results_with_folders.append((source_folder, result))
                     _update_metrics(metrics, result)
             except Exception as e:
                 metrics.failed_count += 1
@@ -70,4 +84,6 @@ class BatchProcessor:
                 if stop_on_first_error:
                     raise
         metrics.total_time_sec = time.perf_counter() - start
+        if with_folders:
+            return results_with_folders, metrics
         return results, metrics
