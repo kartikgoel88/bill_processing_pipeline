@@ -15,6 +15,7 @@ from core.exceptions import OCRError
 from extraction.ocr import create_ocr_engine, run_engine_on_images
 from extraction.image_io import PathImageReader
 from extraction.image_io import BytesImageReader
+from extraction.pdf_text import extract_text_from_pdf, MIN_PDF_TEXT_LEN
 
 
 if TYPE_CHECKING:
@@ -45,10 +46,19 @@ def _extract_from_reader(
 
 
 def _extract_from_path(path: Path, engine_name: str, dpi: int = 300) -> tuple[str, float]:
-
     path = Path(path)
     if not path.exists():
         raise OCRError(f"File not found: {path}", trace_id=None)
+    # For PDFs: try native text extraction first (digital PDFs have embedded text)
+    if path.suffix.lower() == ".pdf":
+        pdf_text = extract_text_from_pdf(path)
+        if pdf_text and len(pdf_text.strip()) >= MIN_PDF_TEXT_LEN:
+            logger.info(
+                "Using native PDF text for %s (len=%s); skipping OCR",
+                path.name,
+                len(pdf_text),
+            )
+            return (pdf_text.strip(), 1.0)
     return _extract_from_reader(
         PathImageReader(path, dpi=dpi),
         engine_name,

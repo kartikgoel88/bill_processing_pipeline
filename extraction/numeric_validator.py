@@ -14,6 +14,7 @@ ACCEPT_PHRASES: Sequence[str] = (
     "Invoice Total",
     "Grand Total",
     "Net Payable",
+    "Net Amount",
     "Amount",
     "Payment Summary",
     "Payment",
@@ -31,6 +32,7 @@ REJECT_PHRASES: Sequence[str] = (
     "HSN",
     "FSSAI",
     "Order ID",
+    "Pincode",
 )
 
 # Window (chars) before/after an occurrence to check for accept/reject phrases

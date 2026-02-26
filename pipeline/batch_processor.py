@@ -39,20 +39,20 @@ class BatchProcessor:
 
     def process_batch(
         self,
-        file_paths: list[str | Path] | list[tuple[str, str | Path]],
+        file_paths: list[str | Path] | list[tuple[str, str | Path]] | list[tuple[str, str | Path, str, str]],
         *,
         stop_on_first_error: bool = False,
     ) -> tuple[list[BillResult], BatchMetrics] | tuple[list[tuple[str, BillResult]], BatchMetrics]:
         """
         Run pipeline.process() for each file. Returns (results, metrics).
-        If file_paths is list of (source_folder, path), returns (list of (source_folder, BillResult), metrics).
-        Otherwise returns (list of BillResult, metrics).
+        If file_paths is list of (source_folder, path) or (source_folder, path, expense_type, employee_id),
+        returns (list of (source_folder, BillResult), metrics). Otherwise returns (list of BillResult, metrics).
         On error: if stop_on_first_error, re-raise; else log and continue, increment failed_count.
         """
         with_folders = bool(
             file_paths
             and isinstance(file_paths[0], (list, tuple))
-            and len(file_paths[0]) == 2
+            and len(file_paths[0]) >= 2
         )
         results: list[BillResult] = []
         results_with_folders: list[tuple[str, BillResult]] = []
@@ -61,8 +61,11 @@ class BatchProcessor:
         for item in file_paths:
             if with_folders:
                 source_folder, path = item[0], item[1]
+                expense_type = item[2] if len(item) >= 4 else None
+                employee_id = item[3] if len(item) >= 4 else None
             else:
                 source_folder, path = "", item
+                expense_type, employee_id = None, None
             p = Path(path)
             if not p.exists():
                 logger.warning("Skip missing file: %s", p)
@@ -70,9 +73,13 @@ class BatchProcessor:
                 continue
             try:
                 if p.suffix.lower() == ".pdf":
-                    page_results = self._pipeline.process_multi(p)
+                    page_results = self._pipeline.process_multi(
+                        p, expense_type=expense_type, employee_id=employee_id
+                    )
                 else:
-                    page_results = self._pipeline.process(p)
+                    page_results = self._pipeline.process(
+                        p, expense_type=expense_type, employee_id=employee_id
+                    )
                 for result in page_results:
                     results.append(result)
                     if with_folders:

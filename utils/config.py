@@ -64,9 +64,10 @@ class LLMConfig:
 
 @dataclass(frozen=True)
 class OCRConfig:
-    """OCR engine selection."""
+    """OCR engine selection and PDF rendering."""
 
     engine: str = "tesseract"  # tesseract | easyocr
+    dpi: int = 300  # PDF→image DPI; higher can help small text (e.g. 400 for receipts)
 
 
 @dataclass(frozen=True)
@@ -178,7 +179,10 @@ def _config_from_dict(data: dict[str, Any]) -> AppConfig:
             timeout_sec=_coerce_int(llm_data.get("timeout_sec", 120)),
         ),
         ocr=(
-            OCRConfig(engine=str(ocr_data.get("engine", "tesseract")))
+            OCRConfig(
+                engine=str(ocr_data.get("engine", "tesseract")),
+                dpi=_coerce_int(ocr_data.get("dpi", 300)),
+            )
             if isinstance(ocr_data := data.get("ocr"), dict)
             else OCRConfig()
         ),
@@ -239,9 +243,13 @@ def load_config(config_path: str | Path | None = None) -> AppConfig:
             retry_delay_sec=llm.retry_delay_sec,
             timeout_sec=llm.timeout_sec,
         )
-    if os.getenv("OCR_ENGINE"):
+    ocr_dpi_env = os.getenv("OCR_DPI")
+    if os.getenv("OCR_ENGINE") or (ocr_dpi_env is not None and ocr_dpi_env != ""):
         ocr = cfg.ocr
-        overrides["ocr"] = OCRConfig(engine=os.getenv("OCR_ENGINE", ocr.engine).strip().lower())
+        overrides["ocr"] = OCRConfig(
+            engine=os.getenv("OCR_ENGINE", ocr.engine).strip().lower(),
+            dpi=_coerce_int(ocr_dpi_env) if (ocr_dpi_env is not None and ocr_dpi_env != "") else ocr.dpi,
+        )
     if not overrides:
         return cfg
     return cfg.with_overrides(**overrides)

@@ -139,19 +139,28 @@ class BillProcessingPipeline:
         self._expense_type = expense_type
         self._employee_id = employee_id
 
-    def process(self, file_path: str | Path) -> list[BillResult]:
+    def process(
+        self,
+        file_path: str | Path,
+        *,
+        expense_type: str | None = None,
+        employee_id: str | None = None,
+    ) -> list[BillResult]:
         """
         Run full pipeline for one file. Returns one BillResult per extracted bill
         (one for single bill, multiple when vision returns multiple bills on one page).
+        Optional expense_type/employee_id override the pipeline defaults (e.g. from folder).
         """
         path = Path(file_path)
         if not path.exists():
             raise FileNotFoundError(f"File not found: {path}")
         trace_id = str(uuid.uuid4())
         start = time.perf_counter()
+        et = (expense_type or self._expense_type).strip() or "meal"
+        eid = (employee_id if employee_id is not None else self._employee_id).strip()
         context = {
-            "employee_id": self._employee_id,
-            "expense_type": self._expense_type,
+            "employee_id": eid,
+            "expense_type": et,
         }
 
         # 1) OCR: run for ocr_only and fusion (needed to decide whether to call vision)
@@ -246,10 +255,11 @@ class BillProcessingPipeline:
                 }
             else:
                 monthly_total = float(structured_bill.get("amount") or 0)
+                bill_expense_type = (structured_bill.get("expense_type") or et or self._expense_type or "meal").strip() or "meal"
                 decision = self._decision.get_decision(
                     structured_bill,
                     self._policy,
-                    self._expense_type,
+                    bill_expense_type,
                     monthly_total,
                     trace_id,
                 )
@@ -257,7 +267,7 @@ class BillProcessingPipeline:
                     decision,
                     structured_bill,
                     self._policy,
-                    self._expense_type,
+                    bill_expense_type,
                     remaining_day_cap=None,
                 )
             elapsed = time.perf_counter() - start
@@ -282,20 +292,29 @@ class BillProcessingPipeline:
             )
         return results
 
-    def process_multi(self, file_path: str | Path) -> list[BillResult]:
+    def process_multi(
+        self,
+        file_path: str | Path,
+        *,
+        expense_type: str | None = None,
+        employee_id: str | None = None,
+    ) -> list[BillResult]:
         """
         Process a file that may contain multiple bills (e.g. multi-page PDF).
         Runs vision extraction per page and returns one BillResult per page.
         Use for PDFs where each page is a separate bill.
         In ocr_only mode, runs OCR once on the whole file and returns one BillResult.
+        Optional expense_type/employee_id override the pipeline defaults (e.g. from folder).
         """
         path = Path(file_path)
         if not path.exists():
             raise FileNotFoundError(f"File not found: {path}")
         trace_id = str(uuid.uuid4())
+        et = (expense_type or self._expense_type).strip() or "meal"
+        eid = (employee_id if employee_id is not None else self._employee_id).strip()
         context = {
-            "employee_id": self._employee_id,
-            "expense_type": self._expense_type,
+            "employee_id": eid,
+            "expense_type": et,
         }
 
         if self._strategy == "ocr_only":
@@ -335,11 +354,12 @@ class BillProcessingPipeline:
                     }
                 else:
                     monthly_total = float(structured_bill.get("amount") or 0)
+                    bill_expense_type = (structured_bill.get("expense_type") or et or self._expense_type or "meal").strip() or "meal"
                     decision = self._decision.get_decision(
-                        structured_bill, self._policy, self._expense_type, monthly_total, trace_id,
+                        structured_bill, self._policy, bill_expense_type, monthly_total, trace_id,
                     )
                     decision = self._post.apply(
-                        decision, structured_bill, self._policy, self._expense_type, remaining_day_cap=None,
+                        decision, structured_bill, self._policy, bill_expense_type, remaining_day_cap=None,
                     )
                 elapsed = time.perf_counter() - start
                 structured_bill_out = dict(structured_bill)
@@ -405,11 +425,12 @@ class BillProcessingPipeline:
                         }
                     else:
                         monthly_total = float(structured_bill.get("amount") or 0)
+                        bill_expense_type = (structured_bill.get("expense_type") or et or self._expense_type or "meal").strip() or "meal"
                         decision = self._decision.get_decision(
-                            structured_bill, self._policy, self._expense_type, monthly_total, trace_id,
+                            structured_bill, self._policy, bill_expense_type, monthly_total, trace_id,
                         )
                         decision = self._post.apply(
-                            decision, structured_bill, self._policy, self._expense_type, remaining_day_cap=None,
+                            decision, structured_bill, self._policy, bill_expense_type, remaining_day_cap=None,
                         )
                     elapsed = time.perf_counter() - start
                     structured_bill_out = dict(structured_bill)
@@ -494,10 +515,11 @@ class BillProcessingPipeline:
                     }
                 else:
                     monthly_total = float(structured_bill.get("amount") or 0)
+                    bill_expense_type = (structured_bill.get("expense_type") or et or self._expense_type or "meal").strip() or "meal"
                     decision = self._decision.get_decision(
                         structured_bill,
                         self._policy,
-                        self._expense_type,
+                        bill_expense_type,
                         monthly_total,
                         trace_id,
                     )
@@ -505,7 +527,7 @@ class BillProcessingPipeline:
                         decision,
                         structured_bill,
                         self._policy,
-                        self._expense_type,
+                        bill_expense_type,
                         remaining_day_cap=None,
                     )
                 elapsed = time.perf_counter() - start

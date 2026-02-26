@@ -45,17 +45,24 @@ INVOICE_DATE_PATTERN = re.compile(
     r"Invoice\s+Date\s*:\s*(\d{4}-\d{2}-\d{2})",
     re.IGNORECASE,
 )
-# Total line: allow leading noise (e.g. "Total F158", "Total ₹ 33.60")
+# Total line: allow leading noise (e.g. "Total F158", "Total ₹ 33.60", "Net Amount 78.75")
 TOTAL_AMOUNT_PATTERN = re.compile(
-    r"(?:Total|Grand\s+Total)\s*[^\d]*(?:₹|Rs?\.?|INR)?\s*(\d+(?:\.\d{2})?)",
+    r"(?:Total|Grand\s+Total|Net\s+Amount|Net\s+Payable)\s*[^\d]*(?:₹|Rs?\.?|INR)?\s*(\d+(?:\.\d{2})?)",
     re.IGNORECASE,
 )
 # Fallback: last amount-like number on a line containing "Total" (handles "Total 8 70.00" OCR)
 TOTAL_LINE_LAST_NUMBER = re.compile(r"(\d+(?:\.\d{2})?)")
-# Payment/UPI lines often have the final amount (e.g. "Paytm UPI % 170.00", "Payment Summary 170.00")
+# Comma-thousands (e.g. "23,400.00" on Grand Total line)
+TOTAL_LINE_COMMA_THOUSANDS = re.compile(r"(\d{1,3}(?:,\d{3})*\.\d{2})")
+# Total/Paytm UPI then optional newlines/whitespace then amount (HungerBox table layout)
+TOTAL_AMOUNT_MULTILINE = re.compile(
+    r"(?:Total|Paytm\s+UPI|Payment\s+Summary|Net\s+Amount)\s*(?:₹|Rs?\.?|INR)?\s*[\s\n]*(\d+(?:\.\d{2})?)",
+    re.IGNORECASE | re.DOTALL,
+)
+# Payment/UPI lines often have the final amount (e.g. "Paytm UPI % 170.00", "Payment Summary 170.00", "Net Amount 78.75")
 # Include ride/commute receipt phrases: Selected Price, Price, Fare
 PAYMENT_LINE_KEYWORDS = re.compile(
-    r"\b(?:Payment\s+Summary|Payable|UPI|Paid|Total|Selected\s+Price|Price|Fare)\b",
+    r"\b(?:Payment\s+Summary|Payable|UPI|Paid|Total|Net\s+Amount|Net\s+Payable|Selected\s+Price|Price|Fare)\b",
     re.IGNORECASE,
 )
 # Ride receipt date: "Time of Ride Nov 11th 2024" or "Nov 14th 2024"
@@ -67,6 +74,25 @@ RIDE_DATE_PATTERN = re.compile(
 # Fallback: month name + day + year anywhere (e.g. "Nov 11th 2024")
 MONTH_NAME_YEAR_PATTERN = re.compile(
     r"\b(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+\d{1,2}(?:st|nd|rd|th)?\s+(20\d{2})\b",
+    re.IGNORECASE,
+)
+# DD/MM/YY or DD/MM/YYYY (common on Indian receipts: "Date : 18/12/25", "12/12/25")
+DATE_DDMMYY_PATTERN = re.compile(
+    r"(?:Date|Dato|Bill\s+Date)\s*[:\s]*(\d{1,2})[/-](\d{1,2})[/-](\d{2,4})\b",
+    re.IGNORECASE,
+)
+# Standalone: 18/12/2025 or 18/12/25 (2-digit year)
+DATE_DDMMYY_STANDALONE = re.compile(
+    r"\b(\d{1,2})[/-](\d{1,2})[/-](20\d{2}|\d{2})\b",
+)
+# DD-MON-YYYY (e.g. 08-DEC-2025, 19-DEC-2025 on hotel/invoice bills)
+DATE_DD_MON_YYYY = re.compile(
+    r"\b(\d{1,2})-(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*[-]?\s*(20\d{2})\b",
+    re.IGNORECASE,
+)
+# Month name + day only (e.g. "Aug 29, 15:00") — use for month when no year on same line
+MONTH_DAY_PATTERN = re.compile(
+    r"\b(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+(\d{1,2})\b",
     re.IGNORECASE,
 )
 # First line after "Bill To:" is typically the merchant/vendor name on GST invoices
@@ -82,6 +108,8 @@ from core.schema import DEFAULT_EXPENSE_TYPE
 
 REASONABLE_AMOUNT_MAX = {"fuel": 50_000.0, "meal": 10_000.0, "commute": 10_000.0}  # keys from EXPENSE_TYPES
 DEFAULT_REASONABLE_MAX = 100_000.0
+# Indian pincode range: 6-digit numbers in 100000-599999 (and 6xxxxx) often appear in addresses
+PINCODE_AMOUNT_MIN, PINCODE_AMOUNT_MAX = 100_000.0, 599_999.0
 
 
 def _parse_float(value: Any) -> float:
@@ -116,6 +144,13 @@ def _find_month_in_text(text: str) -> str | None:
     m = MONTH_PATTERN.search(text)
     if m:
         return f"{m.group(1)}-{m.group(2)}"
+    # DD-MON-YYYY (e.g. 08-DEC-2025)
+    for m in DATE_DD_MON_YYYY.finditer(text):
+        try:
+            dt = datetime.strptime(f"{m.group(2)} 1 {m.group(3)}", "%b %d %Y")
+            return dt.strftime("%Y-%m")
+        except ValueError:
+            continue
     # Ride-style: "Time of Ride Nov 11th 2024" or "Nov 14th 2024"
     for pattern in (RIDE_DATE_PATTERN, MONTH_NAME_YEAR_PATTERN):
         ride = pattern.search(text)
@@ -126,6 +161,16 @@ def _find_month_in_text(text: str) -> str | None:
                 return dt.strftime("%Y-%m")
             except ValueError:
                 pass
+    # "Aug 29, 15:00" — month name + day; infer year from Invoice Date or use current
+    year_from_invoice = re.search(r"Invoice\s+Date\s*:\s*20(\d{2})-\d{2}-\d{2}", text, re.IGNORECASE)
+    year_str = year_from_invoice.group(1) if year_from_invoice else str(datetime.now().year)[2:]
+    year = 2000 + int(year_str) if len(year_str) == 2 else int(year_str)
+    for m in MONTH_DAY_PATTERN.finditer(text):
+        try:
+            dt = datetime.strptime(f"{m.group(1)} 1 {year}", "%b %d %Y")
+            return dt.strftime("%Y-%m")
+        except ValueError:
+            continue
     return None
 
 
@@ -162,8 +207,60 @@ def _correct_rupee_read_as_leading_2(raw_text: str, amount: float) -> float:
     return amount
 
 
+def _line_looks_like_address_or_trip(line: str) -> bool:
+    """True if line looks like address (503/2, 560,) or trip (kilometers, minutes)."""
+    lower = line.lower()
+    if "kilometer" in lower or "minutes" in lower:
+        return True
+    if re.search(r"\d+/\d+", line):  # e.g. 503/2
+        return True
+    if re.search(r",\s*\d{2,3}\s", line) and re.search(r"(Layout|Rd|Road|India|Karnataka|Bengaluru)", line, re.IGNORECASE):
+        return True
+    return False
+
+
+def _extract_amount_from_last_total_or_payment_line(raw_text: str, max_amount: float = 1_000_000.0) -> float:
+    """Get amount from the last line that contains Total/Payment Summary/Paytm UPI/Selected Price, or the next 1–2 lines."""
+    lines = raw_text.splitlines()
+    last_idx = None
+    last_keyword = None
+    for i, line in enumerate(lines):
+        m = re.search(r"\b(Total|Payment\s+Summary|Paytm\s+UPI|Net\s+Amount|Payments|Selected\s+Price)\b", line, re.IGNORECASE)
+        if m:
+            last_idx = i
+            last_keyword = (m.group(1) or "").strip().lower()
+    if last_idx is None:
+        return 0.0
+    # For "Selected Price", take amount only from next line(s) to avoid time (7:11, 11) on same line
+    start = last_idx + 1 if (last_keyword == "selected price") else last_idx
+    for idx in range(start, min(last_idx + 3, len(lines))):
+        line = lines[idx]
+        if _line_looks_like_address_or_trip(line):
+            continue
+        for m in TOTAL_LINE_COMMA_THOUSANDS.finditer(line):
+            val = _parse_float(m.group(1))
+            if 0 < val <= max_amount and val > 9:
+                return val
+        for num_str in TOTAL_LINE_LAST_NUMBER.findall(line):
+            val = _parse_float(num_str)
+            if PINCODE_AMOUNT_MIN <= val <= PINCODE_AMOUNT_MAX:
+                continue
+            if 0 < val <= max_amount and val > 9:
+                return val
+    return 0.0
+
+
 def _extract_amount_gst_style(raw_text: str) -> float:
-    """Extract amount from GST-style text. Avoid single-digit (rupee misread); merge Total + Payment lines, return max."""
+    """Extract amount from GST-style text. Prefer last Total/Payment line (invoice total at end); else max of candidates."""
+    # Use DEFAULT_REASONABLE_MAX so Grand Total 23,400.00 is found; pincodes (>599999) still rejected in last-line logic
+    last_line_amt = _extract_amount_from_last_total_or_payment_line(raw_text, max_amount=DEFAULT_REASONABLE_MAX)
+    if last_line_amt > 0:
+        return last_line_amt
+    # Multiline Total...amount (HungerBox / table layout where Total and amount are on different lines)
+    for m in reversed(list(TOTAL_AMOUNT_MULTILINE.finditer(raw_text))):
+        val = _parse_float(m.group(1))
+        if 0 < val < 1_000_000 and val > 9 and not (PINCODE_AMOUNT_MIN <= val <= PINCODE_AMOUNT_MAX):
+            return val
     candidates: list[float] = []
 
     # 1) TOTAL_AMOUNT_PATTERN: skip single-digit (1-9); collect same-line or captured amount
@@ -200,28 +297,84 @@ def _extract_amount_gst_style(raw_text: str) -> float:
 def _extract_amount_from_total_lines_with_cap(raw_text: str, max_amount: float) -> float:
     """
     From lines containing 'Total' (or amount-related keywords), collect all numbers in (0, max_amount]
-    and return the largest. Use when initial extraction picked a wrong number (e.g. invoice ID 313692 instead of 78).
+    and return the largest. When the keyword line has no number, check the next 1–2 lines (e.g. "Total\\n123.02").
     """
     if max_amount <= 0:
         return 0.0
     amount_keywords = re.compile(
-        r"\b(Total|Grand\s+Total|Amount|Paid|Payable|Payment\s+Summary|Payment|UPI|₹|Rs\.?|INR|Selected\s+Price|Price|Fare)\b",
+        r"\b(Total|Grand\s+Total|Net\s+Amount|Net\s+Payable|Amount|Paid|Payable|Payment\s+Summary|Payment|Payments|UPI|₹|Rs\.?|INR|Selected\s+Price|Price|Fare)\b",
         re.IGNORECASE,
     )
+    lines = raw_text.splitlines()
     candidates: list[float] = []
-    for line in raw_text.splitlines():
+    for i, line in enumerate(lines):
         if not amount_keywords.search(line):
             continue
-        for num_str in TOTAL_LINE_LAST_NUMBER.findall(line):
-            val = _parse_float(num_str)
+        for m in TOTAL_LINE_COMMA_THOUSANDS.finditer(line):
+            val = _parse_float(m.group(1))
             if 0 < val <= max_amount:
                 candidates.append(val)
-    # Also check TOTAL_AMOUNT_PATTERN matches
+        for num_str in TOTAL_LINE_LAST_NUMBER.findall(line):
+            val = _parse_float(num_str)
+            if PINCODE_AMOUNT_MIN <= val <= PINCODE_AMOUNT_MAX:
+                continue
+            if 0 < val <= max_amount:
+                candidates.append(val)
+        for j in range(i + 1, min(i + 3, len(lines))):
+            for m in TOTAL_LINE_COMMA_THOUSANDS.finditer(lines[j]):
+                val = _parse_float(m.group(1))
+                if 0 < val <= max_amount:
+                    candidates.append(val)
+            for num_str in TOTAL_LINE_LAST_NUMBER.findall(lines[j]):
+                val = _parse_float(num_str)
+                if PINCODE_AMOUNT_MIN <= val <= PINCODE_AMOUNT_MAX:
+                    continue
+                if 0 < val <= max_amount:
+                    candidates.append(val)
     for m in TOTAL_AMOUNT_PATTERN.finditer(raw_text):
         val = _parse_float(m.group(1))
         if 0 < val <= max_amount:
             candidates.append(val)
     return max(candidates) if candidates else 0.0
+
+
+def _parse_ddmmyy(day: str, month: str, year: str) -> str | None:
+    """Parse DD/MM/YY or DD/MM/YYYY to YYYY-MM-DD. Returns None on failure."""
+    try:
+        d, m = int(day), int(month)
+        y = int(year)
+        if y < 100:
+            y += 2000 if y < 50 else 1900
+        if 1 <= d <= 31 and 1 <= m <= 12 and 1900 <= y <= 2100:
+            return datetime(y, m, d).date().isoformat()
+    except (ValueError, TypeError):
+        pass
+    return None
+
+
+def _extract_date_ddmmyy_style(raw_text: str) -> tuple[str, str]:
+    """Extract date from 'Date : DD/MM/YY' or standalone DD/MM/YYYY. Returns (YYYY-MM-DD, YYYY-MM)."""
+    # "Date : 18/12/25" or "Dato : 16/12/25" (OCR typo)
+    m = DATE_DDMMYY_PATTERN.search(raw_text)
+    if m:
+        parsed = _parse_ddmmyy(m.group(1), m.group(2), m.group(3))
+        if parsed:
+            return parsed, parsed[:7]
+    # Standalone 18/12/2025 or 18-12-25 (prefer last occurrence as often the bill date)
+    for m in reversed(list(DATE_DDMMYY_STANDALONE.finditer(raw_text))):
+        parsed = _parse_ddmmyy(m.group(1), m.group(2), m.group(3))
+        if parsed:
+            return parsed, parsed[:7]
+    return "", ""
+
+
+def _parse_dd_mon_yyyy(day: str, month_name: str, year: str) -> str | None:
+    """Parse DD-MON-YYYY to YYYY-MM-DD."""
+    try:
+        dt = datetime.strptime(f"{month_name[:3]} {day} {year}", "%b %d %Y")
+        return dt.date().isoformat()
+    except ValueError:
+        return None
 
 
 def _extract_invoice_date_gst_style(raw_text: str) -> str:
@@ -233,7 +386,14 @@ def _extract_invoice_date_gst_style(raw_text: str) -> str:
     date_candidate = re.search(r"\b(20\d{2}-\d{2}-\d{2})\b", raw_text)
     if date_candidate:
         return date_candidate.group(1)
-    return ""
+    # DD-MON-YYYY (e.g. 08-DEC-2025, 19-DEC-2025)
+    for m in reversed(list(DATE_DD_MON_YYYY.finditer(raw_text))):
+        parsed = _parse_dd_mon_yyyy(m.group(1), m.group(2), m.group(3))
+        if parsed:
+            return parsed
+    # DD/MM/YY style (Indian receipts)
+    bill_date_str, _ = _extract_date_ddmmyy_style(raw_text)
+    return bill_date_str
 
 
 def _extract_vendor_ordered_from(raw_text: str) -> str:
@@ -283,6 +443,16 @@ def parse_structured_from_ocr(
             amount,
         )
         amount = 0.0
+    # Reject pincode-like amounts (100000-599999) — often from addresses; use Total-line amount instead
+    if PINCODE_AMOUNT_MIN <= amount <= PINCODE_AMOUNT_MAX:
+        alt = _extract_amount_from_total_lines_with_cap(
+            text, REASONABLE_AMOUNT_MAX.get((expense_type or DEFAULT_EXPENSE_TYPE).lower(), DEFAULT_REASONABLE_MAX)
+        )
+        if alt > 0 and is_valid_amount(text, alt):
+            logger.info("Bill amount %.0f rejected (pincode-like); using Total-line amount %.2f", amount, alt)
+            amount = alt
+        else:
+            amount = 0.0
     # Numeric guardrails: reject amounts that appear only near Invoice No, GST, etc. or embedded in IDs
     if amount > 0 and not is_valid_amount(text, amount):
         alt = _extract_amount_from_total_lines_with_cap(
@@ -318,7 +488,7 @@ def parse_structured_from_ocr(
     if amount == 0.0:
         for line in lines:
             lower = line.lower()
-            if "total" in lower or "grand total" in lower:
+            if "total" in lower or "grand total" in lower or "net amount" in lower or "net payable" in lower:
                 cand = _parse_float(line)
                 if 0 < cand < 1_000_000 and is_valid_amount(text, cand):
                     amount = cand
@@ -344,11 +514,13 @@ def parse_structured_from_ocr(
         if amount == 0.0:
             for part in re.split(r"[\s]+", text):
                 val = _parse_float(part)
+                if PINCODE_AMOUNT_MIN <= val <= PINCODE_AMOUNT_MAX:
+                    continue
                 if 0 < val < 1_000_000 and is_valid_amount(text, val):
                     amount = val
                     break
 
-    # Date: only "Invoice Date: YYYY-MM-DD" or clean YYYY-MM-DD
+    # Date: Invoice Date, YYYY-MM-DD, or DD/MM/YY (Indian receipts)
     bill_date_str = _extract_invoice_date_gst_style(text)
     if bill_date_str and not re.match(r"^\d{4}-\d{2}-\d{2}$", bill_date_str):
         parsed = _parse_date(bill_date_str)
@@ -357,6 +529,8 @@ def parse_structured_from_ocr(
     month = _find_month_in_text(text)
     if not month and bill_date_str and len(bill_date_str) >= 7:
         month = bill_date_str[:7]
+    if not month:
+        _, month = _extract_date_ddmmyy_style(text)
 
     # Vendor: only from "Ordered From:" block (first line)
     vendor_name = _extract_vendor_ordered_from(text)

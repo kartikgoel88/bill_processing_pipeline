@@ -92,7 +92,7 @@ def _build_pipeline(config, policy: dict, policy_hash: str) -> BillProcessingPip
         max_retries=llm_config.max_retries,
         retry_delay_sec=llm_config.retry_delay_sec,
     )
-    ocr = OCRService(engine=config.ocr.engine)
+    ocr = OCRService(engine=config.ocr.engine, dpi=config.ocr.dpi)
     post = PostProcessingService()
     ext = config.extraction
     return BillProcessingPipeline(
@@ -109,17 +109,17 @@ def _build_pipeline(config, policy: dict, policy_hash: str) -> BillProcessingPip
     )
 
 
-def _discover_bills(root: Path) -> list[tuple[str, Path]]:
+def _discover_bills(root: Path) -> list[tuple[str, Path, str, str]]:
     """
-    Discover bill files under root. Returns list of (source_folder, path).
+    Discover bill files under root. Returns list of (source_folder, path, expense_type, employee_id).
     Deduplicates by (source_folder, filename), keeping the first occurrence.
     source_folder is the path relative to root (e.g. 'commute/kartik').
     """
     from extraction.discovery import iter_bills
     root_resolved = root.resolve()
     seen: set[tuple[str, str]] = set()
-    out: list[tuple[str, Path]] = []
-    for _, _, path in iter_bills(root):
+    out: list[tuple[str, Path, str, str]] = []
+    for expense_type, employee_id, path in iter_bills(root):
         path = path.resolve()
         try:
             folder = str(path.parent.relative_to(root_resolved))
@@ -130,7 +130,7 @@ def _discover_bills(root: Path) -> list[tuple[str, Path]]:
             logger.debug("Skipping duplicate in folder %s: %s", folder, path.name)
             continue
         seen.add(key)
-        out.append((folder, path))
+        out.append((folder, path, (expense_type or "meal").strip(), (employee_id or "").strip()))
     return out
 
 

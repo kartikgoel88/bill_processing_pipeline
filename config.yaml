@@ -27,6 +27,7 @@ llm:
 
 ocr:
   engine: tesseract         # tesseract (default) | easyocr
+  dpi: 300                  # PDF→image DPI; try 400 for receipts with small text
 
 extraction:
   strategy: ocr_only          # ocr_only | fusion | vision_first
