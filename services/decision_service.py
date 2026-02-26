@@ -42,6 +42,26 @@ def _build_user_prompt(
     return "\n".join(parts)
 
 
+def _critical_validation_reason(structured_bill: dict[str, Any]) -> str:
+    """Exact reason for critical validation failure (amount/month)."""
+    reasons: list[str] = []
+    amt = structured_bill.get("amount")
+    if amt is None:
+        reasons.append("amount missing")
+    else:
+        try:
+            if float(amt) <= 0:
+                reasons.append("amount is zero or negative")
+        except (TypeError, ValueError):
+            reasons.append("amount invalid or not a number")
+    month = (structured_bill.get("month") or "").strip()
+    if not month:
+        reasons.append("month missing")
+    if not reasons:
+        return "Critical validation failed"
+    return "Critical validation failed: " + "; ".join(reasons)
+
+
 def _normalize_decision(data: dict[str, Any]) -> dict[str, Any]:
     out: dict[str, Any] = {}
     out["decision"] = (data.get("decision") or "NEEDS_REVIEW").upper().strip()
@@ -109,11 +129,12 @@ class DecisionService(IDecisionService):
         trace_id: str,
     ) -> dict[str, Any]:
         if not structured_bill or (structured_bill.get("amount") or 0) <= 0:
+            reason = _critical_validation_reason(structured_bill or {})
             return _normalize_decision({
                 "decision": "REJECTED",
                 "confidence_score": 1.0,
-                "reasoning": "Critical validation failed: amount or month invalid",
-                "violated_rules": ["Critical validation failed"],
+                "reasoning": reason,
+                "violated_rules": [reason],
                 "approved_amount": None,
             })
         user_content = _build_user_prompt(

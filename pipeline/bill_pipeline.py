@@ -75,6 +75,26 @@ def _validate_critical(structured_bill: dict[str, Any]) -> bool:
     return bool(month)
 
 
+def _critical_validation_reason(structured_bill: dict[str, Any]) -> str:
+    """Return exact reason(s) for critical validation failure (amount/month)."""
+    reasons: list[str] = []
+    amt = structured_bill.get("amount")
+    if amt is None:
+        reasons.append("amount missing")
+    else:
+        try:
+            if float(amt) <= 0:
+                reasons.append("amount is zero or negative")
+        except (TypeError, ValueError):
+            reasons.append("amount invalid or not a number")
+    month = (structured_bill.get("month") or "").strip()
+    if not month:
+        reasons.append("month missing")
+    if not reasons:
+        return "Critical validation failed"
+    return "Critical validation failed: " + "; ".join(reasons)
+
+
 def _bills_from_extraction(extraction: ExtractionResult) -> list[dict[str, Any]]:
     """One or more structured bills from extraction (multiple when structured_bills is set)."""
     if extraction.structured_bills:
@@ -216,11 +236,12 @@ class BillProcessingPipeline:
         results: list[BillResult] = []
         for structured_bill in bills_to_process:
             if extraction.critical_validation_failed or not _validate_critical(structured_bill):
+                reason = _critical_validation_reason(structured_bill)
                 decision = {
                     "decision": "REJECTED",
                     "confidence_score": 1.0,
-                    "reasoning": "Critical validation failed",
-                    "violated_rules": ["Critical validation failed"],
+                    "reasoning": reason,
+                    "violated_rules": [reason],
                     "approved_amount": None,
                 }
             else:
@@ -304,11 +325,12 @@ class BillProcessingPipeline:
             results: list[BillResult] = []
             for structured_bill in bills_to_process:
                 if extraction.critical_validation_failed or not _validate_critical(structured_bill):
+                    reason = _critical_validation_reason(structured_bill)
                     decision = {
                         "decision": "REJECTED",
                         "confidence_score": 1.0,
-                        "reasoning": "Critical validation failed",
-                        "violated_rules": ["Critical validation failed"],
+                        "reasoning": reason,
+                        "violated_rules": [reason],
                         "approved_amount": None,
                     }
                 else:
@@ -373,11 +395,12 @@ class BillProcessingPipeline:
                 results = []
                 for structured_bill in bills_to_process:
                     if extraction.critical_validation_failed or not _validate_critical(structured_bill):
+                        reason = _critical_validation_reason(structured_bill)
                         decision = {
                             "decision": "REJECTED",
                             "confidence_score": 1.0,
-                            "reasoning": "Critical validation failed",
-                            "violated_rules": ["Critical validation failed"],
+                            "reasoning": reason,
+                            "violated_rules": [reason],
                             "approved_amount": None,
                         }
                     else:
@@ -461,11 +484,12 @@ class BillProcessingPipeline:
 
             for structured_bill in bills_to_process:
                 if extraction.critical_validation_failed or not _validate_critical(structured_bill):
+                    reason = _critical_validation_reason(structured_bill)
                     decision = {
                         "decision": "REJECTED",
                         "confidence_score": 1.0,
-                        "reasoning": "Critical validation failed",
-                        "violated_rules": ["Critical validation failed"],
+                        "reasoning": reason,
+                        "violated_rules": [reason],
                         "approved_amount": None,
                     }
                 else:
