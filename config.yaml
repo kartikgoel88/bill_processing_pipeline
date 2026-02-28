@@ -8,6 +8,9 @@ audit_log_path: test_output/audit_trail.log
 log_level: INFO
 dry_run: false
 max_workers: 3
+# page_parallel_workers: 4     # 0 = sequential; >0 = run extraction+decision per PDF page in parallel
+# result_cache_enabled: true   # set true to cache results by (path + mtime); re-runs skip OCR/LLM
+# result_cache_dir: ""         # if empty, uses output_dir/.bill_cache
 
 llm:
   provider: ollama          # ollama | openai | huggingface (default for vision & decision)

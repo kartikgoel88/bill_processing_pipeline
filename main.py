@@ -101,6 +101,7 @@ def _build_pipeline(config, policy: dict, policy_hash: str) -> BillProcessingPip
         mask_rupee_symbol=config.ocr.mask_rupee_symbol,
     )
     post = PostProcessingService()
+    cache_dir = (config.result_cache_dir or f"{config.output_dir}/.bill_cache") if config.result_cache_enabled else None
     return BillProcessingPipeline(
         ocr,
         vision,
@@ -113,6 +114,8 @@ def _build_pipeline(config, policy: dict, policy_hash: str) -> BillProcessingPip
         extraction_strategy=ext.strategy,
         vision_if_ocr_below=ext.confidence_threshold,
         ocr_extraction=ext.ocr_extraction,
+        cache_dir=cache_dir,
+        page_parallel_workers=config.page_parallel_workers,
     )
 
 

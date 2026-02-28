@@ -97,6 +97,9 @@ class AppConfig:
     log_level: str = "INFO"
     dry_run: bool = False
     max_workers: int = 1
+    page_parallel_workers: int = 0  # 0 = sequential; >0 = max workers for multi-page PDF (extraction+decision per page)
+    result_cache_enabled: bool = False
+    result_cache_dir: str = ""  # if empty and enabled, use output_dir/.bill_cache
     llm: LLMConfig = field(default_factory=LLMConfig)
     ocr: OCRConfig = field(default_factory=OCRConfig)
     extraction: ExtractionConfig = field(default_factory=ExtractionConfig)
@@ -111,6 +114,9 @@ class AppConfig:
             "log_level": self.log_level,
             "dry_run": self.dry_run,
             "max_workers": self.max_workers,
+            "page_parallel_workers": self.page_parallel_workers,
+            "result_cache_enabled": self.result_cache_enabled,
+            "result_cache_dir": self.result_cache_dir,
             "llm": self.llm,
             "ocr": self.ocr,
             "extraction": self.extraction,
@@ -126,6 +132,9 @@ class AppConfig:
             log_level=d["log_level"],
             dry_run=_coerce_bool(d["dry_run"]),
             max_workers=_coerce_int(d["max_workers"]),
+            page_parallel_workers=_coerce_int(d.get("page_parallel_workers", 0)),
+            result_cache_enabled=_coerce_bool(d.get("result_cache_enabled", False)),
+            result_cache_dir=str(d.get("result_cache_dir", "")),
             llm=d["llm"] if isinstance(d["llm"], LLMConfig) else LLMConfig(**d["llm"]),
             ocr=d["ocr"] if isinstance(d["ocr"], OCRConfig) else OCRConfig(**d["ocr"]),
             extraction=d["extraction"] if isinstance(d["extraction"], ExtractionConfig) else ExtractionConfig(**d["extraction"]),
@@ -167,6 +176,9 @@ def _config_from_dict(data: dict[str, Any]) -> AppConfig:
         log_level=str(data.get("log_level", "INFO")),
         dry_run=_coerce_bool(data.get("dry_run", False)),
         max_workers=_coerce_int(data.get("max_workers", 1)),
+        page_parallel_workers=_coerce_int(data.get("page_parallel_workers", 0)),
+        result_cache_enabled=_coerce_bool(data.get("result_cache_enabled", False)),
+        result_cache_dir=str(data.get("result_cache_dir", "")),
         llm=LLMConfig(
             provider=str(llm_data.get("provider", "ollama")),
             vision_provider=str(llm_data.get("vision_provider", "")),
@@ -225,6 +237,12 @@ def load_config(config_path: str | Path | None = None) -> AppConfig:
         overrides["dry_run"] = _coerce_bool(os.getenv("DRY_RUN"))
     if os.getenv("MAX_WORKERS") is not None:
         overrides["max_workers"] = _coerce_int(os.getenv("MAX_WORKERS"))
+    if os.getenv("PAGE_PARALLEL_WORKERS") is not None:
+        overrides["page_parallel_workers"] = _coerce_int(os.getenv("PAGE_PARALLEL_WORKERS"))
+    if os.getenv("RESULT_CACHE_ENABLED") is not None:
+        overrides["result_cache_enabled"] = _coerce_bool(os.getenv("RESULT_CACHE_ENABLED"))
+    if os.getenv("RESULT_CACHE_DIR"):
+        overrides["result_cache_dir"] = os.getenv("RESULT_CACHE_DIR", "").strip()
     provider = os.getenv("LLM_PROVIDER")
     base_url = os.getenv("LLM_BASE_URL")
     model = os.getenv("LLM_MODEL")

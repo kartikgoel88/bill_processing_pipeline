@@ -1,7 +1,7 @@
 [
   {
     "source_folder": "commute/kartik",
-    "trace_id": "d4c67163-8343-4a31-bf2e-d5e3b9fbd96e",
+    "trace_id": "3648b523-6358-4a24-b8fd-bb629a692ba2",
     "file": "AUTO_RECEIPT_RD17313323427215751.pdf",
     "extraction_source": "ocr_llm",
     "structured_bill": {
@@ -9,12 +9,12 @@
       "expense_type": "commute",
       "amount": 160.0,
       "month": "2024-11",
-      "bill_date": "Nov 11th 2024",
-      "vendor_name": "fapido",
+      "bill_date": "2024-11-14",
+      "vendor_name": "Rapido",
       "currency": "INR",
       "line_items": [
         {
-          "description": "Bill total",
+          "description": "",
           "amount": 160.0,
           "quantity": 1,
           "code": ""
@@ -31,7 +31,7 @@
       "approved_amount": null
     },
     "metadata": {
-      "processing_time_sec": 28.7347,
+      "processing_time_sec": 37.3153,
       "page_index": 0,
       "total_pages": 1
     },
@@ -42,21 +42,21 @@
   },
   {
     "source_folder": "commute/kartik",
-    "trace_id": "778fa813-272b-42a5-9949-248da844e35f",
+    "trace_id": "8516d25b-bfbe-480b-9fc6-3b0360b07577",
     "file": "AUTO_RECEIPT_RD17315579158315167.pdf",
     "extraction_source": "ocr_llm",
     "structured_bill": {
       "employee_id": "kartik",
       "expense_type": "commute",
-      "amount": 376.0,
+      "amount": 188.0,
       "month": "2024-11",
-      "bill_date": "2024-11-14",
+      "bill_date": "Nov 14th 2024",
       "vendor_name": "Rapido",
       "currency": "INR",
       "line_items": [
         {
           "description": "Auto",
-          "amount": 376.0,
+          "amount": 188.0,
           "quantity": 1,
           "code": ""
         }
@@ -67,10 +67,10 @@
       "confidence_score": 1.0,
       "reasoning": "Within policy limits for commute expense.",
       "violated_rules": [],
-      "approved_amount": 376.0
+      "approved_amount": 188.0
     },
     "metadata": {
-      "processing_time_sec": 13.8765,
+      "processing_time_sec": 14.5377,
       "page_index": 0,
       "total_pages": 1
     },
@@ -81,7 +81,7 @@
   },
   {
     "source_folder": "commute/kartik",
-    "trace_id": "6797dd6a-0170-489b-9f3f-35b3bbfa80b8",
+    "trace_id": "b6503bf8-4492-4bdd-8197-7575eeff6b47",
     "file": "AUTO_RECEIPT_RD17315907206185320.pdf",
     "extraction_source": "ocr_llm",
     "structured_bill": {
@@ -89,52 +89,13 @@
       "expense_type": "commute",
       "amount": 183.0,
       "month": "2024-11",
-      "bill_date": "2024-11-14",
-      "vendor_name": "Rapido",
-      "currency": "INR",
-      "line_items": [
-        {
-          "description": "Auto",
-          "amount": 183.0,
-          "quantity": 1,
-          "code": ""
-        }
-      ]
-    },
-    "decision": {
-      "decision": "APPROVED",
-      "confidence_score": 1.0,
-      "reasoning": "Within policy limits for commute expense.",
-      "violated_rules": [],
-      "approved_amount": 183.0
-    },
-    "metadata": {
-      "processing_time_sec": 11.0075,
-      "page_index": 0,
-      "total_pages": 1
-    },
-    "ocr_extracted": {
-      "raw_text": "Booking History\n\nfapido\n\nCustomer Name\n\nAshwini\n\nRide ID\n\nRD17315907206185320\n\nDriver name\n\nVikeshMahto\n\nVehicle Number\n\nKA03AK0875\n\nMode of Vehicle\n\nAuto\n\nTime of Ride\n\nNov 14th 2024, 7:02 PM.\n\nSelected Price\n\n% 183\n\nGate, Tesco,\n\nXP22+G2J, Service Rd, CKB Layout, Chandra Layout, Marathahalli, Bengaluru,\n\nKarnataka 560037, India\n\n\u2018This document i isued on request by the passenger. Rapido does not collect any fee/commission from passengers and shall not issue tax\n\ninvoices to the passengers under this segment, The document may be used forall official / reimbursement purposes.\n\n\u2018Selected Price refers to the inital price decided between User and Drivers from the estimated price range",
-      "confidence": 0.8505940594059406
-    }
-  },
-  {
-    "source_folder": "commute/kartik",
-    "trace_id": "38a942be-a540-4500-926e-9f2f07198525",
-    "file": "AUTO_RECEIPT_RD17321585542843974.pdf",
-    "extraction_source": "ocr_llm",
-    "structured_bill": {
-      "employee_id": "kartik",
-      "expense_type": "commute",
-      "amount": 214.0,
-      "month": "2024-11",
       "bill_date": "",
-      "vendor_name": "Rapido",
+      "vendor_name": "fapido",
       "currency": "INR",
       "line_items": [
         {
-          "description": "Auto",
-          "amount": 214.0,
+          "description": "Selected Price",
+          "amount": 183.0,
           "quantity": 1,
           "code": ""
         }
@@ -145,10 +106,57 @@
       "confidence_score": 1.0,
       "reasoning": "Bill amount within policy limits for commute expense.",
       "violated_rules": [],
-      "approved_amount": 214.0
+      "approved_amount": 183.0
     },
     "metadata": {
-      "processing_time_sec": 11.9434,
+      "processing_time_sec": 11.9341,
+      "page_index": 0,
+      "total_pages": 1
+    },
+    "ocr_extracted": {
+      "raw_text": "Booking History\n\nfapido\n\nCustomer Name\n\nAshwini\n\nRide ID\n\nRD17315907206185320\n\nDriver name\n\nVikeshMahto\n\nVehicle Number\n\nKA03AK0875\n\nMode of Vehicle\n\nAuto\n\nTime of Ride\n\nNov 14th 2024, 7:02 PM.\n\nSelected Price\n\n% 183\n\nGate, Tesco,\n\nXP22+G2J, Service Rd, CKB Layout, Chandra Layout, Marathahalli, Bengaluru,\n\nKarnataka 560037, India\n\n\u2018This document i isued on request by the passenger. Rapido does not collect any fee/commission from passengers and shall not issue tax\n\ninvoices to the passengers under this segment, The document may be used forall official / reimbursement purposes.\n\n\u2018Selected Price refers to the inital price decided between User and Drivers from the estimated price range",
+      "confidence": 0.8505940594059406
+    }
+  },
+  {
+    "source_folder": "commute/kartik",
+    "trace_id": "4bd767ff-0f14-4198-b196-9e78aad0104f",
+    "file": "AUTO_RECEIPT_RD17321585542843974.pdf",
+    "extraction_source": "ocr_llm",
+    "structured_bill": {
+      "employee_id": "kartik",
+      "expense_type": "commute",
+      "amount": 425.5,
+      "month": "2024-11",
+      "bill_date": "2024-11-21",
+      "vendor_name": "Abc Restaurant",
+      "currency": "INR",
+      "line_items": [
+        {
+          "description": "Soda",
+          "amount": 35.75,
+          "quantity": 1,
+          "code": "101"
+        },
+        {
+          "description": "Biscut",
+          "amount": 110.25,
+          "quantity": 1,
+          "code": "102"
+        }
+      ]
+    },
+    "decision": {
+      "decision": "APPROVED",
+      "confidence_score": 0.99,
+      "reasoning": "Policy limits exceeded for commute expense.",
+      "violated_rules": [
+        "Client location allowance limit exceeded"
+      ],
+      "approved_amount": null
+    },
+    "metadata": {
+      "processing_time_sec": 17.1906,
       "page_index": 0,
       "total_pages": 1
     },
@@ -159,21 +167,21 @@
   },
   {
     "source_folder": "commute/kartik",
-    "trace_id": "d092df02-d986-4bdf-b3a6-0a605312a1f5",
+    "trace_id": "dfb21424-27d7-4a21-9955-e8c8dd824b04",
     "file": "AUTO_RECEIPT_RD17321854214454215.pdf",
     "extraction_source": "ocr_llm",
     "structured_bill": {
       "employee_id": "kartik",
       "expense_type": "commute",
-      "amount": 133.0,
+      "amount": 380.0,
       "month": "2024-11",
-      "bill_date": "Nov 21st 2024, 4:09 PM",
+      "bill_date": "2024-11-21",
       "vendor_name": "Rapido",
       "currency": "INR",
       "line_items": [
         {
           "description": "Auto",
-          "amount": 133.0,
+          "amount": 380.0,
           "quantity": 1,
           "code": ""
         }
@@ -189,7 +197,7 @@
       "approved_amount": null
     },
     "metadata": {
-      "processing_time_sec": 13.079,
+      "processing_time_sec": 13.3495,
       "page_index": 0,
       "total_pages": 1
     },
@@ -200,7 +208,7 @@
   },
   {
     "source_folder": "commute/kartik",
-    "trace_id": "da5bf200-6a16-4d44-9744-d4760fef22e3",
+    "trace_id": "2dc7e051-d4b5-468b-9ce9-da09e8f2ec4e",
     "file": "AUTO_RECEIPT_RD17322466992750953.pdf",
     "extraction_source": "ocr_llm",
     "structured_bill": {
@@ -208,12 +216,12 @@
       "expense_type": "commute",
       "amount": 2151.0,
       "month": "2024-11",
-      "bill_date": "2024-11-22",
+      "bill_date": "2024-11-14",
       "vendor_name": "fapido",
       "currency": "INR",
       "line_items": [
         {
-          "description": "Bill total",
+          "description": "Selected Price",
           "amount": 2151.0,
           "quantity": 1,
           "code": ""
@@ -230,7 +238,7 @@
       "approved_amount": null
     },
     "metadata": {
-      "processing_time_sec": 10.9487,
+      "processing_time_sec": 14.3094,
       "page_index": 0,
       "total_pages": 1
     },
@@ -241,13 +249,13 @@
   },
   {
     "source_folder": "commute/kartik",
-    "trace_id": "8c0d3b9e-67f7-4dca-92f8-10f157537993",
+    "trace_id": "6fed6e6c-1609-4398-a77c-9f8235883c7e",
     "file": "AUTO_RECEIPT_RD17327642156571431.pdf",
     "extraction_source": "ocr_llm",
     "structured_bill": {
       "employee_id": "kartik",
       "expense_type": "commute",
-      "amount": 152.0,
+      "amount": 566.0,
       "month": "2024-11",
       "bill_date": "2024-11-28",
       "vendor_name": "Rapido",
@@ -255,23 +263,21 @@
       "line_items": [
         {
           "description": "Auto",
-          "amount": 152.0,
+          "amount": 566.0,
           "quantity": 1,
-          "code": "Rapido"
+          "code": ""
         }
       ]
     },
     "decision": {
       "decision": "APPROVED",
       "confidence_score": 1.0,
-      "reasoning": "Policy limits exceeded for commute expense.",
-      "violated_rules": [
-        "Client location allowance limit exceeded"
-      ],
-      "approved_amount": null
+      "reasoning": "Within policy limits for commute expense.",
+      "violated_rules": [],
+      "approved_amount": 566.0
     },
     "metadata": {
-      "processing_time_sec": 13.568,
+      "processing_time_sec": 12.5968,
       "page_index": 0,
       "total_pages": 1
     },
@@ -282,21 +288,21 @@
   },
   {
     "source_folder": "commute/kartik",
-    "trace_id": "07226a8a-14f1-48be-91ba-af4b14212e23",
+    "trace_id": "782c9506-ebc3-44b1-940c-044310e13449",
     "file": "AUTO_RECEIPT_RD17328020445687517.pdf",
     "extraction_source": "ocr_llm",
     "structured_bill": {
       "employee_id": "kartik",
       "expense_type": "commute",
-      "amount": 2155.0,
+      "amount": 3450.0,
       "month": "2024-11",
       "bill_date": "2024-11-28",
       "vendor_name": "Rapido",
       "currency": "INR",
       "line_items": [
         {
-          "description": "Auto",
-          "amount": 2155.0,
+          "description": "Bill total",
+          "amount": 3450.0,
           "quantity": 1,
           "code": ""
         }
@@ -312,7 +318,7 @@
       "approved_amount": null
     },
     "metadata": {
-      "processing_time_sec": 13.6266,
+      "processing_time_sec": 13.1493,
       "page_index": 0,
       "total_pages": 1
     },
@@ -323,35 +329,30 @@
   },
   {
     "source_folder": "commute/kartik",
-    "trace_id": "7d1eb44f-682b-4a2b-93b8-7a56102aa644",
+    "trace_id": "6582a110-cba9-47b2-8847-53cfa6e14cd1",
     "file": "CAB_RECEIP.pdf",
     "extraction_source": "ocr_llm",
     "structured_bill": {
       "employee_id": "kartik",
       "expense_type": "commute",
-      "amount": 210.0,
+      "amount": 0.0,
       "month": "2025-06",
-      "bill_date": "2025-06-23",
+      "bill_date": "",
       "vendor_name": "rapido",
       "currency": "INR",
-      "line_items": [
-        {
-          "description": "Bill total",
-          "amount": 210.0,
-          "quantity": 1,
-          "code": ""
-        }
-      ]
+      "line_items": []
     },
     "decision": {
-      "decision": "APPROVED",
+      "decision": "REJECTED",
       "confidence_score": 1.0,
-      "reasoning": "Bill amount within policy limits for commute expense.",
-      "violated_rules": [],
-      "approved_amount": 210.0
+      "reasoning": "Critical validation failed: amount is zero or negative",
+      "violated_rules": [
+        "Critical validation failed: amount is zero or negative"
+      ],
+      "approved_amount": null
     },
     "metadata": {
-      "processing_time_sec": 10.5612,
+      "processing_time_sec": 7.4695,
       "page_index": 0,
       "total_pages": 1
     },
@@ -362,7 +363,7 @@
   },
   {
     "source_folder": "commute/kartik",
-    "trace_id": "c6285e2f-bd8d-42a1-a6fa-e772ba53c270",
+    "trace_id": "3fa95f45-b07c-45e7-af34-58304576b9c8",
     "file": "CAB_RECEIPT_RD17506969273550314.pdf",
     "extraction_source": "ocr_llm",
     "structured_bill": {
@@ -371,11 +372,11 @@
       "amount": 210.0,
       "month": "2025-06",
       "bill_date": "2025-06-23",
-      "vendor_name": "Rapido.com",
+      "vendor_name": "fapido",
       "currency": "INR",
       "line_items": [
         {
-          "description": "Auto",
+          "description": "Bill total",
           "amount": 210.0,
           "quantity": 1,
           "code": ""
@@ -390,7 +391,7 @@
       "approved_amount": 210.0
     },
     "metadata": {
-      "processing_time_sec": 14.9634,
+      "processing_time_sec": 11.58,
       "page_index": 0,
       "total_pages": 1
     },
@@ -401,7 +402,7 @@
   },
   {
     "source_folder": "commute/kartik",
-    "trace_id": "f79bfaff-5850-4ad8-89bf-3f77f5e79ae1",
+    "trace_id": "90ead29c-6ca4-4946-a8a8-eb52f799aa2b",
     "file": "receipt_9ed71f8b-428d-4d31-8743-c3dda2c2e686.pdf",
     "extraction_source": "ocr_llm",
     "structured_bill": {
@@ -414,51 +415,9 @@
       "currency": "INR",
       "line_items": [
         {
-          "description": "Auto 7.41",
+          "description": "Auto",
           "amount": 3123.02,
-          "quantity": 1,
-          "code": ""
-        },
-        {
-          "description": "Suggestee 2582",
-          "amount": 0.0,
-          "quantity": 1,
-          "code": "296 PM"
-        },
-        {
-          "description": "Tip",
-          "amount": 7.41,
-          "quantity": 1,
-          "code": "297"
-        },
-        {
-          "description": "Promotion 3.60",
-          "amount": 3.6,
-          "quantity": 1,
-          "code": "2:05 Pm"
-        },
-        {
-          "description": "Eyes Cash",
-          "amount": 1250.02,
-          "quantity": 1,
-          "code": ""
-        },
-        {
-          "description": "Tis oil woes to Sungesod Face (excusing GST) andi nol lx invoiee, bel can be used fo rire reimbursement purposes. No GST",
-          "amount": 345.0,
-          "quantity": 1,
-          "code": ""
-        },
-        {
-          "description": "Ising reovere by Uber rm he ders on tis Tip",
-          "amount": 0.0,
-          "quantity": 1,
-          "code": "You're wen tuas"
-        },
-        {
-          "description": "\u201cYou\u2019re wen tuas",
-          "amount": 85.0,
-          "quantity": 1,
+          "quantity": 7,
           "code": ""
         }
       ]
@@ -466,12 +425,14 @@
     "decision": {
       "decision": "APPROVED",
       "confidence_score": 1.0,
-      "reasoning": "Bill amount within policy limits for commute expense.",
-      "violated_rules": [],
-      "approved_amount": 3123.02
+      "reasoning": "Policy limits exceeded for commute expense.",
+      "violated_rules": [
+        "Client location allowance limit exceeded"
+      ],
+      "approved_amount": null
     },
     "metadata": {
-      "processing_time_sec": 35.6493,
+      "processing_time_sec": 13.4186,
       "page_index": 0,
       "total_pages": 1
     },
@@ -482,23 +443,23 @@
   },
   {
     "source_folder": "meal/0000_naveen_unknown_unknown",
-    "trace_id": "333cc107-2146-40f3-b5ee-f06b46d1650a",
+    "trace_id": "327a2e5e-c1dc-4429-9f2a-7008af91c18f",
     "file": "AugMealReceipts.pdf",
     "extraction_source": "ocr_llm",
     "structured_bill": {
       "employee_id": "0000_naveen_unknown_unknown",
       "expense_type": "meal",
-      "amount": 476.5,
-      "month": "2024-09",
-      "bill_date": "2024-09-23",
-      "vendor_name": "IRCTC Trains",
+      "amount": 290.0,
+      "month": "2024-06",
+      "bill_date": "2024-06-28",
+      "vendor_name": "Rail Meal",
       "currency": "INR",
       "line_items": [
         {
-          "description": "Base fare",
-          "amount": 476.5,
+          "description": "Meal Veg",
+          "amount": 158.0,
           "quantity": 1,
-          "code": ""
+          "code": "R1"
         }
       ]
     },
@@ -510,7 +471,7 @@
       "approved_amount": 125.0
     },
     "metadata": {
-      "processing_time_sec": 29.0414,
+      "processing_time_sec": 26.6138,
       "page_index": 0,
       "total_pages": 2
     },
@@ -521,23 +482,23 @@
   },
   {
     "source_folder": "meal/0000_naveen_unknown_unknown",
-    "trace_id": "333cc107-2146-40f3-b5ee-f06b46d1650a",
+    "trace_id": "327a2e5e-c1dc-4429-9f2a-7008af91c18f",
     "file": "AugMealReceipts.pdf",
     "extraction_source": "ocr_llm",
     "structured_bill": {
       "employee_id": "0000_naveen_unknown_unknown",
       "expense_type": "meal",
-      "amount": 392.0,
-      "month": "2025-07",
-      "bill_date": "",
-      "vendor_name": "X",
+      "amount": 192.0,
+      "month": "unreada",
+      "bill_date": "Aug 25 2023 15:00",
+      "vendor_name": "iss",
       "currency": "INR",
       "line_items": [
         {
-          "description": "Mini Meal Veg",
-          "amount": 392.0,
+          "description": "Bill total",
+          "amount": 192.0,
           "quantity": 1,
-          "code": "15a"
+          "code": ""
         }
       ]
     },
@@ -549,7 +510,7 @@
       "approved_amount": 125.0
     },
     "metadata": {
-      "processing_time_sec": 14.2744,
+      "processing_time_sec": 10.2111,
       "page_index": 1,
       "total_pages": 2
     },
@@ -560,21 +521,21 @@
   },
   {
     "source_folder": "meal/0000_smithau_unknown_unknown",
-    "trace_id": "ed7e84c5-3e22-486c-96e9-ec058ed4065f",
+    "trace_id": "67eb6ac8-3866-4155-8904-ecba2382477b",
     "file": "31st_Lunch.pdf",
     "extraction_source": "ocr_llm",
     "structured_bill": {
       "employee_id": "0000_smithau_unknown_unknown",
       "expense_type": "meal",
-      "amount": 34.6,
+      "amount": 32.0,
       "month": "2025-07",
       "bill_date": "2025-07-30",
-      "vendor_name": "vw HungerBox",
+      "vendor_name": "HungerBox",
       "currency": "INR",
       "line_items": [
         {
           "description": "Tax Invoice",
-          "amount": 34.6,
+          "amount": 32.0,
           "quantity": 1,
           "code": ""
         }
@@ -585,10 +546,10 @@
       "confidence_score": 1.0,
       "reasoning": "Within meal allowance limit of INR 125 per day.",
       "violated_rules": [],
-      "approved_amount": 34.6
+      "approved_amount": 32.0
     },
     "metadata": {
-      "processing_time_sec": 20.8968,
+      "processing_time_sec": 21.2347,
       "page_index": 0,
       "total_pages": 1
     },
@@ -599,20 +560,20 @@
   },
   {
     "source_folder": "meal/0000_smithau_unknown_unknown",
-    "trace_id": "6bac3a04-49fa-4745-8219-a9deb2194fba",
+    "trace_id": "265436d4-6034-4e7c-b523-e53be1df4e83",
     "file": "31st_Lunch_1.pdf",
     "extraction_source": "ocr_llm",
     "structured_bill": {
       "employee_id": "0000_smithau_unknown_unknown",
       "expense_type": "meal",
-      "amount": 425.5,
+      "amount": 42.0,
       "month": "2025-07",
       "bill_date": "2025-07-30",
-      "vendor_name": "Vw HungerBox",
+      "vendor_name": "VW HungerBox",
       "currency": "INR",
       "line_items": [
         {
-          "description": "Dosa Pavilion",
+          "description": "Ragi Masala Dosa",
           "amount": 42.0,
           "quantity": 1,
           "code": ""
@@ -624,10 +585,10 @@
       "confidence_score": 1.0,
       "reasoning": "Within meal allowance limit of INR 125 per day.",
       "violated_rules": [],
-      "approved_amount": 125.0
+      "approved_amount": 42.0
     },
     "metadata": {
-      "processing_time_sec": 19.1593,
+      "processing_time_sec": 21.2728,
       "page_index": 0,
       "total_pages": 1
     },
@@ -638,16 +599,16 @@
   },
   {
     "source_folder": "meal/0000_smithau_unknown_unknown",
-    "trace_id": "9a0ace6c-1e65-4e80-a209-e1cd0bcc0168",
+    "trace_id": "7880b053-a2c3-4fe7-92ea-258f61360697",
     "file": "July8th_Lunch.pdf",
     "extraction_source": "ocr_llm",
     "structured_bill": {
       "employee_id": "0000_smithau_unknown_unknown",
       "expense_type": "meal",
-      "amount": 78.75,
-      "month": "2024-07",
+      "amount": 192.35,
+      "month": "2025-07",
       "bill_date": "2025-07-08",
-      "vendor_name": "HungerBox",
+      "vendor_name": "Fruit Pro - Vydehi Hospital",
       "currency": "INR",
       "line_items": [
         {
@@ -669,10 +630,10 @@
       "confidence_score": 1.0,
       "reasoning": "Within meal allowance limit of INR 125 per day.",
       "violated_rules": [],
-      "approved_amount": 78.75
+      "approved_amount": 125.0
     },
     "metadata": {
-      "processing_time_sec": 21.5895,
+      "processing_time_sec": 29.1039,
       "page_index": 0,
       "total_pages": 2
     },
@@ -683,21 +644,21 @@
   },
   {
     "source_folder": "meal/0000_smithau_unknown_unknown",
-    "trace_id": "9a0ace6c-1e65-4e80-a209-e1cd0bcc0168",
+    "trace_id": "7880b053-a2c3-4fe7-92ea-258f61360697",
     "file": "July8th_Lunch.pdf",
     "extraction_source": "ocr_llm",
     "structured_bill": {
       "employee_id": "0000_smithau_unknown_unknown",
       "expense_type": "meal",
-      "amount": 1495.0,
-      "month": "2023-07",
-      "bill_date": "2023-07-13",
-      "vendor_name": "Dominos",
+      "amount": 500.0,
+      "month": "2025-09",
+      "bill_date": "n/a",
+      "vendor_name": "Foo's Cafe",
       "currency": "INR",
       "line_items": [
         {
           "description": "Bill total",
-          "amount": 1495.0,
+          "amount": 500.0,
           "quantity": 1,
           "code": ""
         }
@@ -711,7 +672,7 @@
       "approved_amount": 125.0
     },
     "metadata": {
-      "processing_time_sec": 7.9866,
+      "processing_time_sec": 9.3487,
       "page_index": 1,
       "total_pages": 2
     },
@@ -722,21 +683,120 @@
   },
   {
     "source_folder": "meal/0000_smithau_unknown_unknown",
-    "trace_id": "705d266b-d89c-4e29-89e8-492c52fb5e17",
+    "trace_id": "a5510ac8-8ba5-4a50-845e-0f217113051c",
     "file": "July8th_Lunch_1.pdf",
     "extraction_source": "ocr_llm",
     "structured_bill": {
       "employee_id": "0000_smithau_unknown_unknown",
       "expense_type": "meal",
-      "amount": 161.9,
+      "amount": 170.0,
       "month": "2025-07",
       "bill_date": "2025-07-08",
       "vendor_name": "HungerBox",
       "currency": "INR",
       "line_items": [
         {
-          "description": "Cookie Man - Pop Up Menu",
+          "description": "Tax Amount and Cess",
           "amount": 161.9,
+          "quantity": 1,
+          "code": ""
+        },
+        {
+          "description": "GST ITC",
+          "amount": 2.5,
+          "quantity": 1,
+          "code": ""
+        },
+        {
+          "description": "Taxes Paid",
+          "amount": 4.05,
+          "quantity": 1,
+          "code": ""
+        }
+      ]
+    },
+    "decision": {
+      "decision": "APPROVED",
+      "confidence_score": 1.0,
+      "reasoning": "Bill amount within policy limit for meal expense.",
+      "violated_rules": [],
+      "approved_amount": 125.0
+    },
+    "metadata": {
+      "processing_time_sec": 29.9207,
+      "page_index": 0,
+      "total_pages": 1
+    },
+    "ocr_extracted": {
+      "raw_text": "w HungerBox\n\nTax Invoice\n\nlinvoice No: COONND14435,\n\nlinvoice Date: 2025-07-08\n\nInvoice issued by Eatgood Technologies Pvt Ltd on behalf of Vendor\n\nlordered From:\n\nBilt To:\n\n|cookie Man - Pop Up\n\nISmitha Upadya\n\nJAustralian Foods India Private Limited\n\nWhitefield\n\nJ29aaBccig99cizi\n\n181 & 82, EPIP Area, Near Vydehi Hospital\n\nlAustralian Foods India\n\nivate Limited\n\nHTesco Campus Rd, Whitefield\n\nBengaluru\n\nleengaluru\n\n[29-Karnataka\n\n129-Karnataka\n\nPincode: 560029\n\nlPincode: S60066\n\nDescription\n\nGST Rate\n\nInvoice Value\n\nHSN\n\nary\n\nIsILNo: 1 - CGST @ 2.50%, SGST @ 2.50%, CESS @ 0.00%\n\nJother Menu items : Butter Cashew Cookie\n\nsn : 996333\n\nls\n\nA\n\ni 170.00\n\nFio00\n\nGST Breakup Details (Amount INR)\n\nlest IND\n\n[Taxable Amount\n\nllest\n\nleast\n\niscsr\n\ncess\n\nInvoice Value\n\na\n\nlk 161.90\n\n[x 4.05\n\nlz 4.05\n\n[x 0.00\n\n[170.00\n\naig\n\nlPayment Summary\n\nSon:\n\nPayment Mode\n\nlamount\n\net\n\nPaytm UPI\n\nlk 170.00\n\nare:\n\nEs\n\nee\n\n[Total\n\nlk 170.00\n\nSee\n\ni\n\nbras.\n\nName: Eatgood Technologies Pvt Ltd (HungerBox)\n\nAddress:\n\nround & 4th Floor at Siri Shambhavi, #2346\n\nGST Applied For : 29AADCE9896/12Q\n\nHungerBox FBO FSSAI:10019043002849\n\nThis invoice is issued by Eatgood Technologies Pvt Ltd in accordance with section 9(5) of the\n\nCGST Act 2017 and the corresponding Section 5(5) of the IGST Act 2017 read with\n\nNotification 17/2021 - Central Tax(rate)\n\nThis is computer generated Invoice\n\nNo Signature Required",
+      "confidence": 0.7528909952606635
+    }
+  },
+  {
+    "source_folder": "meal/0000_smithau_unknown_unknown",
+    "trace_id": "c619f190-d88c-4557-a97d-fe11ae0262ac",
+    "file": "foodbill1.pdf",
+    "extraction_source": "vision_llm",
+    "structured_bill": {
+      "employee_id": "0000_smithau_unknown_unknown",
+      "expense_type": "meal",
+      "amount": 582.0,
+      "month": "2024-11",
+      "bill_date": "2024-11-16",
+      "vendor_name": "The Recreation Club Restaurant",
+      "currency": "INR",
+      "line_items": [
+        {
+          "description": "Bill total",
+          "amount": 582.0,
+          "quantity": 1,
+          "code": ""
+        }
+      ]
+    },
+    "decision": {
+      "decision": "APPROVED",
+      "confidence_score": 1.0,
+      "reasoning": "Within meal allowance limit",
+      "violated_rules": [],
+      "approved_amount": 125.0
+    },
+    "metadata": {
+      "processing_time_sec": 24.2923,
+      "page_index": 0,
+      "total_pages": 1
+    },
+    "ocr_extracted": {}
+  },
+  {
+    "source_folder": "meal/0000_smithau_unknown_unknown",
+    "trace_id": "a5507c65-74b5-439d-8a04-25d8080552a3",
+    "file": "foodbills.pdf",
+    "extraction_source": "ocr_llm",
+    "structured_bill": {
+      "employee_id": "0000_smithau_unknown_unknown",
+      "expense_type": "meal",
+      "amount": 400.0,
+      "month": "2027-03",
+      "bill_date": "2027-03-15",
+      "vendor_name": "BANGALORE DOSSA",
+      "currency": "INR",
+      "line_items": [
+        {
+          "description": "Tots: Bisi biryani",
+          "amount": 936.74,
+          "quantity": 2,
+          "code": ""
+        },
+        {
+          "description": "Teas: Masala chai",
+          "amount": 187.0,
+          "quantity": 2,
+          "code": ""
+        },
+        {
+          "description": "Value added tax",
+          "amount": 49.0,
           "quantity": 1,
           "code": ""
         }
@@ -750,54 +810,18 @@
       "approved_amount": 125.0
     },
     "metadata": {
-      "processing_time_sec": 18.8457,
+      "processing_time_sec": 47.7699,
       "page_index": 0,
-      "total_pages": 1
+      "total_pages": 3
     },
     "ocr_extracted": {
-      "raw_text": "w HungerBox\n\nTax Invoice\n\nlinvoice No: COONND14435,\n\nlinvoice Date: 2025-07-08\n\nInvoice issued by Eatgood Technologies Pvt Ltd on behalf of Vendor\n\nlordered From:\n\nBilt To:\n\n|cookie Man - Pop Up\n\nISmitha Upadya\n\nJAustralian Foods India Private Limited\n\nWhitefield\n\nJ29aaBccig99cizi\n\n181 & 82, EPIP Area, Near Vydehi Hospital\n\nlAustralian Foods India\n\nivate Limited\n\nHTesco Campus Rd, Whitefield\n\nBengaluru\n\nleengaluru\n\n[29-Karnataka\n\n129-Karnataka\n\nPincode: 560029\n\nlPincode: S60066\n\nDescription\n\nGST Rate\n\nInvoice Value\n\nHSN\n\nary\n\nIsILNo: 1 - CGST @ 2.50%, SGST @ 2.50%, CESS @ 0.00%\n\nJother Menu items : Butter Cashew Cookie\n\nsn : 996333\n\nls\n\nA\n\ni 170.00\n\nFio00\n\nGST Breakup Details (Amount INR)\n\nlest IND\n\n[Taxable Amount\n\nllest\n\nleast\n\niscsr\n\ncess\n\nInvoice Value\n\na\n\nlk 161.90\n\n[x 4.05\n\nlz 4.05\n\n[x 0.00\n\n[170.00\n\naig\n\nlPayment Summary\n\nSon:\n\nPayment Mode\n\nlamount\n\net\n\nPaytm UPI\n\nlk 170.00\n\nare:\n\nEs\n\nee\n\n[Total\n\nlk 170.00\n\nSee\n\ni\n\nbras.\n\nName: Eatgood Technologies Pvt Ltd (HungerBox)\n\nAddress:\n\nround & 4th Floor at Siri Shambhavi, #2346\n\nGST Applied For : 29AADCE9896/12Q\n\nHungerBox FBO FSSAI:10019043002849\n\nThis invoice is issued by Eatgood Technologies Pvt Ltd in accordance with section 9(5) of the\n\nCGST Act 2017 and the corresponding Section 5(5) of the IGST Act 2017 read with\n\nNotification 17/2021 - Central Tax(rate)\n\nThis is computer generated Invoice\n\nNo Signature Required",
-      "confidence": 0.7528909952606635
+      "raw_text": "BANGALORE OOSA\n\n#10, TPLYVDiLeb Bera\n\nHens\n\nESS01T0 PYELTO.\n\nostin\n\nPBAAHCELBONNTE\n\neats:\n\nThis; 964\n\n9\n\nw\n\n3\n\n277\n\n2s\n\np,\n\nTr\n\n21980\n\nfed MOHAN\n\nss\n\nGry Rove\n\nvie\n\n329.00\n\n:\n\nAloo Onion nara\n\n2329\n\natha 286\n\n4.00\n\nqaty 28e\n\na\n\nry\n\nSee\n\ncad\n\n178.00\n\nNet Amount\n\n4178.00\n\nF888): 13Z2SININ\n\nNum\n\non\n\nost\n\nTHANE YOU.\n\nSCEYOUSOON,\n\nBANGALORE DOSA\n\n\"\n\n120, HPL Wittig Op\n\nESSOTTO PYFLIO\n\n6\n\nTH\n\nPRARHCENOBSHTZG\n\nBilt: $3579\n\nTeas: 218\n\nbat\n\n\u201d\n\nPact\n\nView\n\nast\n\nSiva MOHAN,\n\n0\n\nhem Naw\n\nVaio\n\nOty Rate\n\nA\n\na\n\nTaly ote\n\n2\n\n0\n\n99.00\n\n*\n\nnotad\n\n9.00\n\nNet Amount\n\n98.00\n\nFs\n\n\u201c122\n\n202701\n\nE\n\nou\n\n0\n\nrn\n\nCons\n\nx\n\nTHANK YOU\n\nEC YOU SOON\n\n*\n\nBANGALORE OOSA\n\n\u201c\n\n120. NTPL Whites\n\nco\n\nave\n\nnone\n\nESSOTTO P\u00a5T LTO\n\nosm\n\nBABHCEUWOSHIZC\n\nTots: 213\n\n\u00b0.\n\nitt; 93674\n\n2\n\nas\n\na\n\nsta OMAN\n\nSH emt\n\n8\n\nGey Rite\n\nValue\n\n2\n\nud\u00e9in vada\n\n;\n\na\n\n20\n\n40.00\n\n2\n\n=)\n\n40.00\n\n2\n\nFilter Corres\n\n2\n\n20\n\npotad\n\n330.00\n\nNet Amount\n\n130.00\n\nFessat:- 1222933600201\n\nGu\n\n1 Nee\n\npany Nac\n\nsmn\n\nTHANK YOU\n\nSEE YOU SCON\n\n4\n\n\u2018\n\nBANGALORE DOSA\n\n\"\n\n120,114\n\ne008\n\n[\n\n\u00a30310 PT LTD\n\nGSTIN = 2AANCETOR\n\n1126\n\nBui w: 94645\n\nTob: 187\n\nOute\n\n1225\n\nPat\n\nTwn -0957\n\nStood MOHAN,\n\niy Rate\n\nValve\n\nSF Mem tans\n\na\n\ntaly (2) +\u00a5adaQQ)\n\ns\n\n49\n\n147 00\n\n)\n\nA\n\n2\n\n2\n\nFilter coftes\n\n2\n\n20\n\n40.00\n\n=.\n\nsotad\n\n287.09\n\nNet Amount\n\n187.00\n\nSAL: 1272320002001\n\nGuo\n\nwa\n\nCompany Nome\n\nGSTIN\n\nTHANK YOU\n\nSEEYOU SOON,",
+      "confidence": 0.4549792531120332
     }
   },
   {
     "source_folder": "meal/0000_smithau_unknown_unknown",
-    "trace_id": "c96d94a2-91b7-4354-bfb5-adfd351755cb",
-    "file": "foodbill1.pdf",
-    "extraction_source": "vision_llm",
-    "structured_bill": {
-      "employee_id": "0000_smithau_unknown_unknown",
-      "expense_type": "meal",
-      "amount": 392.0,
-      "month": "2024-11",
-      "bill_date": "2024-11-14",
-      "vendor_name": "Essetto Restaurant",
-      "currency": "INR",
-      "line_items": [
-        {
-          "description": "Bill total",
-          "amount": 392.0,
-          "quantity": 1,
-          "code": "B"
-        }
-      ]
-    },
-    "decision": {
-      "decision": "APPROVED",
-      "confidence_score": 1.0,
-      "reasoning": "Within meal allowance limit",
-      "violated_rules": [],
-      "approved_amount": 125.0
-    },
-    "metadata": {
-      "page_index": 0,
-      "total_pages": 1,
-      "processing_time_sec": 19.3017
-    },
-    "ocr_extracted": {}
-  },
-  {
-    "source_folder": "meal/0000_smithau_unknown_unknown",
-    "trace_id": "29df6b13-ae72-4de4-94bc-5b82f592a56e",
+    "trace_id": "a5507c65-74b5-439d-8a04-25d8080552a3",
     "file": "foodbills.pdf",
     "extraction_source": "vision_llm",
     "structured_bill": {
@@ -805,7 +829,7 @@
       "expense_type": "meal",
       "amount": 392.0,
       "month": "2024-11",
-      "bill_date": "2024-11-14",
+      "bill_date": "",
       "vendor_name": "Ola",
       "currency": "INR",
       "line_items": [
@@ -820,34 +844,34 @@
     "decision": {
       "decision": "APPROVED",
       "confidence_score": 1.0,
-      "reasoning": "Within meal allowance limit",
+      "reasoning": "Within meal allowance limit of INR 125 per day.",
       "violated_rules": [],
       "approved_amount": 125.0
     },
     "metadata": {
-      "page_index": 0,
-      "total_pages": 3,
-      "processing_time_sec": 12.7978
+      "processing_time_sec": 21.5203,
+      "page_index": 1,
+      "total_pages": 3
     },
     "ocr_extracted": {}
   },
   {
     "source_folder": "meal/0000_smithau_unknown_unknown",
-    "trace_id": "29df6b13-ae72-4de4-94bc-5b82f592a56e",
+    "trace_id": "a5507c65-74b5-439d-8a04-25d8080552a3",
     "file": "foodbills.pdf",
-    "extraction_source": "vision_llm",
+    "extraction_source": "ocr_llm",
     "structured_bill": {
       "employee_id": "0000_smithau_unknown_unknown",
       "expense_type": "meal",
-      "amount": 392.0,
-      "month": "2024-11",
-      "bill_date": "",
-      "vendor_name": "Rapido",
+      "amount": 525.0,
+      "month": "2024-09",
+      "bill_date": "2024-11-18",
+      "vendor_name": "THE RECREATION HUB",
       "currency": "INR",
       "line_items": [
         {
-          "description": "Bill total",
-          "amount": 392.0,
+          "description": "MORNING BREAKFAST",
+          "amount": 350.0,
           "quantity": 1,
           "code": ""
         }
@@ -861,91 +885,41 @@
       "approved_amount": 125.0
     },
     "metadata": {
-      "page_index": 1,
-      "total_pages": 3,
-      "processing_time_sec": 12.1694
-    },
-    "ocr_extracted": {}
-  },
-  {
-    "source_folder": "meal/0000_smithau_unknown_unknown",
-    "trace_id": "29df6b13-ae72-4de4-94bc-5b82f592a56e",
-    "file": "foodbills.pdf",
-    "extraction_source": "vision_llm",
-    "structured_bill": {
-      "employee_id": "0000_smithau_unknown_unknown",
-      "expense_type": "meal",
-      "amount": 392.0,
-      "month": "2024-11",
-      "bill_date": "2024-11-28",
-      "vendor_name": "Ola cabs",
-      "currency": "INR",
-      "line_items": [
-        {
-          "description": "Bill total",
-          "amount": 392.0,
-          "quantity": 1,
-          "code": ""
-        }
-      ]
-    },
-    "decision": {
-      "decision": "APPROVED",
-      "confidence_score": 1.0,
-      "reasoning": "Within meal allowance limit",
-      "violated_rules": [],
-      "approved_amount": 125.0
-    },
-    "metadata": {
+      "processing_time_sec": 41.6731,
       "page_index": 2,
-      "total_pages": 3,
-      "processing_time_sec": 12.7846
+      "total_pages": 3
     },
-    "ocr_extracted": {}
+    "ocr_extracted": {
+      "raw_text": "ESSOTTO PVT.LTD\n\nTHE RECREATION HUB\n\nW3120, (TPL BMTC Bus Station\n\npot-18,Epip A\n\nMPL,Whitofiold, Bengatury - 560066\n\ncage Se\n\nGSTIN :- 29AAHCE1893H1ZC\n\nIN ROOM DINEIN\n\n\u2014\n\n=\n\nBill #: 628\n\nRoom#: R101\n\ni\n\nDato : 18/12/25\n\nPax:\n\nTime : 10:25\n\n\u2018Stwd: SHIVANG!\n\nae\n\n3H Item Nome\n\n\u2018Valuo\n\n\u2014=\n\nee\n\nOty Rate\n\n1\n\nMORNING BREAKFA\n\n250\n\n500 00\n\nast\n\neeeeeenenennno=\n\nsuees\n\nTotal\n\n500.00\n\ncast\n\n12.50\n\nsoar\n\n12.50\n\n\u2014\n\n_\n\nNet Amount\n\n525.00\n\nFssau:. 14227530002201\n\n=\n\nane\n\nSuost ame |\n\nCompany Name:\n\nGsTIN\n\n\u2014\n\nTHANK Y\n\nSEEYOU SCON\n\n4\n\nBANGALORE DOSA\n\n4: 120, TTPL.Whitefiold Bengaluru - 560085\n\nESSOTTO PVT LTO\n\nGSTIN :- 29AAHCE1883H12C\n\nBill #: 99248\n\nToit: 134\n\nDato\n\n1911228\n\nPox: 4\n\nTimo :08:22\n\nStwd: MOHAN\n\noe\n\nas\n\na\n\nSi omtame\n\nQty Rato\n\nValue\n\nes\n\n2\n\nIdly 2Pe\n\n1 49\n\n=\n\nSaeek\n\n49.00\n\nTotal\n\n49.00\n\n\u2014\u2014\n\n=a\n\nNet Amount\n\n49.00\n\nFSSAN:- 1122253302201\n\n\u2014\n\nGuest Namo\n\nGsTN\n\n\u2018ompany Nam\n\neee\n\nTHANKY\n\nSEEYOUSOON _\n\nBANGALORE DOSA\n\n1: 120, TPLWiteflold, Bengaluru - 860066\n\nESSOTTO PVT LTD\n\nGSTIN:\n\n29AAHCE1883H1ZC.\n\n=\n\n=\n\n\u2014\n\nBill #\n\n19247\n\nTit: 133\n\n18/1225\n\nTien\n\n\u2018tw\n\n1OHAN\n\nae\n\nss\n\n\u2018SM Item Namo\n\niy Rate\n\nValue\n\nes\n\n=\n\n2\n\nZdly (2) #vada (2)\n\n2\n\n49\n\n98.00\n\n)\n\n2\n\nFilter coffeo\n\n2 20\n\n40.00\n\naepeeessnreeccaans:\n\notal :\n\n138.00\n\nNet Amount\n\n138.00\n\nFSSA\n\ntrazzsa2002201\n\net\n\nGuest Namo\n\nCompany Name:\n\nGSTIN\n\neee\n\n\u2014_\n\nTHANK YOU\n\n$EE YOU SOON",
+      "confidence": 0.5743891402714932
+    }
   },
   {
     "source_folder": "meal/0000_smithau_unknown_unknown",
-    "trace_id": "62d18571-cb97-4a35-87b4-39cdfc486da0",
+    "trace_id": "a633e498-cfbf-4b9d-befe-6b39b0de7012",
     "file": "hotel bill.pdf",
     "extraction_source": "ocr_llm",
     "structured_bill": {
       "employee_id": "0000_smithau_unknown_unknown",
       "expense_type": "meal",
-      "amount": 274.64,
-      "month": "2025-02",
-      "bill_date": "2025-02-24",
-      "vendor_name": "ESSORTTO PRIVATE",
+      "amount": 0.0,
+      "month": "2026-06",
+      "bill_date": "2026-06-02",
+      "vendor_name": "Essott Private",
       "currency": "INR",
-      "line_items": [
-        {
-          "description": "Room Rate(7000 - Dise.",
-          "amount": 2000.0,
-          "quantity": 1,
-          "code": ""
-        },
-        {
-          "description": "GST @ 25%",
-          "amount": 50.0,
-          "quantity": 1,
-          "code": "sos"
-        },
-        {
-          "description": "Day Total",
-          "amount": 2746.64,
-          "quantity": 1,
-          "code": ""
-        }
-      ]
+      "line_items": []
     },
     "decision": {
-      "decision": "APPROVED",
+      "decision": "REJECTED",
       "confidence_score": 1.0,
-      "reasoning": "Bill amount within policy limit for meal expense.",
-      "violated_rules": [],
-      "approved_amount": 125.0
+      "reasoning": "Critical validation failed: amount is zero or negative",
+      "violated_rules": [
+        "Critical validation failed: amount is zero or negative"
+      ],
+      "approved_amount": null
     },
     "metadata": {
-      "processing_time_sec": 31.5671,
+      "processing_time_sec": 19.7773,
       "page_index": 0,
       "total_pages": 3
     },
@@ -956,21 +930,21 @@
   },
   {
     "source_folder": "meal/0000_smithau_unknown_unknown",
-    "trace_id": "62d18571-cb97-4a35-87b4-39cdfc486da0",
+    "trace_id": "a633e498-cfbf-4b9d-befe-6b39b0de7012",
     "file": "hotel bill.pdf",
     "extraction_source": "ocr_llm",
     "structured_bill": {
       "employee_id": "0000_smithau_unknown_unknown",
       "expense_type": "meal",
-      "amount": 6043.0,
-      "month": "2025-12",
-      "bill_date": "2025-12-14",
-      "vendor_name": "ESSOTIO",
+      "amount": 1800.0,
+      "month": "",
+      "bill_date": "",
+      "vendor_name": "Park-ITPL",
       "currency": "INR",
       "line_items": [
         {
           "description": "Bill total",
-          "amount": 6043.0,
+          "amount": 1800.0,
           "quantity": 1,
           "code": ""
         }
@@ -978,15 +952,15 @@
     },
     "decision": {
       "decision": "REJECTED",
-      "confidence_score": 0.0,
-      "reasoning": "Monthly cap exceeded for meal expense",
+      "confidence_score": 1.0,
+      "reasoning": "Critical validation failed: month missing",
       "violated_rules": [
-        "Monthly cap exceeded for meal expense"
+        "Critical validation failed: month missing"
       ],
       "approved_amount": null
     },
     "metadata": {
-      "processing_time_sec": 20.6831,
+      "processing_time_sec": 15.227,
       "page_index": 1,
       "total_pages": 3
     },
@@ -997,27 +971,21 @@
   },
   {
     "source_folder": "meal/0000_smithau_unknown_unknown",
-    "trace_id": "62d18571-cb97-4a35-87b4-39cdfc486da0",
+    "trace_id": "a633e498-cfbf-4b9d-befe-6b39b0de7012",
     "file": "hotel bill.pdf",
     "extraction_source": "ocr_llm",
     "structured_bill": {
       "employee_id": "0000_smithau_unknown_unknown",
       "expense_type": "meal",
       "amount": 23400.0,
-      "month": "2025-04",
-      "bill_date": "2025-04-14",
-      "vendor_name": "Urs Cafe",
+      "month": "2023-09",
+      "bill_date": "2023-09-18",
+      "vendor_name": "Usha Silphira",
       "currency": "INR",
       "line_items": [
         {
-          "description": "Food",
-          "amount": 1785.61,
-          "quantity": 1,
-          "code": ""
-        },
-        {
-          "description": "Service Charge (SC)",
-          "amount": 554.39,
+          "description": "Check-out",
+          "amount": 12.0,
           "quantity": 1,
           "code": ""
         }
@@ -1033,7 +1001,7 @@
       "approved_amount": null
     },
     "metadata": {
-      "processing_time_sec": 18.5078,
+      "processing_time_sec": 17.8199,
       "page_index": 2,
       "total_pages": 3
     },

@@ -9,6 +9,7 @@ from __future__ import annotations
 import time
 import uuid
 import logging
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import Any
 
@@ -20,6 +21,7 @@ from core.interfaces import (
 )
 from core.models import BillResult, ExtractionResult
 from utils.image_utils import image_bytes_from_path_for_vision, image_bytes_list_from_path_for_vision
+from utils.result_cache import get_cached_results, set_cached_results
 
 logger = logging.getLogger(__name__)
 
@@ -171,6 +173,8 @@ class BillProcessingPipeline:
         ocr_extraction: str = "parser",
         expense_type: str = "meal",
         employee_id: str = "",
+        cache_dir: str | None = None,
+        page_parallel_workers: int = 0,
     ) -> None:
         self._ocr = ocr_service
         self._vision = vision_service
@@ -185,6 +189,8 @@ class BillProcessingPipeline:
         self._ocr_extraction = (ocr_extraction or "parser").strip().lower() or "parser"
         self._expense_type = expense_type
         self._employee_id = employee_id
+        self._cache_dir = (cache_dir or "").strip() or None
+        self._page_parallel_workers = max(0, page_parallel_workers)
 
     def process(
         self,
@@ -201,6 +207,11 @@ class BillProcessingPipeline:
         path = Path(file_path)
         if not path.exists():
             raise FileNotFoundError(f"File not found: {path}")
+        if self._cache_dir:
+            cached = get_cached_results(path, self._cache_dir)
+            if cached is not None:
+                logger.info("Cache hit: %s", path.name)
+                return cached
         trace_id = str(uuid.uuid4())
         start = time.perf_counter()
         et = (expense_type or self._expense_type).strip() or "meal"
@@ -279,7 +290,7 @@ class BillProcessingPipeline:
         bills_to_process = _bills_from_extraction(extraction)
         if not bills_to_process:
             elapsed = time.perf_counter() - start
-            return [
+            no_bill_results = [
                 BillResult(
                     trace_id=trace_id,
                     file_name=path.name,
@@ -298,6 +309,9 @@ class BillProcessingPipeline:
                     fusion_metadata=extraction.fusion_metadata,
                 )
             ]
+            if self._cache_dir:
+                set_cached_results(path, no_bill_results, self._cache_dir)
+            return no_bill_results
 
         results: list[BillResult] = []
         for structured_bill in bills_to_process:
@@ -347,6 +361,8 @@ class BillProcessingPipeline:
                     fusion_metadata=extraction.fusion_metadata,
                 )
             )
+        if self._cache_dir:
+            set_cached_results(path, results, self._cache_dir)
         return results
 
     def process_multi(
@@ -365,6 +381,11 @@ class BillProcessingPipeline:
         path = Path(file_path)
         if not path.exists():
             raise FileNotFoundError(f"File not found: {path}")
+        if self._cache_dir:
+            cached = get_cached_results(path, self._cache_dir)
+            if cached is not None:
+                logger.info("Cache hit (multi): %s", path.name)
+                return cached
         trace_id = str(uuid.uuid4())
         et = (expense_type or self._expense_type).strip() or "meal"
         eid = (employee_id if employee_id is not None else self._employee_id).strip()
@@ -423,156 +444,61 @@ class BillProcessingPipeline:
                     )
                 )
 
-        if self._strategy == "ocr_only":
-            page_images = image_bytes_list_from_path_for_vision(path)
-            if not page_images:
-                extraction = _ocr_fallback(self._ocr, path, context, vision_service=self._vision, ocr_extraction=self._ocr_extraction)
-                bills_to_process = _bills_from_extraction(extraction)
-                start = time.perf_counter()
-                if not bills_to_process:
-                    return [
-                        BillResult(
-                            trace_id=trace_id,
-                            file_name=path.name,
-                            extraction_source=extraction.source,
-                            structured_bill={},
-                            decision={
-                                "decision": "REJECTED",
-                                "confidence_score": 1.0,
-                                "reasoning": "No bill extracted",
-                                "violated_rules": [],
-                                "approved_amount": None,
-                            },
-                            policy_version_hash=self._policy_hash,
-                            metadata={"processing_time_sec": 0},
-                            ocr_extracted={"raw_text": extraction.ocr_raw_text, "confidence": extraction.ocr_confidence},
-                            fusion_metadata=extraction.fusion_metadata,
-                        )
-                    ]
-                results: list[BillResult] = []
-                _run_decision_and_append(results, extraction, bills_to_process, None, 0, start)
-                return results
-            results = []
-            for page_index, page_bytes in enumerate(page_images):
-                start = time.perf_counter()
-                try:
-                    page_text, page_conf = self._ocr.extract_from_bytes(page_bytes, is_pdf=False)
-                except Exception as e:
-                    logger.warning("OCR failed for page %s: %s", page_index + 1, e)
-                    page_text, page_conf = "", 0.0
-                extraction = _ocr_fallback_from_text(
-                    page_text, page_conf, context,
-                    vision_service=self._vision,
-                    ocr_extraction=self._ocr_extraction,
-                )
-                bills_to_process = _bills_from_extraction(extraction)
-                if not bills_to_process:
-                    elapsed = time.perf_counter() - start
-                    results.append(
-                        BillResult(
-                            trace_id=trace_id,
-                            file_name=path.name,
-                            extraction_source=extraction.source,
-                            structured_bill={},
-                            decision={
-                                "decision": "REJECTED",
-                                "confidence_score": 1.0,
-                                "reasoning": "No bill extracted",
-                                "violated_rules": [],
-                                "approved_amount": None,
-                            },
-                            policy_version_hash=self._policy_hash,
-                            metadata={"page_index": page_index, "total_pages": len(page_images), "processing_time_sec": round(elapsed, 4)},
-                            ocr_extracted={"raw_text": page_text, "confidence": page_conf},
-                            fusion_metadata=extraction.fusion_metadata,
-                        )
-                    )
-                    continue
-                _run_decision_and_append(results, extraction, bills_to_process, page_index, len(page_images), start)
-            return results
-
-        # fusion with high OCR confidence: run OCR per page so each page yields its own bill(s)
-        if self._strategy == "fusion":
+        def _process_one_page_ocr(
+            page_index: int,
+            page_bytes: bytes,
+            path: Path,
+            context: dict[str, Any],
+            trace_id: str,
+            total_pages: int,
+            et: str,
+        ) -> tuple[int, list[BillResult]]:
+            start = time.perf_counter()
             try:
-                ocr_text, ocr_conf = self._ocr.extract_from_path(path)
+                page_text, page_conf = self._ocr.extract_from_bytes(page_bytes, is_pdf=False)
             except Exception as e:
-                logger.exception("OCR failed for %s: %s", path, e)
-                ocr_text, ocr_conf = "", 0.0
-            if ocr_conf >= self._vision_if_ocr_below:
-                logger.info("OCR confidence %.2f >= threshold %.2f; skipping vision for multi-page", ocr_conf, self._vision_if_ocr_below)
-                page_images = image_bytes_list_from_path_for_vision(path)
-                if not page_images:
-                    extraction = _ocr_fallback(self._ocr, path, context, vision_service=self._vision, ocr_extraction=self._ocr_extraction)
-                    bills_to_process = _bills_from_extraction(extraction)
-                    start = time.perf_counter()
-                    if not bills_to_process:
-                        return [
-                            BillResult(
-                                trace_id=trace_id,
-                                file_name=path.name,
-                                extraction_source=extraction.source,
-                                structured_bill={},
-                                decision={
-                                    "decision": "REJECTED",
-                                    "confidence_score": 1.0,
-                                    "reasoning": "No bill extracted",
-                                    "violated_rules": [],
-                                    "approved_amount": None,
-                                },
-                                policy_version_hash=self._policy_hash,
-                                metadata={"processing_time_sec": 0},
-                                ocr_extracted={"raw_text": extraction.ocr_raw_text, "confidence": extraction.ocr_confidence},
-                                fusion_metadata=extraction.fusion_metadata,
-                            )
-                        ]
-                    results = []
-                    _run_decision_and_append(results, extraction, bills_to_process, None, 0, start)
-                    return results
-                results = []
-                for page_index, page_bytes in enumerate(page_images):
-                    start = time.perf_counter()
-                    try:
-                        page_text, page_conf = self._ocr.extract_from_bytes(page_bytes, is_pdf=False)
-                    except Exception as e:
-                        logger.warning("OCR failed for page %s: %s", page_index + 1, e)
-                        page_text, page_conf = "", 0.0
-                    extraction = _ocr_fallback_from_text(
-                        page_text, page_conf, context,
-                        vision_service=self._vision,
-                        ocr_extraction=self._ocr_extraction,
+                logger.warning("OCR failed for page %s: %s", page_index + 1, e)
+                page_text, page_conf = "", 0.0
+            extraction = _ocr_fallback_from_text(
+                page_text, page_conf, context,
+                vision_service=self._vision,
+                ocr_extraction=self._ocr_extraction,
+            )
+            bills_to_process = _bills_from_extraction(extraction)
+            if not bills_to_process:
+                elapsed = time.perf_counter() - start
+                return (page_index, [
+                    BillResult(
+                        trace_id=trace_id,
+                        file_name=path.name,
+                        extraction_source=extraction.source,
+                        structured_bill={},
+                        decision={
+                            "decision": "REJECTED",
+                            "confidence_score": 1.0,
+                            "reasoning": "No bill extracted",
+                            "violated_rules": [],
+                            "approved_amount": None,
+                        },
+                        policy_version_hash=self._policy_hash,
+                        metadata={"page_index": page_index, "total_pages": total_pages, "processing_time_sec": round(elapsed, 4)},
+                        ocr_extracted={"raw_text": page_text, "confidence": page_conf},
+                        fusion_metadata=extraction.fusion_metadata,
                     )
-                    bills_to_process = _bills_from_extraction(extraction)
-                    if not bills_to_process:
-                        elapsed = time.perf_counter() - start
-                        results.append(
-                            BillResult(
-                                trace_id=trace_id,
-                                file_name=path.name,
-                                extraction_source=extraction.source,
-                                structured_bill={},
-                                decision={
-                                    "decision": "REJECTED",
-                                    "confidence_score": 1.0,
-                                    "reasoning": "No bill extracted",
-                                    "violated_rules": [],
-                                    "approved_amount": None,
-                                },
-                                policy_version_hash=self._policy_hash,
-                                metadata={"page_index": page_index, "total_pages": len(page_images), "processing_time_sec": round(elapsed, 4)},
-                                ocr_extracted={"raw_text": page_text, "confidence": page_conf},
-                                fusion_metadata=extraction.fusion_metadata,
-                            )
-                        )
-                        continue
-                    _run_decision_and_append(results, extraction, bills_to_process, page_index, len(page_images), start)
-                return results
+                ])
+            results: list[BillResult] = []
+            _run_decision_and_append(results, extraction, bills_to_process, page_index, total_pages, start)
+            return (page_index, results)
 
-        page_images = image_bytes_list_from_path_for_vision(path)
-        if not page_images:
-            logger.warning("No images for multi-page vision: %s", path)
-            return []
-        results = []
-        for page_index, image_bytes in enumerate(page_images):
+        def _process_one_page_vision(
+            page_index: int,
+            image_bytes: bytes,
+            path: Path,
+            context: dict[str, Any],
+            trace_id: str,
+            total_pages: int,
+            et: str,
+        ) -> tuple[int, list[BillResult]]:
             start = time.perf_counter()
             try:
                 extraction = self._vision.extract(image_bytes, context)
@@ -599,8 +525,6 @@ class BillProcessingPipeline:
                     vision_service=self._vision,
                     ocr_extraction=self._ocr_extraction,
                 )
-
-            # OCR primary: if vision returned incomplete bills (amount 0 or month missing), use OCR for this page only
             if extraction.source == "vision_llm":
                 bills_check = _bills_from_extraction(extraction)
                 if _vision_bills_incomplete(bills_check):
@@ -615,11 +539,10 @@ class BillProcessingPipeline:
                         vision_service=self._vision,
                         ocr_extraction=self._ocr_extraction,
                     )
-
             bills_to_process = _bills_from_extraction(extraction)
             if not bills_to_process:
                 elapsed = time.perf_counter() - start
-                results.append(
+                return (page_index, [
                     BillResult(
                         trace_id=trace_id,
                         file_name=path.name,
@@ -633,63 +556,156 @@ class BillProcessingPipeline:
                             "approved_amount": None,
                         },
                         policy_version_hash=self._policy_hash,
-                        metadata={
-                            "page_index": page_index,
-                            "total_pages": len(page_images),
-                            "processing_time_sec": round(elapsed, 4),
-                        },
+                        metadata={"page_index": page_index, "total_pages": total_pages, "processing_time_sec": round(elapsed, 4)},
                         ocr_extracted={},
                         fusion_metadata=extraction.fusion_metadata,
                     )
-                )
-                continue
+                ])
+            results = []
+            _run_decision_and_append(results, extraction, bills_to_process, page_index, total_pages, start)
+            return (page_index, results)
 
-            for structured_bill in bills_to_process:
-                if extraction.critical_validation_failed or not _validate_critical(structured_bill):
-                    reason = _critical_validation_reason(structured_bill)
-                    decision = {
-                        "decision": "REJECTED",
-                        "confidence_score": 1.0,
-                        "reasoning": reason,
-                        "violated_rules": [reason],
-                        "approved_amount": None,
+        if self._strategy == "ocr_only":
+            page_images = image_bytes_list_from_path_for_vision(path)
+            if not page_images:
+                extraction = _ocr_fallback(self._ocr, path, context, vision_service=self._vision, ocr_extraction=self._ocr_extraction)
+                bills_to_process = _bills_from_extraction(extraction)
+                start = time.perf_counter()
+                if not bills_to_process:
+                    no_bill_list = [
+                        BillResult(
+                            trace_id=trace_id,
+                            file_name=path.name,
+                            extraction_source=extraction.source,
+                            structured_bill={},
+                            decision={
+                                "decision": "REJECTED",
+                                "confidence_score": 1.0,
+                                "reasoning": "No bill extracted",
+                                "violated_rules": [],
+                                "approved_amount": None,
+                            },
+                            policy_version_hash=self._policy_hash,
+                            metadata={"processing_time_sec": 0},
+                            ocr_extracted={"raw_text": extraction.ocr_raw_text, "confidence": extraction.ocr_confidence},
+                            fusion_metadata=extraction.fusion_metadata,
+                        )
+                    ]
+                    if self._cache_dir:
+                        set_cached_results(path, no_bill_list, self._cache_dir)
+                    return no_bill_list
+                results: list[BillResult] = []
+                _run_decision_and_append(results, extraction, bills_to_process, None, 0, start)
+                if self._cache_dir:
+                    set_cached_results(path, results, self._cache_dir)
+                return results
+            total_pages = len(page_images)
+            use_parallel = self._page_parallel_workers > 0 and total_pages > 1
+            if use_parallel:
+                with ThreadPoolExecutor(max_workers=min(self._page_parallel_workers, total_pages)) as executor:
+                    futures = {
+                        executor.submit(_process_one_page_ocr, i, pb, path, context, trace_id, total_pages, et): i
+                        for i, pb in enumerate(page_images)
                     }
+                    page_results: list[tuple[int, list[BillResult]]] = []
+                    for fut in as_completed(futures):
+                        page_results.append(fut.result())
+                    page_results.sort(key=lambda x: x[0])
+                    results = [r for _i, res in page_results for r in res]
+            else:
+                results = []
+                for page_index, page_bytes in enumerate(page_images):
+                    _, page_res = _process_one_page_ocr(page_index, page_bytes, path, context, trace_id, total_pages, et)
+                    results.extend(page_res)
+            if self._cache_dir:
+                set_cached_results(path, results, self._cache_dir)
+            return results
+
+        # fusion with high OCR confidence: run OCR per page so each page yields its own bill(s)
+        if self._strategy == "fusion":
+            try:
+                ocr_text, ocr_conf = self._ocr.extract_from_path(path)
+            except Exception as e:
+                logger.exception("OCR failed for %s: %s", path, e)
+                ocr_text, ocr_conf = "", 0.0
+            if ocr_conf >= self._vision_if_ocr_below:
+                logger.info("OCR confidence %.2f >= threshold %.2f; skipping vision for multi-page", ocr_conf, self._vision_if_ocr_below)
+                page_images = image_bytes_list_from_path_for_vision(path)
+                if not page_images:
+                    extraction = _ocr_fallback(self._ocr, path, context, vision_service=self._vision, ocr_extraction=self._ocr_extraction)
+                    bills_to_process = _bills_from_extraction(extraction)
+                    start = time.perf_counter()
+                    if not bills_to_process:
+                        no_bill_list = [
+                            BillResult(
+                                trace_id=trace_id,
+                                file_name=path.name,
+                                extraction_source=extraction.source,
+                                structured_bill={},
+                                decision={
+                                    "decision": "REJECTED",
+                                    "confidence_score": 1.0,
+                                    "reasoning": "No bill extracted",
+                                    "violated_rules": [],
+                                    "approved_amount": None,
+                                },
+                                policy_version_hash=self._policy_hash,
+                                metadata={"processing_time_sec": 0},
+                                ocr_extracted={"raw_text": extraction.ocr_raw_text, "confidence": extraction.ocr_confidence},
+                                fusion_metadata=extraction.fusion_metadata,
+                            )
+                        ]
+                        if self._cache_dir:
+                            set_cached_results(path, no_bill_list, self._cache_dir)
+                        return no_bill_list
+                    results = []
+                    _run_decision_and_append(results, extraction, bills_to_process, None, 0, start)
+                    if self._cache_dir:
+                        set_cached_results(path, results, self._cache_dir)
+                    return results
+                total_pages = len(page_images)
+                use_parallel = self._page_parallel_workers > 0 and total_pages > 1
+                if use_parallel:
+                    with ThreadPoolExecutor(max_workers=min(self._page_parallel_workers, total_pages)) as executor:
+                        futures = {
+                            executor.submit(_process_one_page_ocr, i, pb, path, context, trace_id, total_pages, et): i
+                            for i, pb in enumerate(page_images)
+                        }
+                        page_results = [fut.result() for fut in as_completed(futures)]
+                        page_results.sort(key=lambda x: x[0])
+                        results = [r for _i, res in page_results for r in res]
                 else:
-                    monthly_total = float(structured_bill.get("amount") or 0)
-                    bill_expense_type = (structured_bill.get("expense_type") or et or self._expense_type or "meal").strip() or "meal"
-                    decision = self._decision.get_decision(
-                        structured_bill,
-                        self._policy,
-                        bill_expense_type,
-                        monthly_total,
-                        trace_id,
-                    )
-                    decision = self._post.apply(
-                        decision,
-                        structured_bill,
-                        self._policy,
-                        bill_expense_type,
-                        remaining_day_cap=None,
-                    )
-                elapsed = time.perf_counter() - start
-                structured_bill_out = dict(structured_bill)
-                if structured_bill_out.get("bill_date") and hasattr(structured_bill_out["bill_date"], "isoformat"):
-                    structured_bill_out["bill_date"] = str(structured_bill_out["bill_date"])
-                results.append(
-                    BillResult(
-                        trace_id=trace_id,
-                        file_name=path.name,
-                        extraction_source=extraction.source,
-                        structured_bill=structured_bill_out,
-                        decision=decision,
-                        policy_version_hash=self._policy_hash,
-                        metadata={
-                            "page_index": page_index,
-                            "total_pages": len(page_images),
-                            "processing_time_sec": round(elapsed, 4),
-                        },
-                        ocr_extracted={"raw_text": extraction.ocr_raw_text, "confidence": extraction.ocr_confidence} if (extraction.ocr_raw_text or extraction.ocr_confidence) else {},
-                        fusion_metadata=extraction.fusion_metadata,
-                    )
-                )
+                    results = []
+                    for page_index, page_bytes in enumerate(page_images):
+                        _, page_res = _process_one_page_ocr(page_index, page_bytes, path, context, trace_id, total_pages, et)
+                        results.extend(page_res)
+                if self._cache_dir:
+                    set_cached_results(path, results, self._cache_dir)
+                return results
+
+        page_images = image_bytes_list_from_path_for_vision(path)
+        if not page_images:
+            logger.warning("No images for multi-page vision: %s", path)
+            empty: list[BillResult] = []
+            if self._cache_dir:
+                set_cached_results(path, empty, self._cache_dir)
+            return empty
+        total_pages = len(page_images)
+        use_parallel = self._page_parallel_workers > 0 and total_pages > 1
+        if use_parallel:
+            with ThreadPoolExecutor(max_workers=min(self._page_parallel_workers, total_pages)) as executor:
+                futures = {
+                    executor.submit(_process_one_page_vision, i, img, path, context, trace_id, total_pages, et): i
+                    for i, img in enumerate(page_images)
+                }
+                page_results = [fut.result() for fut in as_completed(futures)]
+                page_results.sort(key=lambda x: x[0])
+                results = [r for _i, res in page_results for r in res]
+        else:
+            results = []
+            for page_index, image_bytes in enumerate(page_images):
+                _, page_res = _process_one_page_vision(page_index, image_bytes, path, context, trace_id, total_pages, et)
+                results.extend(page_res)
+        if self._cache_dir:
+            set_cached_results(path, results, self._cache_dir)
         return results
