@@ -7,6 +7,7 @@ from __future__ import annotations
 import logging
 import os
 from abc import ABC, abstractmethod
+from pathlib import Path
 from typing import Any
 
 from PIL import Image, ImageEnhance, ImageFilter
@@ -128,6 +129,133 @@ class OpenCVDenoisePreprocessor(BasePreprocessor):
             denoised = cv2.fastNlMeansDenoising(arr, None, h=10, templateWindowSize=7, searchWindowSize=21)
             img = Image.fromarray(denoised)
         return img
+
+
+def _make_rupee_templates() -> list[Any]:
+    """Build small template images of ₹ for OpenCV matchTemplate. Returns list of grayscale template arrays."""
+    if not CV2_AVAILABLE or cv2 is None or np is None:
+        return []
+    templates: list[Any] = []
+    try:
+        from PIL import ImageDraw, ImageFont
+    except ImportError:
+        return []
+    # Try font names that often include ₹ (DejaVu, Liberation, Arial, Noto)
+    font_names = [
+        "DejaVuSans.ttf", "DejaVuSans-Bold.ttf",
+        "LiberationSans-Regular.ttf", "arial.ttf", "Arial.ttf",
+        "NotoSansDevanagari-Regular.ttf", "NotoSans-Regular.ttf",
+    ]
+    import sys
+    if sys.platform == "darwin":
+        font_names.extend(["/System/Library/Fonts/Supplemental/Arial.ttf", "/Library/Fonts/Arial.ttf"])
+    font_path: str | None = None
+    for name in font_names:
+        try:
+            f = ImageFont.truetype(name, 24)
+            img = Image.new("L", (40, 40), 255)
+            d = ImageDraw.Draw(img)
+            d.text((2, 2), "₹", font=f, fill=0)
+            if np.array(img).min() < 255:
+                font_path = name
+                break
+        except (OSError, IOError):
+            continue
+    if font_path is None:
+        logger.debug("No font with ₹ found; rupee masking disabled")
+        return []
+    for size in (16, 24, 32):
+        try:
+            f = ImageFont.truetype(font_path, size)
+            pad = max(4, size // 4)
+            w, h = size + 2 * pad, size + 2 * pad
+            img = Image.new("L", (w, h), 255)
+            d = ImageDraw.Draw(img)
+            d.text((pad, pad), "₹", font=f, fill=0)
+            arr = np.array(img)
+            if arr.min() < 255:
+                templates.append(arr)
+        except Exception:
+            continue
+    # Optional: load templates from folder (bold/light/rotated) for better detection
+    _templates_dir = Path(__file__).resolve().parent / "templates" / "rupee"
+    if _templates_dir.is_dir():
+        for p in sorted(_templates_dir.glob("*.png")):
+            try:
+                timg = Image.open(p).convert("L")
+                tarr = np.array(timg)
+                if tarr.size > 0:
+                    templates.append(tarr)
+            except Exception as e:
+                logger.debug("Could not load rupee template %s: %s", p, e)
+    return templates
+
+
+def _detect_rupee_regions(image_bgr: Any, templates: list[Any], threshold: float = 0.5) -> list[tuple[int, int, int, int]]:
+    """Run template matching; return list of (x, y, w, h) to mask. Merges overlapping boxes."""
+    if not templates or image_bgr is None:
+        return []
+    gray = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2GRAY)
+    boxes: list[tuple[int, int, int, int]] = []
+    for tpl_gray in templates:
+        th, tw = tpl_gray.shape[:2]
+        if th > gray.shape[0] or tw > gray.shape[1]:
+            continue
+        try:
+            res = cv2.matchTemplate(gray, tpl_gray, cv2.TM_CCOEFF_NORMED)
+            loc = np.where(res >= threshold)
+            for pt in zip(*loc[::-1]):
+                boxes.append((int(pt[0]), int(pt[1]), tw, th))
+        except Exception:
+            continue
+    if not boxes:
+        return []
+    # Merge overlapping boxes (simple merge)
+    boxes = sorted(boxes, key=lambda b: (b[0], b[1]))
+    merged: list[tuple[int, int, int, int]] = []
+    for (x, y, w, h) in boxes:
+        overlap = False
+        for i, (mx, my, mw, mh) in enumerate(merged):
+            if not (x + w < mx or x > mx + mw or y + h < my or y > my + mh):
+                overlap = True
+                break
+        if not overlap:
+            merged.append((x, y, w, h))
+    return merged
+
+
+class RupeeMaskPreprocessor(BasePreprocessor):
+    """
+    Mask ₹ symbol in the image (replace with white) before OCR using OpenCV template matching.
+    Reduces OCR misreading ₹ as 2 or 7. Runs first, then delegates to inner preprocessor.
+    """
+
+    def __init__(self, inner: BasePreprocessor | None = None) -> None:
+        self._inner = inner or PILPreprocessor()
+        self._templates: list[Any] = []
+
+    @property
+    def name(self) -> str:
+        return f"rupee_mask+{self._inner.name}"
+
+    def preprocess(self, image: Image.Image) -> Image.Image:
+        if not CV2_AVAILABLE or cv2 is None or np is None:
+            return self._inner.preprocess(image)
+        if not self._templates:
+            self._templates = _make_rupee_templates()
+        if not self._templates:
+            return self._inner.preprocess(image)
+        arr = np.array(image)
+        if arr.ndim == 2:
+            img_bgr = cv2.cvtColor(arr, cv2.COLOR_GRAY2BGR)
+        else:
+            img_bgr = cv2.cvtColor(arr, cv2.COLOR_RGB2BGR)
+        boxes = _detect_rupee_regions(img_bgr, self._templates, threshold=0.5)
+        for (x, y, w, h) in boxes:
+            cv2.rectangle(img_bgr, (x, y), (x + w, y + h), (255, 255, 255), -1)
+        img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
+        image_masked = Image.fromarray(img_rgb)
+        return self._inner.preprocess(image_masked)
 
 
 class DeskewPreprocessor(BasePreprocessor):
@@ -252,21 +380,29 @@ class EasyOCREngine(BaseOCREngine):
 # ---------------------------------------------------------------------------
 
 
-def create_preprocessor(kind: str = "auto", deskew: bool = True) -> BasePreprocessor:
-    """Create preprocessor. kind: 'none' | 'pil' | 'opencv' | 'auto'."""
+def create_preprocessor(
+    kind: str = "auto",
+    deskew: bool = True,
+    mask_rupee: bool = False,
+) -> BasePreprocessor:
+    """Create preprocessor. kind: 'none' | 'pil' | 'opencv' | 'auto'. mask_rupee: mask ₹ before OCR (template matching)."""
     k = (kind or "auto").strip().lower()
     if k == "none":
-        return NoOpPreprocessor()
-    if k == "pil":
-        return DeskewPreprocessor(PILPreprocessor()) if deskew and CV2_AVAILABLE else PILPreprocessor()
-    if k == "opencv":
-        base = OpenCVDenoisePreprocessor() if CV2_AVAILABLE else PILPreprocessor()
-        return DeskewPreprocessor(base) if deskew and CV2_AVAILABLE else base
-    # auto: opencv+deskew if available, else pil
-    if CV2_AVAILABLE:
-        base = OpenCVDenoisePreprocessor()
-        return DeskewPreprocessor(base) if deskew else base
-    return DeskewPreprocessor(PILPreprocessor()) if deskew else PILPreprocessor()
+        base = NoOpPreprocessor()
+    elif k == "pil":
+        base = DeskewPreprocessor(PILPreprocessor()) if deskew and CV2_AVAILABLE else PILPreprocessor()
+    elif k == "opencv":
+        inner = OpenCVDenoisePreprocessor() if CV2_AVAILABLE else PILPreprocessor()
+        base = DeskewPreprocessor(inner) if deskew and CV2_AVAILABLE else inner
+    else:
+        if CV2_AVAILABLE:
+            inner = OpenCVDenoisePreprocessor()
+            base = DeskewPreprocessor(inner) if deskew else inner
+        else:
+            base = DeskewPreprocessor(PILPreprocessor()) if deskew else PILPreprocessor()
+    if mask_rupee and CV2_AVAILABLE:
+        base = RupeeMaskPreprocessor(inner=base)
+    return base
 
 
 def create_ocr_engine(
@@ -275,6 +411,7 @@ def create_ocr_engine(
     preprocessor: BasePreprocessor | None = None,
     preprocessor_kind: str = "auto",
     deskew: bool = True,
+    mask_rupee: bool = False,
 ) -> BaseOCREngine:
     """Create OCR engine by name. preprocessor used for Tesseract; EasyOCR uses minimal resize only."""
     e = (engine or "tesseract").strip().lower()
@@ -282,7 +419,7 @@ def create_ocr_engine(
         e = "tesseract"
     if e == "easyocr" and not EASYOCR_AVAILABLE:
         raise RuntimeError("easyocr not installed; pip install easyocr or .[ocr]")
-    prep = preprocessor or create_preprocessor(kind=preprocessor_kind, deskew=deskew)
+    prep = preprocessor or create_preprocessor(kind=preprocessor_kind, deskew=deskew, mask_rupee=mask_rupee)
     if e == "tesseract":
         eng = TesseractEngine(preprocessor=prep)
     else:

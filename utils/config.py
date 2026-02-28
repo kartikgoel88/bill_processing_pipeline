@@ -68,6 +68,7 @@ class OCRConfig:
 
     engine: str = "tesseract"  # tesseract | easyocr
     dpi: int = 300  # PDF→image DPI; higher can help small text (e.g. 400 for receipts)
+    mask_rupee_symbol: bool = False  # mask ₹ with template matching before OCR to reduce 2/7 misreads
 
 
 @dataclass(frozen=True)
@@ -185,6 +186,7 @@ def _config_from_dict(data: dict[str, Any]) -> AppConfig:
             OCRConfig(
                 engine=str(ocr_data.get("engine", "tesseract")),
                 dpi=_coerce_int(ocr_data.get("dpi", 300)),
+                mask_rupee_symbol=_coerce_bool(ocr_data.get("mask_rupee_symbol", False)),
             )
             if isinstance(ocr_data := data.get("ocr"), dict)
             else OCRConfig()

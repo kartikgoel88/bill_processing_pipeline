@@ -16,6 +16,7 @@ from extraction.ocr import create_ocr_engine, run_engine_on_images
 from extraction.image_io import PathImageReader
 from extraction.image_io import BytesImageReader
 from extraction.pdf_text import extract_text_from_pdf, MIN_PDF_TEXT_LEN
+from utils.ocr_normalize import normalize_rupee_misread
 
 
 if TYPE_CHECKING:
@@ -30,13 +31,13 @@ def _extract_from_reader(
     *,
     path: Path | None = None,
     dpi: int = 300,
+    mask_rupee: bool = False,
 ) -> tuple[str, float]:
     """Run OCR on images from any reader (path, bytes, etc.). path optional for PDF logging."""
-    
-
-    eng = create_ocr_engine(engine_name)
+    eng = create_ocr_engine(engine_name, mask_rupee=mask_rupee)
     images = reader.read()
     text, confidence = run_engine_on_images(eng, images)
+    text = normalize_rupee_misread(text or "")
     if path is not None and path.suffix.lower() == ".pdf" and images:
         logger.info(
             "OCR from PDF: %s pages, dpi=%s, engine=%s, combined length %s, avg confidence %.3f",
@@ -45,7 +46,12 @@ def _extract_from_reader(
     return (text or "", float(confidence))
 
 
-def _extract_from_path(path: Path, engine_name: str, dpi: int = 300) -> tuple[str, float]:
+def _extract_from_path(
+    path: Path,
+    engine_name: str,
+    dpi: int = 300,
+    mask_rupee: bool = False,
+) -> tuple[str, float]:
     path = Path(path)
     if not path.exists():
         raise OCRError(f"File not found: {path}", trace_id=None)
@@ -58,39 +64,56 @@ def _extract_from_path(path: Path, engine_name: str, dpi: int = 300) -> tuple[st
                 path.name,
                 len(pdf_text),
             )
-            return (pdf_text.strip(), 1.0)
+            return (normalize_rupee_misread(pdf_text.strip()), 1.0)
     return _extract_from_reader(
         PathImageReader(path, dpi=dpi),
         engine_name,
         path=path,
         dpi=dpi,
+        mask_rupee=mask_rupee,
     )
 
 
-def _extract_from_bytes(data: bytes, is_pdf: bool, engine_name: str, dpi: int = 300) -> tuple[str, float]:
-
+def _extract_from_bytes(
+    data: bytes,
+    is_pdf: bool,
+    engine_name: str,
+    dpi: int = 300,
+    mask_rupee: bool = False,
+) -> tuple[str, float]:
     return _extract_from_reader(
         BytesImageReader(data, is_pdf=is_pdf, dpi=dpi),
         engine_name,
         dpi=dpi,
+        mask_rupee=mask_rupee,
     )
 
 
 class OCRService(IOCRService):
     """Production OCR service: path or bytes -> (text, confidence). Engine from config."""
 
-    def __init__(self, engine: str = "tesseract", dpi: int = 300) -> None:
+    def __init__(
+        self,
+        engine: str = "tesseract",
+        dpi: int = 300,
+        mask_rupee_symbol: bool = False,
+    ) -> None:
         self._engine = (engine or "tesseract").strip().lower()
         self._dpi = dpi
+        self._mask_rupee = mask_rupee_symbol
 
     def extract_from_path(self, path: Path) -> tuple[str, float]:
         try:
-            return _extract_from_path(Path(path), self._engine, dpi=self._dpi)
+            return _extract_from_path(
+                Path(path), self._engine, dpi=self._dpi, mask_rupee=self._mask_rupee
+            )
         except Exception as e:
             raise OCRError(f"OCR failed: {e}", trace_id=None) from e
 
     def extract_from_bytes(self, data: bytes, is_pdf: bool) -> tuple[str, float]:
         try:
-            return _extract_from_bytes(data, is_pdf, self._engine, dpi=self._dpi)
+            return _extract_from_bytes(
+                data, is_pdf, self._engine, dpi=self._dpi, mask_rupee=self._mask_rupee
+            )
         except Exception as e:
             raise OCRError(f"OCR from bytes failed: {e}", trace_id=None) from e

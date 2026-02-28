@@ -95,7 +95,11 @@ def _build_pipeline(config, policy: dict, policy_hash: str) -> BillProcessingPip
         max_retries=llm_config.max_retries,
         retry_delay_sec=llm_config.retry_delay_sec,
     )
-    ocr = OCRService(engine=config.ocr.engine, dpi=config.ocr.dpi)
+    ocr = OCRService(
+        engine=config.ocr.engine,
+        dpi=config.ocr.dpi,
+        mask_rupee_symbol=config.ocr.mask_rupee_symbol,
+    )
     post = PostProcessingService()
     return BillProcessingPipeline(
         ocr,

@@ -28,6 +28,7 @@ llm:
 ocr:
   engine: tesseract         # tesseract (default) | easyocr
   dpi: 300                  # PDF→image DPI; try 400 for receipts with small text
+  mask_rupee_symbol: true  # true = mask ₹ with OpenCV template matching before OCR (reduces 2/7 misreads)
 
 extraction:
   strategy: fusion             # ocr_only = reliable for policy reimbursement; fusion | vision_first use vision LLM (can hallucinate)
