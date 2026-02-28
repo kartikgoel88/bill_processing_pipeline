@@ -16,13 +16,25 @@ from extraction.parser import (
     _bill_extraction_system_prompt,
     _bill_extraction_vision_prompt,
     _bill_extraction_from_text_prompt,
+    bill_extraction_reasoning_instruction,
     parse_llm_extraction_multi,
 )
 logger = logging.getLogger(__name__)
 
+# Request JSON object output when provider supports it (OpenAI, some Ollama-compatible endpoints)
+EXTRACTION_RESPONSE_FORMAT = {"type": "json_object"}
 
-def _vision_prompt() -> str:
-    return f"{_bill_extraction_system_prompt()}\n\n---\n\n{_bill_extraction_vision_prompt()}"
+
+def _vision_prompt(context: dict[str, Any] | None = None) -> str:
+    """Build vision prompt; uses expense_type from context for commute/meal-specific prefix."""
+    expense_type = (context or {}).get("expense_type", "")
+    system = _bill_extraction_system_prompt(expense_type)
+    return f"{system}\n\n---\n\n{_bill_extraction_vision_prompt()}"
+
+
+def _vision_prompt_with_reasoning(context: dict[str, Any] | None = None) -> str:
+    """Prompt variant that asks for one line of reasoning before the JSON (for fallback)."""
+    return f"{bill_extraction_reasoning_instruction()}\n\n---\n\n{_vision_prompt(context)}"
 
 
 def _parse_llm_extraction_to_bills(text: str, context: dict[str, Any]) -> tuple[dict[str, Any], list[dict[str, Any]]]:
@@ -49,11 +61,23 @@ class VisionService(IVisionService):
         model: str = "llava",
         max_retries: int = 3,
         retry_delay_sec: float = 2.0,
+        *,
+        json_mode: bool = True,
+        reasoning_fallback: bool = True,
     ) -> None:
         self._llm = llm_provider
         self._model = model
         self._max_retries = max_retries
         self._retry_delay_sec = retry_delay_sec
+        self._json_mode = json_mode
+        self._reasoning_fallback = reasoning_fallback
+
+    def _extraction_kwargs(self) -> dict[str, Any]:
+        """Kwargs for extraction LLM calls (e.g. response_format when json_mode enabled)."""
+        kwargs: dict[str, Any] = {"max_tokens": 4096}
+        if self._json_mode:
+            kwargs["response_format"] = EXTRACTION_RESPONSE_FORMAT
+        return kwargs
 
     def extract(self, image_bytes: bytes, context: dict[str, Any]) -> ExtractionResult:
         if not image_bytes:
@@ -64,7 +88,7 @@ class VisionService(IVisionService):
                 critical_validation_failed=True,
             )
         logger.info("Calling vision LLM (model=%s)", self._model)
-        prompt = _vision_prompt()
+        prompt = _vision_prompt(context)
         try:
             from utils.image_utils import image_to_data_url
             data_url = image_to_data_url(image_bytes)
@@ -73,7 +97,9 @@ class VisionService(IVisionService):
                 {"type": "image_url", "image_url": {"url": data_url}},
             ]
             messages = [{"role": "user", "content": content}]
-            text = self._llm.chat_vision(messages, model=self._model, max_tokens=4096)
+            text = self._llm.chat_vision(
+                messages, model=self._model, **self._extraction_kwargs()
+            )
             logger.debug("Vision LLM response length: %s", len(text or ""))
         except Exception as e:
             logger.warning("Vision LLM failed: %s", e)
@@ -82,12 +108,22 @@ class VisionService(IVisionService):
             structured_bill, structured_bills = _parse_llm_extraction_to_bills(text, context)
         except Exception as e:
             logger.warning("Parse LLM extraction failed: %s", e)
-            return ExtractionResult(
-                structured_bill={},
-                confidence=0.0,
-                source="vision_llm",
-                critical_validation_failed=True,
-            )
+            structured_bill, structured_bills = {}, []
+        if (not structured_bill and not structured_bills) and self._reasoning_fallback:
+            logger.info("Vision extraction parse failed; retrying with reasoning-then-JSON prompt")
+            try:
+                prompt_reasoning = _vision_prompt_with_reasoning(context)
+                content_reasoning = [
+                    {"type": "text", "text": prompt_reasoning},
+                    {"type": "image_url", "image_url": {"url": data_url}},
+                ]
+                messages_reasoning = [{"role": "user", "content": content_reasoning}]
+                text2 = self._llm.chat_vision(
+                    messages_reasoning, model=self._model, **self._extraction_kwargs()
+                )
+                structured_bill, structured_bills = _parse_llm_extraction_to_bills(text2, context)
+            except Exception as e2:
+                logger.debug("Reasoning fallback failed: %s", e2)
         if not structured_bill and not structured_bills:
             return ExtractionResult(
                 structured_bill={},
@@ -115,14 +151,17 @@ class VisionService(IVisionService):
                 critical_validation_failed=True,
             )
         logger.info("Calling LLM for extraction from OCR text (model=%s)", self._model)
-        system = _bill_extraction_system_prompt()
+        expense_type = (context or {}).get("expense_type", "")
+        system = _bill_extraction_system_prompt(expense_type)
         user_content = _bill_extraction_from_text_prompt(raw_text)
         messages = [
             {"role": "system", "content": system},
             {"role": "user", "content": user_content},
         ]
         try:
-            text = self._llm.chat(messages, model=self._model, max_tokens=4096)
+            text = self._llm.chat(
+                messages, model=self._model, **self._extraction_kwargs()
+            )
         except Exception as e:
             logger.warning("LLM extraction from text failed: %s", e)
             raise VisionExtractionError(f"LLM extraction from OCR text failed: {e}") from e
@@ -130,12 +169,23 @@ class VisionService(IVisionService):
             structured_bill, structured_bills = _parse_llm_extraction_to_bills(text, context)
         except Exception as e:
             logger.warning("Parse LLM extraction from text failed: %s", e)
-            return ExtractionResult(
-                structured_bill={},
-                confidence=0.0,
-                source="ocr_llm",
-                critical_validation_failed=True,
-            )
+            structured_bill, structured_bills = {}, []
+        if (not structured_bill and not structured_bills) and self._reasoning_fallback:
+            logger.info("OCR LLM parse failed; retrying with reasoning-then-JSON prompt")
+            try:
+                user_reasoning = (
+                    f"{bill_extraction_reasoning_instruction()}\n\n---\n\n{user_content}"
+                )
+                messages_reasoning = [
+                    {"role": "system", "content": system},
+                    {"role": "user", "content": user_reasoning},
+                ]
+                text2 = self._llm.chat(
+                    messages_reasoning, model=self._model, **self._extraction_kwargs()
+                )
+                structured_bill, structured_bills = _parse_llm_extraction_to_bills(text2, context)
+            except Exception as e2:
+                logger.debug("Reasoning fallback from text failed: %s", e2)
         if not structured_bill and not structured_bills:
             return ExtractionResult(
                 structured_bill={},

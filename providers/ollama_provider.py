@@ -51,6 +51,8 @@ class OllamaProvider(BaseLLMProvider):
         }
         if kwargs.get("temperature") is not None:
             payload["temperature"] = kwargs["temperature"]
+        if kwargs.get("response_format") is not None:
+            payload["response_format"] = kwargs["response_format"]
         resp = requests.post(
             url, json=payload, headers=self._headers(), timeout=self._timeout
         )

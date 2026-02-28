@@ -53,6 +53,8 @@ class OpenAIProvider(BaseLLMProvider):
             payload["temperature"] = kwargs["temperature"]
         if kwargs.get("top_p") is not None:
             payload["top_p"] = kwargs["top_p"]
+        if kwargs.get("response_format") is not None:
+            payload["response_format"] = kwargs["response_format"]
         resp = requests.post(
             url, json=payload, headers=self._headers(), timeout=self._timeout
         )

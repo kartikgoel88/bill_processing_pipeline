@@ -80,11 +80,14 @@ def _build_pipeline(config, policy: dict, policy_hash: str) -> BillProcessingPip
         model=llm_config.decision_model,
         timeout_sec=llm_config.timeout_sec,
     )
+    ext = config.extraction
     vision = VisionService(
         vision_llm,
         model=llm_config.vision_model,
         max_retries=llm_config.max_retries,
         retry_delay_sec=llm_config.retry_delay_sec,
+        json_mode=ext.extraction_json_mode,
+        reasoning_fallback=ext.extraction_reasoning_fallback,
     )
     decision = DecisionService(
         decision_llm,
@@ -94,7 +97,6 @@ def _build_pipeline(config, policy: dict, policy_hash: str) -> BillProcessingPip
     )
     ocr = OCRService(engine=config.ocr.engine, dpi=config.ocr.dpi)
     post = PostProcessingService()
-    ext = config.extraction
     return BillProcessingPipeline(
         ocr,
         vision,
@@ -266,7 +268,14 @@ def main() -> int:
     if not files_with_folders:
         logger.warning("No bills found under %s", input_root)
         return 0
-    batch = BatchProcessor(pipeline)
+    folders_in_batch = sorted({item[0] for item in files_with_folders})
+    logger.info(
+        "Batch: %s files from %s folder(s): %s",
+        len(files_with_folders),
+        len(folders_in_batch),
+        ", ".join(folders_in_batch) if folders_in_batch else ".",
+    )
+    batch = BatchProcessor(pipeline, max_workers=config.max_workers)
     results_with_folders, metrics = batch.process_batch(files_with_folders, stop_on_first_error=False)
     out_dir = Path(config.output_dir)
     out_dir.mkdir(parents=True, exist_ok=True)

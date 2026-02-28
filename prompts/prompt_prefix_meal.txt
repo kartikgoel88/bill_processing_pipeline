@@ -1,0 +1,4 @@
+EXPENSE TYPE: MEAL (restaurant / food invoice or receipt)
+- amount: Use "Grand Total", "Net Amount", "Net Payable", or "Total" as printed. Do NOT use order ID, invoice number, or subtotal.
+- date: Use "Invoice Date" or the printed bill date; set month to YYYY-MM (e.g. "2025-07-30" → month "2025-07").
+- vendor_name: Use "Ordered From" or merchant/outlet name from the invoice.

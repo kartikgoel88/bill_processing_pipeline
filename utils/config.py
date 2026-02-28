@@ -81,6 +81,8 @@ class ExtractionConfig:
     fallback_enabled: bool = True
     fallback_threshold: float = 0.6
     ocr_extraction: str = "llm"  # parser = regex/heuristic; llm = LLM extracts from OCR text
+    extraction_json_mode: bool = True  # request JSON/structured output from LLM when supported
+    extraction_reasoning_fallback: bool = True  # on parse failure, retry with reasoning-then-JSON prompt
 
 
 @dataclass(frozen=True)
@@ -195,6 +197,8 @@ def _config_from_dict(data: dict[str, Any]) -> AppConfig:
             fallback_enabled=_coerce_bool(ext_data.get("fallback_enabled", True)),
             fallback_threshold=_coerce_float(ext_data.get("fallback_threshold", 0.6)),
             ocr_extraction=str(ext_data.get("ocr_extraction", "parser")).strip().lower() or "parser",
+            extraction_json_mode=_coerce_bool(ext_data.get("extraction_json_mode", True)),
+            extraction_reasoning_fallback=_coerce_bool(ext_data.get("extraction_reasoning_fallback", True)),
         ),
     )
 

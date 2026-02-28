@@ -582,9 +582,24 @@ def parse_structured_from_ocr(
         return None
 
 
-def _bill_extraction_system_prompt() -> str:
+def _bill_extraction_system_prompt(expense_type: str = "") -> str:
+    """Load base system prompt and optionally prepend expense-type-specific prefix (commute/meal)."""
     from prompts import load_prompt
-    return load_prompt("system_prompt_bill_extraction.txt")
+    base = load_prompt("system_prompt_bill_extraction.txt")
+    et = (expense_type or "").strip().lower()
+    if et in ("commute", "cab"):
+        try:
+            prefix = load_prompt("prompt_prefix_commute.txt")
+            return f"{prefix}\n\n{base}"
+        except FileNotFoundError:
+            pass
+    elif et in ("meal", "meals"):
+        try:
+            prefix = load_prompt("prompt_prefix_meal.txt")
+            return f"{prefix}\n\n{base}"
+        except FileNotFoundError:
+            pass
+    return base
 
 
 def _bill_extraction_vision_prompt() -> str:
@@ -596,13 +611,23 @@ def _bill_extraction_vision_prompt() -> str:
         return "Extract the reimbursement fields from this receipt/bill image. Return only one valid JSON object, no other text."
 
 
+def bill_extraction_reasoning_instruction() -> str:
+    """Short instruction for reasoning-then-JSON fallback: ask model to state total and date first, then output JSON."""
+    return (
+        "First, in one short line, state which number on the receipt is the total amount and which date you use for month (e.g. 'Total is 392 from Selected Price; date Nov 14th 2024 gives month 2024-11'). "
+        "Then on the next line output only the JSON object with keys amount, month, bill_date, vendor_name, currency, line_items."
+    )
+
+
 def _bill_extraction_from_text_prompt(ocr_text: str) -> str:
     """User prompt for LLM extraction from raw OCR text (no image). Same JSON schema as vision."""
     instruction = (
         "Below is the raw OCR text from a receipt or bill. Extract the reimbursement fields and return "
         "exactly one JSON object with keys: amount, month, bill_date, vendor_name, currency, line_items. "
-        "Use the same rules as for images: amount = Grand Total / Net Payable / final total (not invoice/order ID); "
-        "month = YYYY-MM; bill_date = YYYY-MM-DD; line_items = array of {description, amount, quantity, code}. "
+        "Rules: amount = Grand Total / Net Payable / final total or, for ride receipts (Ola, Uber, Rapido), "
+        "'Selected Price' or 'Fare'—never invoice/order/ride ID. month = YYYY-MM (always derive from bill_date or "
+        "'Time of Ride' / 'Invoice Date' when you have a date; e.g. 'Nov 22nd 2024' -> '2024-11'). "
+        "bill_date = YYYY-MM-DD. line_items = array of {description, amount, quantity, code}. "
         "Output only the JSON object, no markdown or explanation.\n\n---\n\n"
     )
     return instruction + (ocr_text or "").strip()
@@ -715,6 +740,14 @@ def _normalize_llm_bill_json(
     if date_val and str(date_val).strip():
         parsed = _parse_date(date_val)
         out["bill_date"] = parsed or str(date_val).strip()
+
+    # Infer month from bill_date when month is missing (e.g. LLM returned date but not month)
+    if not (out["month"] and out["month"].strip()) and out["bill_date"]:
+        bd = out["bill_date"].strip()
+        if len(bd) >= 7 and MONTH_PATTERN.search(bd):
+            m = MONTH_PATTERN.search(bd)
+            if m:
+                out["month"] = f"{m.group(1)}-{m.group(2)}"
 
     out["vendor_name"] = (str(data.get("vendor_name") or "").strip() or "Unknown")[:200]
     currency_raw = (str(data.get("currency") or "").strip() or "INR").upper()

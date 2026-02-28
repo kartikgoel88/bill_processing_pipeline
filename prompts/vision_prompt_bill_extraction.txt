@@ -3,6 +3,7 @@ List every receipt or bill visible on this page. Include all of them—small rec
 If there is a single bill, return a JSON array with one object: [{"amount": ..., "month": ..., "bill_date": ..., "vendor_name": ..., "currency": ..., "line_items": [...]}].
 If there are multiple bills on the page, return a JSON array with one object per bill, in the same format, in reading order.
 Each object must include: amount, month, bill_date, vendor_name, currency, line_items.
-For amount: use the bill's Grand Total / Net Payable / final total as printed on the receipt. Do not use a subtotal or partial sum. Read the printed total carefully (e.g. 392, not 190.5).
+- amount: Grand Total / Net Payable / final total. For ride receipts (Ola, Uber, Rapido) use "Selected Price" or "Fare"—never ride ID or reference. Read the printed total carefully (e.g. 392, not 190.5).
+- month: YYYY-MM. If you have bill_date or "Time of Ride" (e.g. "Nov 22nd 2024"), derive month from it (e.g. "2024-11"). Always set month when you have any date on the receipt.
 
 Return only a valid JSON array. No markdown, no explanation, no text before or after. Start with [ and end with ].

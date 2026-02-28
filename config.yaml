@@ -7,7 +7,7 @@ policy_path: test_output/policy_allowances.json
 audit_log_path: test_output/audit_trail.log
 log_level: INFO
 dry_run: false
-max_workers: 1
+max_workers: 3
 
 llm:
   provider: ollama          # ollama | openai | huggingface (default for vision & decision)
@@ -23,7 +23,7 @@ llm:
   decision_model: llama3.2 #gpt-4o-mini
   max_retries: 3
   retry_delay_sec: 2.0
-  timeout_sec: 120
+  timeout_sec: 200
 
 ocr:
   engine: tesseract         # tesseract (default) | easyocr
@@ -33,7 +33,9 @@ extraction:
   strategy: fusion             # ocr_only = reliable for policy reimbursement; fusion | vision_first use vision LLM (can hallucinate)
   vision_extractor: donut
   vision_backend: ollama
-  confidence_threshold: 0.6      # when fusion: only call vision when OCR confidence < this
+  confidence_threshold: 0.75     # when fusion: only call vision when OCR confidence < this
   fallback_enabled: true
   fallback_threshold: 0.6
-  ocr_extraction: parser       # parser = regex/heuristic from OCR text; llm = LLM extracts fields from OCR text
+  ocr_extraction: llm       # parser = regex/heuristic from OCR text; llm = LLM extracts fields from OCR text
+  extraction_json_mode: true     # request JSON/structured output from LLM when supported (OpenAI, some Ollama)
+  extraction_reasoning_fallback: true  # on parse failure, retry with reasoning-then-JSON prompt
