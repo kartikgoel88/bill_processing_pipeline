@@ -227,8 +227,12 @@ def _extract_amount_from_last_total_or_payment_line(raw_text: str, max_amount: f
     for i, line in enumerate(lines):
         m = re.search(r"\b(Total|Payment\s+Summary|Paytm\s+UPI|Net\s+Amount|Payments|Selected\s+Price)\b", line, re.IGNORECASE)
         if m:
+            keyword = (m.group(1) or "").strip().lower()
+            # Skip footnote line "Selected Price refers to the initial price range" so we use the real header line
+            if keyword == "selected price" and ("refers" in line.lower() or "range" in line.lower()):
+                continue
             last_idx = i
-            last_keyword = (m.group(1) or "").strip().lower()
+            last_keyword = keyword
     if last_idx is None:
         return 0.0
     # For "Selected Price", take amount only from next line(s) to avoid time (7:11, 11) on same line
@@ -298,6 +302,7 @@ def _extract_amount_from_total_lines_with_cap(raw_text: str, max_amount: float) 
     """
     From lines containing 'Total' (or amount-related keywords), collect all numbers in (0, max_amount]
     and return the largest. When the keyword line has no number, check the next 1–2 lines (e.g. "Total\\n123.02").
+    Skips address/trip lines (e.g. "560, Marathahalli...") and Rapido footnote so 147 wins over 560.
     """
     if max_amount <= 0:
         return 0.0
@@ -310,6 +315,11 @@ def _extract_amount_from_total_lines_with_cap(raw_text: str, max_amount: float) 
     for i, line in enumerate(lines):
         if not amount_keywords.search(line):
             continue
+        # Rapido footnote: don't use this line or its next lines (would add 560 from address)
+        if re.search(r"Selected\s+Price", line, re.IGNORECASE) and ("refers" in line.lower() or "range" in line.lower()):
+            continue
+        if _line_looks_like_address_or_trip(line):
+            continue
         for m in TOTAL_LINE_COMMA_THOUSANDS.finditer(line):
             val = _parse_float(m.group(1))
             if 0 < val <= max_amount:
@@ -321,17 +331,27 @@ def _extract_amount_from_total_lines_with_cap(raw_text: str, max_amount: float) 
             if 0 < val <= max_amount:
                 candidates.append(val)
         for j in range(i + 1, min(i + 3, len(lines))):
-            for m in TOTAL_LINE_COMMA_THOUSANDS.finditer(lines[j]):
+            next_line = lines[j]
+            if _line_looks_like_address_or_trip(next_line):
+                continue
+            for m in TOTAL_LINE_COMMA_THOUSANDS.finditer(next_line):
                 val = _parse_float(m.group(1))
                 if 0 < val <= max_amount:
                     candidates.append(val)
-            for num_str in TOTAL_LINE_LAST_NUMBER.findall(lines[j]):
+            for num_str in TOTAL_LINE_LAST_NUMBER.findall(next_line):
                 val = _parse_float(num_str)
                 if PINCODE_AMOUNT_MIN <= val <= PINCODE_AMOUNT_MAX:
                     continue
                 if 0 < val <= max_amount:
                     candidates.append(val)
     for m in TOTAL_AMOUNT_PATTERN.finditer(raw_text):
+        line_start = raw_text.rfind("\n", 0, m.start()) + 1
+        line_end = raw_text.find("\n", m.end())
+        if line_end < 0:
+            line_end = len(raw_text)
+        line = raw_text[line_start:line_end]
+        if _line_looks_like_address_or_trip(line):
+            continue
         val = _parse_float(m.group(1))
         if 0 < val <= max_amount:
             candidates.append(val)
@@ -574,6 +594,18 @@ def _bill_extraction_vision_prompt() -> str:
         return load_prompt("vision_prompt_bill_extraction.txt")
     except FileNotFoundError:
         return "Extract the reimbursement fields from this receipt/bill image. Return only one valid JSON object, no other text."
+
+
+def _bill_extraction_from_text_prompt(ocr_text: str) -> str:
+    """User prompt for LLM extraction from raw OCR text (no image). Same JSON schema as vision."""
+    instruction = (
+        "Below is the raw OCR text from a receipt or bill. Extract the reimbursement fields and return "
+        "exactly one JSON object with keys: amount, month, bill_date, vendor_name, currency, line_items. "
+        "Use the same rules as for images: amount = Grand Total / Net Payable / final total (not invoice/order ID); "
+        "month = YYYY-MM; bill_date = YYYY-MM-DD; line_items = array of {description, amount, quantity, code}. "
+        "Output only the JSON object, no markdown or explanation.\n\n---\n\n"
+    )
+    return instruction + (ocr_text or "").strip()
 
 
 def _fix_invalid_json_escapes(s: str) -> str:

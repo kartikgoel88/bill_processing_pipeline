@@ -80,6 +80,7 @@ class ExtractionConfig:
     confidence_threshold: float = 0.6
     fallback_enabled: bool = True
     fallback_threshold: float = 0.6
+    ocr_extraction: str = "llm"  # parser = regex/heuristic; llm = LLM extracts from OCR text
 
 
 @dataclass(frozen=True)
@@ -193,6 +194,7 @@ def _config_from_dict(data: dict[str, Any]) -> AppConfig:
             confidence_threshold=_coerce_float(ext_data.get("confidence_threshold", 0.6)),
             fallback_enabled=_coerce_bool(ext_data.get("fallback_enabled", True)),
             fallback_threshold=_coerce_float(ext_data.get("fallback_threshold", 0.6)),
+            ocr_extraction=str(ext_data.get("ocr_extraction", "parser")).strip().lower() or "parser",
         ),
     )
 

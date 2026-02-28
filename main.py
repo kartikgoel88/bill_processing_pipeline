@@ -106,6 +106,7 @@ def _build_pipeline(config, policy: dict, policy_hash: str) -> BillProcessingPip
         fallback_enabled=ext.fallback_enabled,
         extraction_strategy=ext.strategy,
         vision_if_ocr_below=ext.confidence_threshold,
+        ocr_extraction=ext.ocr_extraction,
     )
 
 

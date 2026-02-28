@@ -13,14 +13,14 @@ llm:
   provider: ollama          # ollama | openai | huggingface (default for vision & decision)
   # Optional: separate provider/URL for vision or decision (e.g. ollama for vision, openai for decision)
   # vision_provider: ollama
-  decision_provider: openai  # use OpenAI for decision when decision_base_url is OpenAI
+  decision_provider: ollama #openai  # use OpenAI for decision when decision_base_url is OpenAI
   base_url: "http://localhost:11434/v1"
   # vision_base_url: "http://vision-host:11434/v1"
-  decision_base_url: "https://api.openai.com/v1"
+  #decision_base_url: #"https://api.openai.com/v1"
   api_key: ""   # set in .env as LLM_API_KEY or OPENAI_API_KEY when using OpenAI
   model: qwen2.5:7b
-  vision_model: qwen2.5vl:latest
-  decision_model: gpt-4o-mini
+  vision_model: llava:latest #qwen2.5vl:latest
+  decision_model: llama3.2 #gpt-4o-mini
   max_retries: 3
   retry_delay_sec: 2.0
   timeout_sec: 120
@@ -30,9 +30,10 @@ ocr:
   dpi: 300                  # PDF→image DPI; try 400 for receipts with small text
 
 extraction:
-  strategy: ocr_only          # ocr_only | fusion | vision_first
+  strategy: fusion             # ocr_only = reliable for policy reimbursement; fusion | vision_first use vision LLM (can hallucinate)
   vision_extractor: donut
   vision_backend: ollama
-  confidence_threshold: 0.6  # when fusion: only call vision LLM when OCR confidence < this
+  confidence_threshold: 0.6      # when fusion: only call vision when OCR confidence < this
   fallback_enabled: true
   fallback_threshold: 0.6
+  ocr_extraction: parser       # parser = regex/heuristic from OCR text; llm = LLM extracts fields from OCR text

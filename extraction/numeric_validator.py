@@ -190,20 +190,21 @@ def is_valid_amount(raw_text: str, candidate_value: float) -> bool:
             # Reject single-digit when same line has another amount (rupee misread)
             if is_single_digit and _line_has_other_amount(text, start, candidate_value):
                 continue
-            # Reject if near any reject phrase (or on same line as reject phrase)
-            near_reject = any(
-                _is_near_phrase(text, start, phrase) for phrase in REJECT_PHRASES
-            )
             line_at = _get_line_at(text, start)
-            line_has_reject = _line_contains_any_phrase(line_at, REJECT_PHRASES)
-            if near_reject or line_has_reject:
-                continue
             # Accept if near an accept phrase, on same line, or on line adjacent to accept phrase (e.g. "Total\n2126.82")
             near_accept = any(
                 _is_near_phrase(text, start, phrase) for phrase in ACCEPT_PHRASES
             )
             line_has_accept = _line_contains_any_phrase(line_at, ACCEPT_PHRASES)
             adjacent_accept = _line_or_adjacent_has_accept(text, start)
+            # Reject if near any reject phrase (or on same line as reject phrase),
+            # but allow accept context to override reject (e.g. "Total" and "GST" in same window).
+            near_reject = any(
+                _is_near_phrase(text, start, phrase) for phrase in REJECT_PHRASES
+            )
+            line_has_reject = _line_contains_any_phrase(line_at, REJECT_PHRASES)
+            if (near_reject or line_has_reject) and not (near_accept or line_has_accept or adjacent_accept):
+                continue
             if near_accept or line_has_accept or adjacent_accept:
                 found_valid_occurrence = True
                 break
