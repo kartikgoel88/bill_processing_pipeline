@@ -1,9 +1,10 @@
-List every receipt or bill visible on this page. Include all of them—small receipts, corner receipts, and every distinct bill with its own total. When in doubt, include it: better to include every receipt than to miss one. Then output each receipt exactly once (no duplicates). If multiple bills are on the page, list them in reading order (top to bottom, or left to right). If unsure whether two regions are one bill or two, treat each clearly separate receipt as its own bill. Extract the reimbursement fields for each bill using the instructions above.
+List every receipt or bill visible on this page. Include all of them—small receipts, corner receipts, order history cards, and every distinct bill with its own total. When in doubt, include it: better to include every receipt than to miss one. Then output each receipt exactly once (no duplicates). If multiple bills are on the page (e.g. order history with several orders), list them in reading order (top to bottom). Each order card with its own Total is one bill. Extract the reimbursement fields for each bill using the instructions above.
 
 If there is a single bill, return a JSON array with one object: [{"amount": ..., "month": ..., "bill_date": ..., "vendor_name": ..., "currency": ..., "line_items": [...]}].
-If there are multiple bills on the page, return a JSON array with one object per bill, in the same format, in reading order.
+If there are multiple bills on the page (e.g. list of orders), return a JSON array with one object per bill, in the same format, in reading order.
 Each object must include: amount, month, bill_date, vendor_name, currency, line_items.
-- amount: Grand Total / Net Payable / final total. For ride receipts (Ola, Uber, Rapido) use "Selected Price" or "Fare"—never ride ID or reference. Read the printed total carefully (e.g. 392, not 190.5).
-- month: YYYY-MM. If you have bill_date or "Time of Ride" (e.g. "Nov 22nd 2024"), derive month from it (e.g. "2024-11"). Always set month when you have any date on the receipt.
+- amount: Grand Total / Net Payable / final total for that bill. For UPI/payment receipts use the amount paid/debited (e.g. ₹60). For ride receipts use "Selected Price" or "Fare"—never ride ID or reference. For each order in an order history, use that order's Total (e.g. ₹50 or ₹65).
+- month: YYYY-MM. Derive from bill_date or "Time of Ride" or transaction date. For order history with only "Dec 22" or "Dec 19", use current year (e.g. "2025-12"). Always set month when you have any date.
+- bill_date: YYYY-MM-DD. For "Dec 22, 13:20" with no year, use current year (e.g. "2025-12-22").
 
 Return only a valid JSON array. No markdown, no explanation, no text before or after. Start with [ and end with ].

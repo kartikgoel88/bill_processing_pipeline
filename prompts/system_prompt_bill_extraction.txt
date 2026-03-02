@@ -16,10 +16,10 @@ From the attached image, extract exactly one reimbursement record. Return a sing
 
 Fields (exact keys; use null when not found or uncertain):
 
-- amount: number only. The Grand Total / Net Payable / final total as printed on the receipt. Do NOT use a subtotal or line-item sum. Do NOT extract invoice number, order ID, or reference number. Read the printed total carefully (e.g. 392 not 190.5). For ride/cab receipts (Ola, Uber, Rapido): use "Selected Price", "Fare", "Total" or "Price" as the amount—never the ride ID or reference. No currency symbols, no commas. If unreadable or ambiguous → null (caller may use 0).
-- month: string in format "YYYY-MM" (e.g. "2025-02"). Derive from bill date, "Time of Ride", "Invoice Date", or header. If you have bill_date (e.g. "Jun 23rd 2025"), set month to that year-month ("2025-06"). If only day/month/year are separate, combine to YYYY-MM. If not parseable → null.
-- bill_date: string in format "YYYY-MM-DD" (e.g. "2025-02-15"). Date of the bill or transaction. Use "Time of Ride", "Invoice Date", or printed date. If only partial (e.g. month-year), use first day of month or null. If not parseable → null.
-- vendor_name: string. Merchant, outlet, or service provider name (e.g. restaurant, petrol pump, Ola/Uber). Empty or unclear → null (caller may use "Unknown").
+- amount: number only. The Grand Total / Net Payable / final total as printed on the receipt. Do NOT use a subtotal or line-item sum. Do NOT extract invoice number, order ID, or reference number. Read the printed total carefully (e.g. 392 not 190.5). For ride/cab receipts (Ola, Uber, Rapido): use "Selected Price", "Fare", "Total" or "Price" as the amount—never the ride ID or reference. For UPI/payment app receipts (PhonePe, GPay): use the amount paid/debited (e.g. "Paid to ... ₹60" or "Debited From ... ₹60"—amount is 60). No currency symbols, no commas. If unreadable or ambiguous → null (caller may use 0).
+- month: string in format "YYYY-MM" (e.g. "2025-02"). Derive from bill date, "Time of Ride", "Invoice Date", "Transaction Successful" time, or header. If you have bill_date (e.g. "Jun 23rd 2025", "7 Nov 2025"), set month to that year-month ("2025-11"). For order history with only "Dec 22" or "Dec 19", use current year (e.g. "2025-12"). If not parseable → null.
+- bill_date: string in format "YYYY-MM-DD" (e.g. "2025-02-15"). Date of the bill or transaction. Use "Time of Ride", "Invoice Date", "Transaction Successful" date (e.g. "08:26 am on 7 Nov 2025" → "2025-11-07"), or printed date. For order history showing only "Dec 22" or "Dec 19, 13:35", use that day with current year (e.g. "2025-12-22"). If not parseable → null.
+- vendor_name: string. Merchant, outlet, or service provider name. For UPI/payment app receipts use the "Paid to" recipient (e.g. "Bangalore Metro Rail Corporation Ltd"). For orders use the outlet/app name. Empty or unclear → null (caller may use "Unknown").
 - currency: string. Currency code from the receipt (e.g. "INR", "USD"). If only symbol (₹, $), map to INR or USD. Default to "INR" if clearly Indian context; otherwise null.
 - line_items: array of objects. Each object: { "description": string, "amount": number, "quantity": number, "code": string }. Itemized breakdown if present; if only a single total, use one line: description "Bill total", amount = total, quantity 1, code "". If no breakdown, use [] or one item with the total.
 
@@ -35,8 +35,12 @@ Rules:
 Negative example (do NOT do this):
 - Wrong: amount = 17313323427215751 (this is a ride ID). Correct: amount = 160 from "Selected Price = 160".
 - Wrong: month = null when receipt shows "Nov 11th 2024". Correct: month = "2024-11".
+- Wrong: amount = transaction ID. For UPI "Paid to X ₹60", amount = 60 (not the UTR or transaction ID).
 
 Examples (your output should follow this shape):
+
+UPI/payment receipt (PhonePe, GPay):
+{"amount": 60, "month": "2025-11", "bill_date": "2025-11-07", "vendor_name": "Bangalore Metro Rail Corporation Ltd", "currency": "INR", "line_items": [{"description": "Metro", "amount": 60, "quantity": 1, "code": ""}]}
 
 Ride/cab receipt (Rapido, Ola, Uber):
 {"amount": 392, "month": "2024-11", "bill_date": "2024-11-14", "vendor_name": "Rapido", "currency": "INR", "line_items": [{"description": "Auto", "amount": 392, "quantity": 1, "code": ""}]}

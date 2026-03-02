@@ -306,3 +306,74 @@ def test_batch_processor_continues_on_error(tmp_path: Path, pipeline: BillProces
     )
     assert len(results) == 1
     assert metrics.failed_count == 1
+
+
+def test_ocr_parser_upi_receipt(tmp_path: Path, policy_json: dict) -> None:
+    """OCR fallback correctly parses UPI/PhonePe-style receipt (Paid to, amount, 7 Nov 2025)."""
+    ocr_text = (
+        "Transaction Successful\n"
+        "08:26 am on 7 Nov 2025\n"
+        "Paid to\n"
+        "Bangalore Metro Rail Corporation Ltd  ₹60\n"
+        "UPI ID: englishbmrc.payu@axisbank\n"
+        "Transaction ID: T2511070826210983395512\n"
+        "Debited From  ₹60\n"
+        "UTR: 776275614812\n"
+    )
+    ocr = FakeOCRService(raw_text=ocr_text, confidence=0.8)
+    vision = FakeVisionService(confidence=0.5)
+    decision = FakeDecisionService(decision="APPROVED", approved_amount=60.0)
+    post = FakePostProcessingService()
+    pipeline = BillProcessingPipeline(
+        ocr,
+        vision,
+        decision,
+        post,
+        policy=policy_json,
+        fallback_threshold=0.6,
+        fallback_enabled=True,
+        extraction_strategy="ocr_only",
+        vision_if_ocr_below=0.6,
+    )
+    bill_file = _minimal_image_path(tmp_path)
+    results = pipeline.process(bill_file)
+    assert len(results) >= 1
+    bill = results[0].structured_bill
+    assert float(bill.get("amount", 0)) == 60.0
+    assert (bill.get("month") or "").strip() == "2025-11"
+    assert "Bangalore" in (bill.get("vendor_name") or "")
+    assert results[0].decision.get("decision") != "REJECTED"
+
+
+def test_ocr_parser_order_history_style(tmp_path: Path, policy_json: dict) -> None:
+    """OCR fallback handles order-history style with Total and date (Dec 22)."""
+    ocr_text = (
+        "Dec 22, 13:20\n"
+        "Order ID #112306521\n"
+        "1 Sweet Corn Sandwich: ₹50\n"
+        "Total  ₹50\n"
+        "Email Receipt  Reorder  Rate order\n"
+    )
+    ocr = FakeOCRService(raw_text=ocr_text, confidence=0.8)
+    vision = FakeVisionService(confidence=0.5)
+    decision = FakeDecisionService(decision="APPROVED", approved_amount=50.0)
+    post = FakePostProcessingService()
+    pipeline = BillProcessingPipeline(
+        ocr,
+        vision,
+        decision,
+        post,
+        policy=policy_json,
+        fallback_threshold=0.6,
+        fallback_enabled=True,
+        extraction_strategy="ocr_only",
+        vision_if_ocr_below=0.6,
+    )
+    bill_file = _minimal_image_path(tmp_path)
+    results = pipeline.process(bill_file)
+    assert len(results) >= 1
+    bill = results[0].structured_bill
+    assert float(bill.get("amount", 0)) == 50.0
+    # Parser should get month from "Dec 22" (current year)
+    month = (bill.get("month") or "").strip()
+    assert month != "" and len(month) == 7  # YYYY-MM

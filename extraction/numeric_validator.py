@@ -23,6 +23,12 @@ ACCEPT_PHRASES: Sequence[str] = (
     "Price",
     "Fare",
     "Ride",
+    "Paid",
+    "Debited",
+    "Paid to",
+    "Debited From",
+    "Amount Paid",
+    "Transaction Successful",
 )
 
 # Reject: value must NOT appear near any of these (case-insensitive)

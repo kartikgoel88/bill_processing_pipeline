@@ -60,9 +60,21 @@ TOTAL_AMOUNT_MULTILINE = re.compile(
     re.IGNORECASE | re.DOTALL,
 )
 # Payment/UPI lines often have the final amount (e.g. "Paytm UPI % 170.00", "Payment Summary 170.00", "Net Amount 78.75")
-# Include ride/commute receipt phrases: Selected Price, Price, Fare
+# Include ride/commute receipt phrases: Selected Price, Price, Fare; UPI: Paid to, Debited, Amount Paid
 PAYMENT_LINE_KEYWORDS = re.compile(
-    r"\b(?:Payment\s+Summary|Payable|UPI|Paid|Total|Net\s+Amount|Net\s+Payable|Selected\s+Price|Price|Fare)\b",
+    r"\b(?:Payment\s+Summary|Payable|UPI|Paid|Total|Net\s+Amount|Net\s+Payable|Selected\s+Price|Price|Fare|Debited|Amount\s+Paid|Transaction\s+Successful)\b",
+    re.IGNORECASE,
+)
+# UPI receipt: amount next to ₹ on same line as "Paid to" / "Debited" / recipient (e.g. "Name  ₹60", "Debited From ... ₹60")
+UPI_AMOUNT_PATTERN = re.compile(
+    r"(?:Paid\s+to|Debited\s+From|Amount\s+Paid|Debited)\b[\s\S]*?(?:₹|Rs?\.?|INR)?\s*(\d+(?:\.\d{2})?)\b",
+    re.IGNORECASE,
+)
+# Same line: ₹ or "Rs" followed by amount (UPI receipts)
+RUPEES_AMOUNT_ON_LINE = re.compile(r"(?:₹|Rs?\.?|INR)\s*(\d+(?:\.\d{2})?)\b", re.IGNORECASE)
+# Vendor from UPI: "Paid to" then recipient name (until ₹ or end of line)
+PAID_TO_VENDOR_PATTERN = re.compile(
+    r"Paid\s+to\s*:?\s*([^\n₹]+?)(?:\s*[₹\d]|$)",
     re.IGNORECASE,
 )
 # Ride receipt date: "Time of Ride Nov 11th 2024" or "Nov 14th 2024"
@@ -74,6 +86,11 @@ RIDE_DATE_PATTERN = re.compile(
 # Fallback: month name + day + year anywhere (e.g. "Nov 11th 2024")
 MONTH_NAME_YEAR_PATTERN = re.compile(
     r"\b(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+\d{1,2}(?:st|nd|rd|th)?\s+(20\d{2})\b",
+    re.IGNORECASE,
+)
+# UPI/PhonePe: "7 Nov 2025" or "08:26 am on 7 Nov 2025" (day month year)
+DAY_MONTH_YEAR_PATTERN = re.compile(
+    r"(?:on\s+)?(\d{1,2})\s+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+(20\d{2})\b",
     re.IGNORECASE,
 )
 # DD/MM/YY or DD/MM/YYYY (common on Indian receipts: "Date : 18/12/25", "12/12/25")
@@ -161,6 +178,11 @@ def _find_month_in_text(text: str) -> str | None:
                 return dt.strftime("%Y-%m")
             except ValueError:
                 pass
+    # UPI: "7 Nov 2025" or "on 7 Nov 2025"
+    for m in DAY_MONTH_YEAR_PATTERN.finditer(text):
+        parsed = _parse_day_month_year(m.group(1), m.group(2), m.group(3))
+        if parsed:
+            return parsed[:7]
     # "Aug 29, 15:00" — month name + day; infer year from Invoice Date or use current
     year_from_invoice = re.search(r"Invoice\s+Date\s*:\s*20(\d{2})-\d{2}-\d{2}", text, re.IGNORECASE)
     year_str = year_from_invoice.group(1) if year_from_invoice else str(datetime.now().year)[2:]
@@ -185,6 +207,43 @@ def _extract_amount_from_payment_lines(raw_text: str, max_amount: float = 1_000_
             if 0 < val <= max_amount and val not in (2.0, 7.0):  # skip common ₹ misreads
                 candidates.append(val)
     return candidates
+
+
+def _extract_amount_upi_style(raw_text: str, max_amount: float = 100_000.0) -> float:
+    """Extract amount from UPI/payment app receipts (PhonePe, GPay): Paid to, Debited, ₹ on same line."""
+    # Multiline: "Paid to ... Debited From ... ₹60" or "Amount Paid ... 60"
+    for m in UPI_AMOUNT_PATTERN.finditer(raw_text):
+        val = _parse_float(m.group(1))
+        if 0 < val <= max_amount:
+            return val
+    # Lines with Payment/Paid/Debited keyword: also check for ₹ amount on same or next line
+    lines = raw_text.splitlines()
+    for i, line in enumerate(lines):
+        if not re.search(r"\b(Paid\s+to|Debited|Amount\s+Paid|Transaction\s+Successful)\b", line, re.IGNORECASE):
+            continue
+        for m in RUPEES_AMOUNT_ON_LINE.finditer(line):
+            val = _parse_float(m.group(1))
+            if 0 < val <= max_amount:
+                return val
+        for j in range(i + 1, min(i + 3, len(lines))):
+            for m in RUPEES_AMOUNT_ON_LINE.finditer(lines[j]):
+                val = _parse_float(m.group(1))
+                if 0 < val <= max_amount:
+                    return val
+    return 0.0
+
+
+def _extract_vendor_paid_to(raw_text: str) -> str:
+    """Vendor from UPI receipt: 'Paid to : Name' or 'Paid to Name' (recipient)."""
+    m = PAID_TO_VENDOR_PATTERN.search(raw_text)
+    if not m:
+        return ""
+    name = (m.group(1) or "").strip()
+    # Drop trailing numbers/amounts and limit length
+    name = re.sub(r"\s*[₹]?\s*\d+(?:\.\d{2})?\s*$", "", name).strip()
+    if re.match(r"^[\d\s]+$", name) or len(name) < 2:
+        return ""
+    return name[:100]
 
 
 def _correct_rupee_read_as_leading_2(raw_text: str, amount: float) -> float:
@@ -397,6 +456,15 @@ def _parse_dd_mon_yyyy(day: str, month_name: str, year: str) -> str | None:
         return None
 
 
+def _parse_day_month_year(day: str, month_name: str, year: str) -> str | None:
+    """Parse '7 Nov 2025' (day month year) to YYYY-MM-DD."""
+    try:
+        dt = datetime.strptime(f"{month_name[:3]} {day} {year}", "%b %d %Y")
+        return dt.date().isoformat()
+    except ValueError:
+        return None
+
+
 def _extract_invoice_date_gst_style(raw_text: str) -> str:
     """Extract only date (YYYY-MM-DD) from 'Invoice Date: YYYY-MM-DD'. No invoice number."""
     m = INVOICE_DATE_PATTERN.search(raw_text)
@@ -406,6 +474,11 @@ def _extract_invoice_date_gst_style(raw_text: str) -> str:
     date_candidate = re.search(r"\b(20\d{2}-\d{2}-\d{2})\b", raw_text)
     if date_candidate:
         return date_candidate.group(1)
+    # UPI/PhonePe: "7 Nov 2025" or "08:26 am on 7 Nov 2025"
+    for m in reversed(list(DAY_MONTH_YEAR_PATTERN.finditer(raw_text))):
+        parsed = _parse_day_month_year(m.group(1), m.group(2), m.group(3))
+        if parsed:
+            return parsed
     # DD-MON-YYYY (e.g. 08-DEC-2025, 19-DEC-2025)
     for m in reversed(list(DATE_DD_MON_YYYY.finditer(raw_text))):
         parsed = _parse_dd_mon_yyyy(m.group(1), m.group(2), m.group(3))
@@ -454,6 +527,9 @@ def parse_structured_from_ocr(
 
     # Amount: GST-style last Total, tolerant to OCR noise
     amount = _extract_amount_gst_style(text)
+    # UPI/PhonePe fallback when no Total line (e.g. payment app receipt)
+    if amount == 0.0:
+        amount = _extract_amount_upi_style(text)
     # Rupee symbol (₹) often read as leading "2": e.g. ₹78.75 → 278.75; correct when XX.XX appears in text
     amount = _correct_rupee_read_as_leading_2(text, amount)
     # Reject year (2000-2030) when it appears in date context (e.g. "Nov 14th 2024" → 2024 is year, not fare)
@@ -552,8 +628,10 @@ def parse_structured_from_ocr(
     if not month:
         _, month = _extract_date_ddmmyy_style(text)
 
-    # Vendor: only from "Ordered From:" block (first line)
+    # Vendor: "Ordered From:" (GST) or "Paid to" (UPI/payment app)
     vendor_name = _extract_vendor_ordered_from(text)
+    if not vendor_name:
+        vendor_name = _extract_vendor_paid_to(text)
     if not vendor_name:
         for line in lines:
             if "vendor" in line.lower() and ":" in line:
@@ -739,6 +817,21 @@ def _normalize_llm_bill_json(
     date_val = data.get("bill_date")
     if date_val and str(date_val).strip():
         parsed = _parse_date(date_val)
+        if not parsed and str(date_val).strip():
+            # Order history often has "Dec 22" or "Dec 22, 13:20" without year — use current year
+            s = str(date_val).strip()
+            mon_day = re.match(
+                r"^(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+(\d{1,2})(?:\s*,?\s*\d{1,2}:\d{2})?$",
+                s,
+                re.IGNORECASE,
+            )
+            if mon_day:
+                try:
+                    y = datetime.now().year
+                    dt = datetime.strptime(f"{mon_day.group(1)[:3]} {mon_day.group(2)} {y}", "%b %d %Y")
+                    parsed = dt.date().isoformat()
+                except ValueError:
+                    pass
         out["bill_date"] = parsed or str(date_val).strip()
 
     # Infer month from bill_date when month is missing (e.g. LLM returned date but not month)
