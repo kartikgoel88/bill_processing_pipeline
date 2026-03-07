@@ -23,7 +23,7 @@ llm:
   api_key: ""   # set in .env as LLM_API_KEY or OPENAI_API_KEY when using OpenAI
   model: qwen2.5:7b
   vision_model: llava:latest #qwen2.5vl:latest
-  decision_model: llama3.2 #gpt-4o-mini
+  decision_model: qwen2.5:7b #gpt-4o-mini
   max_retries: 3
   retry_delay_sec: 2.0
   timeout_sec: 200
@@ -34,12 +34,12 @@ ocr:
   mask_rupee_symbol: true  # true = mask ₹ with OpenCV template matching before OCR (reduces 2/7 misreads)
 
 extraction:
-  strategy: fusion             # ocr_only = reliable for policy reimbursement; fusion | vision_first use vision LLM (can hallucinate)
+  strategy: ocr_only             # ocr_only = reliable for policy reimbursement; fusion | vision_first use vision LLM (can hallucinate)
   vision_extractor: donut
   vision_backend: ollama
   confidence_threshold: 0.75     # when fusion: only call vision when OCR confidence < this
   fallback_enabled: true
   fallback_threshold: 0.6
-  ocr_extraction: llm       # parser = regex/heuristic from OCR text; llm = LLM extracts fields from OCR text
+  ocr_extraction: llm       # parser = regex/heuristic; llm = LLM extracts from OCR text (uses llm.model, not vision_model)
   extraction_json_mode: true     # request JSON/structured output from LLM when supported (OpenAI, some Ollama)
   extraction_reasoning_fallback: true  # on parse failure, retry with reasoning-then-JSON prompt

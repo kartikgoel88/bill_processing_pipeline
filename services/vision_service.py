@@ -64,9 +64,11 @@ class VisionService(IVisionService):
         *,
         json_mode: bool = True,
         reasoning_fallback: bool = True,
+        text_extraction_model: str | None = None,
     ) -> None:
         self._llm = llm_provider
         self._model = model
+        self._text_extraction_model = text_extraction_model if text_extraction_model else model
         self._max_retries = max_retries
         self._retry_delay_sec = retry_delay_sec
         self._json_mode = json_mode
@@ -150,7 +152,10 @@ class VisionService(IVisionService):
                 source="ocr_llm",
                 critical_validation_failed=True,
             )
-        logger.info("Calling LLM for extraction from OCR text (model=%s)", self._model)
+        logger.info(
+            "Calling LLM for OCR text extraction (model=%s)",
+            self._text_extraction_model,
+        )
         expense_type = (context or {}).get("expense_type", "")
         system = _bill_extraction_system_prompt(expense_type)
         user_content = _bill_extraction_from_text_prompt(raw_text)
@@ -160,7 +165,7 @@ class VisionService(IVisionService):
         ]
         try:
             text = self._llm.chat(
-                messages, model=self._model, **self._extraction_kwargs()
+                messages, model=self._text_extraction_model, **self._extraction_kwargs()
             )
         except Exception as e:
             logger.warning("LLM extraction from text failed: %s", e)
@@ -181,7 +186,9 @@ class VisionService(IVisionService):
                     {"role": "user", "content": user_reasoning},
                 ]
                 text2 = self._llm.chat(
-                    messages_reasoning, model=self._model, **self._extraction_kwargs()
+                    messages_reasoning,
+                    model=self._text_extraction_model,
+                    **self._extraction_kwargs(),
                 )
                 structured_bill, structured_bills = _parse_llm_extraction_to_bills(text2, context)
             except Exception as e2:

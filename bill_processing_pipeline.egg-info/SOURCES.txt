@@ -15,6 +15,7 @@ extraction/image_io.py
 extraction/numeric_validator.py
 extraction/ocr.py
 extraction/parser.py
+extraction/pdf_text.py
 pipeline/__init__.py
 pipeline/batch_processor.py
 pipeline/bill_pipeline.py
@@ -37,4 +38,6 @@ utils/__init__.py
 utils/config.py
 utils/image_utils.py
 utils/logger.py
+utils/ocr_normalize.py
+utils/result_cache.py
 utils/retry.py

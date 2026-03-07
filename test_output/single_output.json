@@ -1,23 +1,84 @@
 {
   "file": "foodbills.pdf",
-  "trace_id": "a89c1c0d-250f-4a84-b926-ceff09babb3c",
-  "bill_count": 1,
+  "trace_id": "2088373c-2e60-4168-9681-c2d716a21c1a",
+  "bill_count": 3,
   "bills": [
     {
-      "extraction_source": "ocr_fallback",
+      "extraction_source": "ocr_llm",
       "structured_bill": {
         "employee_id": "",
         "expense_type": "meal",
-        "amount": 1.0,
-        "month": "",
-        "bill_date": "",
-        "vendor_name": "Unknown",
+        "amount": 4178.0,
+        "month": "2025-07",
+        "bill_date": "2025-07-30",
+        "vendor_name": "BANGALORE OOSA",
         "currency": "INR",
-        "category": "",
         "line_items": [
           {
-            "description": "Bill total",
-            "amount": 1.0,
+            "description": "Aloo Onion naariyali paratha 286",
+            "amount": 178.0,
+            "quantity": 1,
+            "code": ""
+          },
+          {
+            "description": "Atharath 186964",
+            "amount": 329.0,
+            "quantity": 1,
+            "code": ""
+          },
+          {
+            "description": "Filter coffee",
+            "amount": 2040.0,
+            "quantity": 50,
+            "code": ""
+          }
+        ]
+      },
+      "decision": {
+        "decision": "REJECTED",
+        "confidence_score": 1.0,
+        "reasoning": "Monthly cap for meal allowance exceeded.",
+        "violated_rules": [
+          "monthly cap exceeded"
+        ],
+        "approved_amount": null
+      },
+      "metadata": {
+        "processing_time_sec": 61.7502,
+        "page_index": 0,
+        "total_pages": 3
+      },
+      "ocr_extracted": {
+        "raw_text": "BANGALORE OOSA\n\n#10, TPLYVDiLeb Bera\n\nHens\n\nESS01T0 PYELTO.\n\nostin\n\nPBAAHCELBONNTE\n\neats:\n\nThis; 964\n\n9\n\nw\n\n3\n\n277\n\n2s\n\np,\n\nTr\n\n21980\n\nfed MOHAN\n\nss\n\nGry Rove\n\nvie\n\n329.00\n\n:\n\nAloo Onion nara\n\n2329\n\natha 286\n\n4.00\n\nqaty 28e\n\na\n\nry\n\nSee\n\ncad\n\n178.00\n\nNet Amount\n\n4178.00\n\nF888): 13Z2SININ\n\nNum\n\non\n\nost\n\nTHANE YOU.\n\nSCEYOUSOON,\n\nBANGALORE DOSA\n\n\"\n\n120, HPL Wittig Op\n\nESSOTTO PYFLIO\n\n6\n\nTH\n\nPRARHCENOBSHTZG\n\nBilt: $3579\n\nTeas: 218\n\nbat\n\n\u201d\n\nPact\n\nView\n\nast\n\nSiva MOHAN,\n\n0\n\nhem Naw\n\nVaio\n\nOty Rate\n\nA\n\na\n\nTaly ote\n\n2\n\n0\n\n99.00\n\n*\n\nnotad\n\n9.00\n\nNet Amount\n\n98.00\n\nFs\n\n\u201c122\n\n202701\n\nE\n\nou\n\n0\n\nrn\n\nCons\n\nx\n\nTHANK YOU\n\nEC YOU SOON\n\n*\n\nBANGALORE OOSA\n\n\u201c\n\n120. NTPL Whites\n\nco\n\nave\n\nnone\n\nESSOTTO P\u00a5T LTO\n\nosm\n\nBABHCEUWOSHIZC\n\nTots: 213\n\n\u00b0.\n\nitt; 93674\n\n2\n\nas\n\na\n\nsta OMAN\n\nSH emt\n\n8\n\nGey Rite\n\nValue\n\n2\n\nud\u00e9in vada\n\n;\n\na\n\n20\n\n40.00\n\n2\n\n=)\n\n40.00\n\n2\n\nFilter Corres\n\n2\n\n20\n\npotad\n\n330.00\n\nNet Amount\n\n130.00\n\nFessat:- 1222933600201\n\nGu\n\n1 Nee\n\npany Nac\n\nsmn\n\nTHANK YOU\n\nSEE YOU SCON\n\n4\n\n\u2018\n\nBANGALORE DOSA\n\n\"\n\n120,114\n\ne008\n\n[\n\n\u00a30310 PT LTD\n\nGSTIN = 2AANCETOR\n\n1126\n\nBui w: 94645\n\nTob: 187\n\nOute\n\n1225\n\nPat\n\nTwn -0957\n\nStood MOHAN,\n\niy Rate\n\nValve\n\nSF Mem tans\n\na\n\ntaly (2) +\u00a5adaQQ)\n\ns\n\n49\n\n147 00\n\n)\n\nA\n\n2\n\n2\n\nFilter coftes\n\n2\n\n20\n\n40.00\n\n=.\n\nsotad\n\n287.09\n\nNet Amount\n\n187.00\n\nSAL: 1272320002001\n\nGuo\n\nwa\n\nCompany Nome\n\nGSTIN\n\nTHANK YOU\n\nSEEYOU SOON,",
+        "confidence": 0.4549792531120332
+      }
+    },
+    {
+      "extraction_source": "ocr_llm",
+      "structured_bill": {
+        "employee_id": "",
+        "expense_type": "meal",
+        "amount": 207.0,
+        "month": "2022-10",
+        "bill_date": "2022-10-14",
+        "vendor_name": "BANGALORE DOSA",
+        "currency": "INR",
+        "line_items": [
+          {
+            "description": "Seer",
+            "amount": 97.0,
+            "quantity": 2,
+            "code": ""
+          },
+          {
+            "description": "Filter Coffes",
+            "amount": 49.0,
+            "quantity": 2,
+            "code": ""
+          },
+          {
+            "description": "Set Vilone",
+            "amount": 45.0,
             "quantity": 1,
             "code": ""
           }
@@ -26,14 +87,76 @@
       "decision": {
         "decision": "REJECTED",
         "confidence_score": 1.0,
-        "reasoning": "Critical validation failed",
+        "reasoning": "Monthly cap for meal allowance exceeded.",
         "violated_rules": [
-          "Critical validation failed"
+          "monthly cap exceeded"
         ],
         "approved_amount": null
       },
       "metadata": {
-        "processing_time_sec": 0.0
+        "processing_time_sec": 54.9889,
+        "page_index": 1,
+        "total_pages": 3
+      },
+      "ocr_extracted": {
+        "raw_text": "BANGALORE DOSA\n\nPOSIT Yiibotiets,\n\nEssorr\n\nBeeyiluns- s006g\n\nGST\n\nPYT LTO\n\nBRAHCELESHIZC\n\n4; 98308\n\nate 18S\n\nToit: 489\n\nNa;\n\nPact\n\nwn 1745,\n\nStwil ROHAN,\n\n\u2014\u2014$_\n\nHie Nune\n\n\u2014\u2014$$___\n\nOy Rowe\n\nVale\n\nShion Paratha\n\n2 129\n\n12\u00b0 00\n\n\u201c=\n\neae\n\n=\n\n=\n\nTotal\n\n=\n\n\u2014\u2014\n\n129 09\n\naes\n\nNet Amount\n\n129.00\n\nFSSAI- 1122239007201\n\na\n\ny\n\nGuest Necro\n\nCompany Nene:\n\n\u2014\n\n=\n\nTHANK Y\n\nSEE YOU Soot\n\n\u2014 a____\n\n~\n\n=\n\nBANGALORE DOSA\n\nPIR ITP Whisk! Bangboce \u00ab 566068:\n\nESSOTTO PYT LTO.\n\nOSTIN = 2e0AHCEtenaHiize\n\nBil A; GSATO\n\nYa 148\n\nDato 1422s,\n\nFars\n\nTheme 10.97\n\nStad: BOHAN\n\n$4 Bente\n\noy ane Value\n\n1 tdly(a)evada(a) 3\n\n45\n\n)\n\n2\n\nFiltor Coffes\n\n20\n\nSeer\n\n49.00\n\nwotal\n\n207.00,\n\n\u2014\n\n; Net Amount\n\n207.00\n\nFes\n\nsammaxore\n\n==\n\nGueat Nev\n\nCompany Na:\n\nGOIN\n\niss\n\nTHANKYOU\n\nStLYOU SOON\n\n_\u2014\n\nOe\n\nCalifornia Burri io\n\nOervito Rese\n\nSarenns Pott\n\n2 Pay hee Ce\n\nre\n\n1b\n\not\n\nSet Vilone\n\nte\n\nYast\n\nING\n\n04\n\n: aad voice #40. 45974\n\nDeed sense\n\n<M\n\nDate 0\n\nCss\n\nones.\n\ntem\n\nPree\n\nut\n\nPout\n\ntet) Cow\n\n2550\n\nSNpee Pe\n\n50.\n\nao\n\n10\n\n2490\n\nrenee\n\n2\n\nOver cour\n\ncast\n\n0\n\nSG5T a 250.\n\nms\n\nos\n\nGrand Tout\n\nwea anes\n\nasa\n\nPeles varees 1,\n\nHOS BOE Hey May\n\nChic poles Batance wt\n\neecealtiertancctte\n\nace\n\noR asus\n\nANIA SN DOP\n\nNee! te bape enter\n\noe pCOWNG\n\nCorpse gee zed bce ose\n\nae Bahay\n\nBANGALORE D034\n\n\u00a9 SOIT Beegaew \u00ab0068\n\nEssortorvt iro\n\nGST ZOARCEHEOMIZC\n\nBum: 96126\n\nTow: 46\n\n$9175\n\nPant\n\nCory\n\nStwe: Woman\n\n=\n\n=\n\nns\n\ne\n\nten None\n\nOy Rice\n\nVite\n\nbas Tea\n\n2\n\n20\n\n20.00\n\n=\n\nSotay\n\n\u2014\n\n20.00\n\nNet Amount j\n\n20.00\n\nFSEA)- Size 3092301\n\n=\n\nGest Nace\n\nCoteoa Nan:\n\n=z\n\n{\n\n;\n\nTHANK YO\n\nSEE YOU SOUK\n\nr",
+        "confidence": 0.3755871886120996
+      }
+    },
+    {
+      "extraction_source": "ocr_llm",
+      "structured_bill": {
+        "employee_id": "",
+        "expense_type": "meal",
+        "amount": 425.0,
+        "month": "2025-12",
+        "bill_date": "2025-12-18",
+        "vendor_name": "ESSOTTO PVT.LTD THE RECREATION HUB",
+        "currency": "INR",
+        "line_items": [
+          {
+            "description": "MORNING BREAKFA",
+            "amount": 250.0,
+            "quantity": 1,
+            "code": ""
+          },
+          {
+            "description": "Idly 2Pe",
+            "amount": 49.0,
+            "quantity": 1,
+            "code": ""
+          },
+          {
+            "description": "Zdly (2) #vada (2)",
+            "amount": 98.0,
+            "quantity": 1,
+            "code": ""
+          },
+          {
+            "description": "Filter coffeo",
+            "amount": 40.0,
+            "quantity": 1,
+            "code": ""
+          }
+        ]
+      },
+      "decision": {
+        "decision": "REJECTED",
+        "confidence_score": 1.0,
+        "reasoning": "Monthly meal allowance limit exceeded.",
+        "violated_rules": [
+          "monthly cap exceeded"
+        ],
+        "approved_amount": null
+      },
+      "metadata": {
+        "processing_time_sec": 62.9918,
+        "page_index": 2,
+        "total_pages": 3
+      },
+      "ocr_extracted": {
+        "raw_text": "ESSOTTO PVT.LTD\n\nTHE RECREATION HUB\n\nW3120, (TPL BMTC Bus Station\n\npot-18,Epip A\n\nMPL,Whitofiold, Bengatury - 560066\n\ncage Se\n\nGSTIN :- 29AAHCE1893H1ZC\n\nIN ROOM DINEIN\n\n\u2014\n\n=\n\nBill #: 628\n\nRoom#: R101\n\ni\n\nDato : 18/12/25\n\nPax:\n\nTime : 10:25\n\n\u2018Stwd: SHIVANG!\n\nae\n\n3H Item Nome\n\n\u2018Valuo\n\n\u2014=\n\nee\n\nOty Rate\n\n1\n\nMORNING BREAKFA\n\n250\n\n500 00\n\nast\n\neeeeeenenennno=\n\nsuees\n\nTotal\n\n500.00\n\ncast\n\n12.50\n\nsoar\n\n12.50\n\n\u2014\n\n_\n\nNet Amount\n\n525.00\n\nFssau:. 14227530002201\n\n=\n\nane\n\nSuost ame |\n\nCompany Name:\n\nGsTIN\n\n\u2014\n\nTHANK Y\n\nSEEYOU SCON\n\n4\n\nBANGALORE DOSA\n\n4: 120, TTPL.Whitefiold Bengaluru - 560085\n\nESSOTTO PVT LTO\n\nGSTIN :- 29AAHCE1883H12C\n\nBill #: 99248\n\nToit: 134\n\nDato\n\n1911228\n\nPox: 4\n\nTimo :08:22\n\nStwd: MOHAN\n\noe\n\nas\n\na\n\nSi omtame\n\nQty Rato\n\nValue\n\nes\n\n2\n\nIdly 2Pe\n\n1 49\n\n=\n\nSaeek\n\n49.00\n\nTotal\n\n49.00\n\n\u2014\u2014\n\n=a\n\nNet Amount\n\n49.00\n\nFSSAN:- 1122253302201\n\n\u2014\n\nGuest Namo\n\nGsTN\n\n\u2018ompany Nam\n\neee\n\nTHANKY\n\nSEEYOUSOON _\n\nBANGALORE DOSA\n\n1: 120, TPLWiteflold, Bengaluru - 860066\n\nESSOTTO PVT LTD\n\nGSTIN:\n\n29AAHCE1883H1ZC.\n\n=\n\n=\n\n\u2014\n\nBill #\n\n19247\n\nTit: 133\n\n18/1225\n\nTien\n\n\u2018tw\n\n1OHAN\n\nae\n\nss\n\n\u2018SM Item Namo\n\niy Rate\n\nValue\n\nes\n\n=\n\n2\n\nZdly (2) #vada (2)\n\n2\n\n49\n\n98.00\n\n)\n\n2\n\nFilter coffeo\n\n2 20\n\n40.00\n\naepeeessnreeccaans:\n\notal :\n\n138.00\n\nNet Amount\n\n138.00\n\nFSSA\n\ntrazzsa2002201\n\net\n\nGuest Namo\n\nCompany Name:\n\nGSTIN\n\neee\n\n\u2014_\n\nTHANK YOU\n\n$EE YOU SOON",
+        "confidence": 0.5743891402714932
       }
     }
   ]

@@ -88,6 +88,7 @@ def _build_pipeline(config, policy: dict, policy_hash: str) -> BillProcessingPip
         retry_delay_sec=llm_config.retry_delay_sec,
         json_mode=ext.extraction_json_mode,
         reasoning_fallback=ext.extraction_reasoning_fallback,
+        text_extraction_model=llm_config.model,
     )
     decision = DecisionService(
         decision_llm,
