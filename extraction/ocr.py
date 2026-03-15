@@ -46,6 +46,37 @@ TESSERACT_CONFIG = "--psm 11 --oem 3"
 MIN_SIDE_PX = 300
 
 
+def _tesseract_data_to_text(data: dict[str, Any]) -> str:
+    """
+    Build text from Tesseract image_to_data preserving block/line layout.
+    Words on the same line are space-separated; lines are newline-separated.
+    Improves receipt/table extraction vs raw image_to_string.
+    """
+    n = len(data.get("text", []))
+    if n == 0:
+        return ""
+    lines: dict[tuple[int, int, int], list[str]] = {}  # (block, par, line) -> words
+    for i in range(n):
+        text = (data.get("text") or [])[i]
+        if not isinstance(text, str) or not text.strip():
+            continue
+        conf = data.get("conf", [])
+        if conf and i < len(conf):
+            try:
+                if int(conf[i]) < 0:
+                    continue  # Tesseract uses -1 for non-text
+            except (TypeError, ValueError):
+                pass
+        block = int((data.get("block_num") or [0])[i]) if i < len(data.get("block_num") or []) else 0
+        par = int((data.get("par_num") or [0])[i]) if i < len(data.get("par_num") or []) else 0
+        line = int((data.get("line_num") or [0])[i]) if i < len(data.get("line_num") or []) else 0
+        key = (block, par, line)
+        lines.setdefault(key, []).append(text.strip())
+    # Sort by block, par, line and join
+    sorted_keys = sorted(lines.keys())
+    return "\n".join(" ".join(lines[k]) for k in sorted_keys).strip()
+
+
 def _log_backend_once(engine_name: str, preprocessor_name: str) -> None:
     global _ocr_backends_printed
     if _ocr_backends_printed:
@@ -224,15 +255,43 @@ def _detect_rupee_regions(image_bgr: Any, templates: list[Any], threshold: float
     return merged
 
 
+def _shrink_rupee_boxes(
+    boxes: list[tuple[int, int, int, int]],
+    shrink_px: int,
+    min_width: int = 4,
+    min_height: int = 4,
+) -> list[tuple[int, int, int, int]]:
+    """Shrink each box inward by shrink_px so masking does not erase digits next to ₹."""
+    if shrink_px <= 0:
+        return boxes
+    out: list[tuple[int, int, int, int]] = []
+    for (x, y, w, h) in boxes:
+        px = min(shrink_px, w // 2, h // 2)
+        x2 = x + px
+        y2 = y + px
+        w2 = max(min_width, w - 2 * px)
+        h2 = max(min_height, h - 2 * px)
+        if w2 > 0 and h2 > 0:
+            out.append((x2, y2, w2, h2))
+    return out
+
+
 class RupeeMaskPreprocessor(BasePreprocessor):
     """
     Mask ₹ symbol in the image (replace with white) before OCR using OpenCV template matching.
     Reduces OCR misreading ₹ as 2 or 7. Runs first, then delegates to inner preprocessor.
     """
 
-    def __init__(self, inner: BasePreprocessor | None = None) -> None:
+    def __init__(
+        self,
+        inner: BasePreprocessor | None = None,
+        threshold: float = 0.5,
+        shrink_px: int = 2,
+    ) -> None:
         self._inner = inner or PILPreprocessor()
         self._templates: list[Any] = []
+        self._threshold = max(0.3, min(0.95, threshold))
+        self._shrink_px = max(0, shrink_px)
 
     @property
     def name(self) -> str:
@@ -250,7 +309,8 @@ class RupeeMaskPreprocessor(BasePreprocessor):
             img_bgr = cv2.cvtColor(arr, cv2.COLOR_GRAY2BGR)
         else:
             img_bgr = cv2.cvtColor(arr, cv2.COLOR_RGB2BGR)
-        boxes = _detect_rupee_regions(img_bgr, self._templates, threshold=0.5)
+        boxes = _detect_rupee_regions(img_bgr, self._templates, threshold=self._threshold)
+        boxes = _shrink_rupee_boxes(boxes, self._shrink_px)
         for (x, y, w, h) in boxes:
             cv2.rectangle(img_bgr, (x, y), (x + w, y + h), (255, 255, 255), -1)
         img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
@@ -318,11 +378,15 @@ class BaseOCREngine(ABC):
 
 
 class TesseractEngine(BaseOCREngine):
-    """Tesseract OCR. Uses grayscale preprocessed image."""
+    """Tesseract OCR. Uses grayscale preprocessed image. Builds text from word-level data to preserve layout."""
 
     def __init__(self, config: str = TESSERACT_CONFIG, preprocessor: BasePreprocessor | None = None) -> None:
         if not TESSERACT_AVAILABLE or pytesseract is None:
             raise RuntimeError("pytesseract is not installed")
+        # Prefer explicit binary (e.g. Homebrew 5.x) when multiple Tesseract installs exist
+        tesseract_cmd = os.getenv("TESSERACT_CMD", "").strip()
+        if tesseract_cmd and os.path.isfile(tesseract_cmd):
+            pytesseract.pytesseract.tesseract_cmd = tesseract_cmd
         self._config = config
         self._preprocessor = preprocessor or PILPreprocessor()
 
@@ -332,9 +396,22 @@ class TesseractEngine(BaseOCREngine):
 
     def run(self, image: Image.Image) -> tuple[str, float]:
         image = self._preprocessor.preprocess(image)
-        data = pytesseract.image_to_data(image, config=self._config, output_type=pytesseract.Output.DICT)
-        text = pytesseract.image_to_string(image, config=self._config).strip()
-        confidences = [int(c) for c in data["conf"] if str(c).isdigit() and int(c) >= 0]
+        config = self._config
+        try:
+            return self._run_with_config(image, config)
+        except Exception as e:
+            err_msg = str(e)
+            if "unknown command line argument" in err_msg and "--lang" in self._config:
+                config = _tesseract_config_fallback_lang(self._config)
+                return self._run_with_config(image, config)
+            raise
+
+    def _run_with_config(self, image: Image.Image, config: str) -> tuple[str, float]:
+        data = pytesseract.image_to_data(image, config=config, output_type=pytesseract.Output.DICT)
+        text = _tesseract_data_to_text(data)
+        if not text.strip():
+            text = pytesseract.image_to_string(image, config=config).strip()
+        confidences = [int(c) for c in data.get("conf", []) if str(c).isdigit() and int(c) >= 0]
         mean_conf = sum(confidences) / len(confidences) / 100.0 if confidences else 0.0
         return text, min(1.0, max(0.0, mean_conf))
 
@@ -384,6 +461,8 @@ def create_preprocessor(
     kind: str = "auto",
     deskew: bool = True,
     mask_rupee: bool = False,
+    rupee_mask_threshold: float = 0.5,
+    rupee_mask_shrink_px: int = 2,
 ) -> BasePreprocessor:
     """Create preprocessor. kind: 'none' | 'pil' | 'opencv' | 'auto'. mask_rupee: mask ₹ before OCR (template matching)."""
     k = (kind or "auto").strip().lower()
@@ -401,8 +480,31 @@ def create_preprocessor(
         else:
             base = DeskewPreprocessor(PILPreprocessor()) if deskew else PILPreprocessor()
     if mask_rupee and CV2_AVAILABLE:
-        base = RupeeMaskPreprocessor(inner=base)
+        base = RupeeMaskPreprocessor(
+            inner=base,
+            threshold=rupee_mask_threshold,
+            shrink_px=rupee_mask_shrink_px,
+        )
     return base
+
+
+def build_tesseract_config(
+    psm: int = 11,
+    oem: int = 3,
+    lang: str = "eng",
+) -> str:
+    """Build Tesseract config string. psm 11 = sparse text; 6 = block; 3 = full page. oem 3 = LSTM only."""
+    parts = [f"--psm {psm}", f"--oem {oem}"]
+    if lang and lang.strip():
+        parts.append(f"--lang {lang.strip()}")  # Tesseract 4.1+; fallback to -l in run() if unsupported
+    return " ".join(parts)
+
+
+def _tesseract_config_fallback_lang(config: str) -> str:
+    """Replace --lang with -l for older Tesseract that don't support --lang."""
+    if "--lang " in config:
+        return config.replace("--lang ", "-l ")
+    return config
 
 
 def create_ocr_engine(
@@ -412,6 +514,11 @@ def create_ocr_engine(
     preprocessor_kind: str = "auto",
     deskew: bool = True,
     mask_rupee: bool = False,
+    rupee_mask_threshold: float = 0.5,
+    rupee_mask_shrink_px: int = 2,
+    tesseract_psm: int = 11,
+    tesseract_oem: int = 3,
+    tesseract_lang: str = "eng",
 ) -> BaseOCREngine:
     """Create OCR engine by name. preprocessor used for Tesseract; EasyOCR uses minimal resize only."""
     e = (engine or "tesseract").strip().lower()
@@ -419,9 +526,16 @@ def create_ocr_engine(
         e = "tesseract"
     if e == "easyocr" and not EASYOCR_AVAILABLE:
         raise RuntimeError("easyocr not installed; pip install easyocr or .[ocr]")
-    prep = preprocessor or create_preprocessor(kind=preprocessor_kind, deskew=deskew, mask_rupee=mask_rupee)
+    prep = preprocessor or create_preprocessor(
+        kind=preprocessor_kind,
+        deskew=deskew,
+        mask_rupee=mask_rupee,
+        rupee_mask_threshold=rupee_mask_threshold,
+        rupee_mask_shrink_px=rupee_mask_shrink_px,
+    )
     if e == "tesseract":
-        eng = TesseractEngine(preprocessor=prep)
+        config = build_tesseract_config(psm=tesseract_psm, oem=tesseract_oem, lang=tesseract_lang or "eng")
+        eng = TesseractEngine(config=config, preprocessor=prep)
     else:
         eng = EasyOCREngine(preprocessor=NoOpPreprocessor())
     _log_backend_once(eng.name, eng._preprocessor.name if hasattr(eng, "_preprocessor") else "default")

@@ -31,7 +31,15 @@ llm:
 ocr:
   engine: tesseract         # tesseract (default) | easyocr
   dpi: 300                  # PDF→image DPI; try 400 for receipts with small text
-  mask_rupee_symbol: true  # true = mask ₹ with OpenCV template matching before OCR (reduces 2/7 misreads)
+  mask_rupee_symbol: true   # true = mask ₹ with OpenCV template matching before OCR (reduces 2/7 misreads)
+  rupee_mask_threshold: 0.5 # template match threshold (0.3–0.95); raise if digits get masked
+  rupee_mask_shrink_px: 2   # shrink mask inward so digits next to ₹ are not erased
+  # Tesseract options (when engine is tesseract):
+  tesseract_psm: 11         # 3=full page, 6=block, 11=sparse text (good for receipts)
+  tesseract_oem: 3          # 3=LSTM only
+  tesseract_lang: eng       # e.g. eng+hin for Hindi numerals
+  preprocessor: auto        # none | pil | opencv | auto (auto=opencv+deskew when available)
+  deskew: true              # correct skew before OCR
 
 extraction:
   strategy: ocr_only             # ocr_only = reliable for policy reimbursement; fusion | vision_first use vision LLM (can hallucinate)

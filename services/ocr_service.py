@@ -32,9 +32,26 @@ def _extract_from_reader(
     path: Path | None = None,
     dpi: int = 300,
     mask_rupee: bool = False,
+    rupee_mask_threshold: float = 0.5,
+    rupee_mask_shrink_px: int = 2,
+    tesseract_psm: int = 11,
+    tesseract_oem: int = 3,
+    tesseract_lang: str = "eng",
+    preprocessor_kind: str = "auto",
+    deskew: bool = True,
 ) -> tuple[str, float]:
     """Run OCR on images from any reader (path, bytes, etc.). path optional for PDF logging."""
-    eng = create_ocr_engine(engine_name, mask_rupee=mask_rupee)
+    eng = create_ocr_engine(
+        engine_name,
+        mask_rupee=mask_rupee,
+        rupee_mask_threshold=rupee_mask_threshold,
+        rupee_mask_shrink_px=rupee_mask_shrink_px,
+        tesseract_psm=tesseract_psm,
+        tesseract_oem=tesseract_oem,
+        tesseract_lang=tesseract_lang or "eng",
+        preprocessor_kind=preprocessor_kind,
+        deskew=deskew,
+    )
     images = reader.read()
     text, confidence = run_engine_on_images(eng, images)
     text = normalize_rupee_misread(text or "")
@@ -51,6 +68,13 @@ def _extract_from_path(
     engine_name: str,
     dpi: int = 300,
     mask_rupee: bool = False,
+    rupee_mask_threshold: float = 0.5,
+    rupee_mask_shrink_px: int = 2,
+    tesseract_psm: int = 11,
+    tesseract_oem: int = 3,
+    tesseract_lang: str = "eng",
+    preprocessor_kind: str = "auto",
+    deskew: bool = True,
 ) -> tuple[str, float]:
     path = Path(path)
     if not path.exists():
@@ -71,6 +95,13 @@ def _extract_from_path(
         path=path,
         dpi=dpi,
         mask_rupee=mask_rupee,
+        rupee_mask_threshold=rupee_mask_threshold,
+        rupee_mask_shrink_px=rupee_mask_shrink_px,
+        tesseract_psm=tesseract_psm,
+        tesseract_oem=tesseract_oem,
+        tesseract_lang=tesseract_lang,
+        preprocessor_kind=preprocessor_kind,
+        deskew=deskew,
     )
 
 
@@ -80,12 +111,26 @@ def _extract_from_bytes(
     engine_name: str,
     dpi: int = 300,
     mask_rupee: bool = False,
+    rupee_mask_threshold: float = 0.5,
+    rupee_mask_shrink_px: int = 2,
+    tesseract_psm: int = 11,
+    tesseract_oem: int = 3,
+    tesseract_lang: str = "eng",
+    preprocessor_kind: str = "auto",
+    deskew: bool = True,
 ) -> tuple[str, float]:
     return _extract_from_reader(
         BytesImageReader(data, is_pdf=is_pdf, dpi=dpi),
         engine_name,
         dpi=dpi,
         mask_rupee=mask_rupee,
+        rupee_mask_threshold=rupee_mask_threshold,
+        rupee_mask_shrink_px=rupee_mask_shrink_px,
+        tesseract_psm=tesseract_psm,
+        tesseract_oem=tesseract_oem,
+        tesseract_lang=tesseract_lang,
+        preprocessor_kind=preprocessor_kind,
+        deskew=deskew,
     )
 
 
@@ -97,15 +142,39 @@ class OCRService(IOCRService):
         engine: str = "tesseract",
         dpi: int = 300,
         mask_rupee_symbol: bool = False,
+        rupee_mask_threshold: float = 0.5,
+        rupee_mask_shrink_px: int = 2,
+        tesseract_psm: int = 11,
+        tesseract_oem: int = 3,
+        tesseract_lang: str = "eng",
+        preprocessor: str = "auto",
+        deskew: bool = True,
     ) -> None:
         self._engine = (engine or "tesseract").strip().lower()
         self._dpi = dpi
         self._mask_rupee = mask_rupee_symbol
+        self._rupee_mask_threshold = rupee_mask_threshold
+        self._rupee_mask_shrink_px = rupee_mask_shrink_px
+        self._tesseract_psm = tesseract_psm
+        self._tesseract_oem = tesseract_oem
+        self._tesseract_lang = tesseract_lang or "eng"
+        self._preprocessor_kind = (preprocessor or "auto").strip().lower() or "auto"
+        self._deskew = deskew
 
     def extract_from_path(self, path: Path) -> tuple[str, float]:
         try:
             return _extract_from_path(
-                Path(path), self._engine, dpi=self._dpi, mask_rupee=self._mask_rupee
+                Path(path),
+                self._engine,
+                dpi=self._dpi,
+                mask_rupee=self._mask_rupee,
+                rupee_mask_threshold=self._rupee_mask_threshold,
+                rupee_mask_shrink_px=self._rupee_mask_shrink_px,
+                tesseract_psm=self._tesseract_psm,
+                tesseract_oem=self._tesseract_oem,
+                tesseract_lang=self._tesseract_lang,
+                preprocessor_kind=self._preprocessor_kind,
+                deskew=self._deskew,
             )
         except Exception as e:
             raise OCRError(f"OCR failed: {e}", trace_id=None) from e
@@ -113,7 +182,18 @@ class OCRService(IOCRService):
     def extract_from_bytes(self, data: bytes, is_pdf: bool) -> tuple[str, float]:
         try:
             return _extract_from_bytes(
-                data, is_pdf, self._engine, dpi=self._dpi, mask_rupee=self._mask_rupee
+                data,
+                is_pdf,
+                self._engine,
+                dpi=self._dpi,
+                mask_rupee=self._mask_rupee,
+                rupee_mask_threshold=self._rupee_mask_threshold,
+                rupee_mask_shrink_px=self._rupee_mask_shrink_px,
+                tesseract_psm=self._tesseract_psm,
+                tesseract_oem=self._tesseract_oem,
+                tesseract_lang=self._tesseract_lang,
+                preprocessor_kind=self._preprocessor_kind,
+                deskew=self._deskew,
             )
         except Exception as e:
             raise OCRError(f"OCR from bytes failed: {e}", trace_id=None) from e

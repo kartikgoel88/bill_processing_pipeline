@@ -100,6 +100,13 @@ def _build_pipeline(config, policy: dict, policy_hash: str) -> BillProcessingPip
         engine=config.ocr.engine,
         dpi=config.ocr.dpi,
         mask_rupee_symbol=config.ocr.mask_rupee_symbol,
+        rupee_mask_threshold=config.ocr.rupee_mask_threshold,
+        rupee_mask_shrink_px=config.ocr.rupee_mask_shrink_px,
+        tesseract_psm=config.ocr.tesseract_psm,
+        tesseract_oem=config.ocr.tesseract_oem,
+        tesseract_lang=config.ocr.tesseract_lang,
+        preprocessor=config.ocr.preprocessor,
+        deskew=config.ocr.deskew,
     )
     post = PostProcessingService()
     cache_dir = (config.result_cache_dir or f"{config.output_dir}/.bill_cache") if config.result_cache_enabled else None

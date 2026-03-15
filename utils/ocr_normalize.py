@@ -11,12 +11,15 @@ import re
 # Lines containing these keywords are treated as amount lines; only there we fix "2 500" / "7 500"
 _AMOUNT_KEYWORDS = re.compile(
     r"\b(Total|Selected\s+Price|Net\s+Amount|Fare|Price|Payable|Net\s+Payable|"
-    r"Payment\s+Summary|Invoice\s+Value|Grand\s+Total|Paytm\s+UPI|Amount)\b",
+    r"Payment\s+Summary|Invoice\s+Value|Grand\s+Total|Paytm\s+UPI|Amount|"
+    r"Debited|Paid\s+to|UPI|Transaction|Bill\s+Amount|Sub\s*Total)\b",
     re.IGNORECASE,
 )
 
 # On amount lines: "2 500" or "7 33.60" where 2/7 is misread ₹. Capture the number part.
 _RUPEE_AS_2_OR_7 = re.compile(r"\b([27])\s+(\d{1,6}(?:\.\d{2})?)\b")
+# Also: "2." or "7." at start of amount (some OCR) → drop leading digit when followed by amount
+_RUPEE_LEADING_DIGIT_SPACE = re.compile(r"\b([27])\.\s*(\d{1,6}(?:\.\d{2})?)\b")
 
 
 def _is_likely_year(num_str: str) -> bool:
@@ -47,6 +50,8 @@ def normalize_rupee_misread(text: str) -> str:
                 return m.group(0)
             return num_str
 
-        return _RUPEE_AS_2_OR_7.sub(repl, line)
+        line = _RUPEE_AS_2_OR_7.sub(repl, line)
+        line = _RUPEE_LEADING_DIGIT_SPACE.sub(repl, line)
+        return line
 
     return "\n".join(process_line(line) for line in text.split("\n"))

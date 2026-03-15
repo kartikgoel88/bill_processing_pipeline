@@ -18,6 +18,7 @@ from extraction.parser import (
     _bill_extraction_from_text_prompt,
     bill_extraction_reasoning_instruction,
     parse_llm_extraction_multi,
+    apply_rupee_correction_to_bill,
 )
 logger = logging.getLogger(__name__)
 
@@ -200,6 +201,11 @@ class VisionService(IVisionService):
                 source="ocr_llm",
                 critical_validation_failed=True,
             )
+        # Correct rupee misread (e.g. 2147 → 147 for Rapido Selected Price) using raw OCR text
+        if raw_text:
+            for b in [structured_bill] + (structured_bills or []):
+                if b:
+                    apply_rupee_correction_to_bill(raw_text, b)
         return ExtractionResult(
             structured_bill=structured_bill,
             confidence=0.85,

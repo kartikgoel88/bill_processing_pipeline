@@ -246,24 +246,78 @@ def _extract_vendor_paid_to(raw_text: str) -> str:
     return name[:100]
 
 
+def _first_number_after_phrase(raw_text: str, phrase: str, max_chars: int = 500) -> float:
+    """First number (2–6 digits, optional decimal) appearing after phrase. Returns 0 if none."""
+    lower = raw_text.lower()
+    idx = lower.find(phrase.lower())
+    if idx < 0:
+        return 0.0
+    snippet = raw_text[idx + len(phrase) : idx + len(phrase) + max_chars]
+    m = re.search(r"\b(\d{2,6}(?:\.\d{2})?)\b", snippet)
+    if m:
+        try:
+            return float(m.group(1))
+        except ValueError:
+            pass
+    return 0.0
+
+
 def _correct_rupee_read_as_leading_2(raw_text: str, amount: float) -> float:
     """
-    OCR/LLM often reads ₹ as '2', so e.g. ₹78.75 becomes 278.75.
-    If amount is in [200, 300) and (amount - 200) appears in the text, return the corrected value.
+    OCR/LLM often reads ₹ as '2' or '7', e.g. ₹78.75 → 278.75, ₹33.60 → 733.60, ₹147 → 2147.
+    If amount is in [200, 300), treat leading 2 as rupee; if in [700, 800), treat leading 7;
+    if in [2000, 3000), treat leading 2 as rupee (e.g. 2147 → 147 for Rapido Selected Price).
+    When amount is huge (e.g. 2147560 = 2147+560 concatenated), use first number after "Selected Price" then correct.
     """
-    if not (200 <= amount < 300):
-        return amount
-    corrected = amount - 200.0
-    # Check if the corrected amount appears in text (e.g. 78.75 or 78,75)
-    if f"{corrected:.2f}" in raw_text:
-        return corrected
-    dec_str = f"{corrected:.2f}".rstrip("0").rstrip(".")
-    if dec_str in raw_text:
-        return corrected
-    # Comma as decimal separator
-    if f"{corrected:.2f}".replace(".", ",") in raw_text:
-        return corrected
+    # Huge amount with "Selected Price" → likely fare (2147) concatenated with address (560)
+    if amount > 100_000 and "selected price" in raw_text.lower():
+        first = _first_number_after_phrase(raw_text, "selected price")
+        if 2000 <= first < 3000:
+            corrected = first - 2000.0
+            if 0 < corrected < 1000:
+                return corrected
+    # ₹ read as 2: 278.75 → 78.75
+    if 200 <= amount < 300:
+        corrected = amount - 200.0
+        if _amount_appears_in_text(raw_text, corrected):
+            return corrected
+    # ₹ read as 7: 733.60 → 33.60, 778.75 → 78.75
+    if 700 <= amount < 800:
+        corrected = amount - 700.0
+        if _amount_appears_in_text(raw_text, corrected):
+            return corrected
+    # ₹ read as 2 before hundreds: 2147 or 2147.56 → 147 (e.g. Rapido "Selected Price" line)
+    if 2000 <= amount < 3000:
+        corrected = amount - 2000.0
+        if 0 < corrected < 1000:
+            if _amount_appears_in_text_or_selected_price(raw_text, corrected, amount):
+                return corrected
+            # LLM may merge address (560) as decimal: 2147.56 → treat as 2147 → 147
+            if "selected price" in raw_text.lower():
+                return float(int(corrected))
     return amount
+
+
+def _amount_appears_in_text(raw_text: str, value: float) -> bool:
+    """True if value appears in text as XX.XX, XX,XX, or integer form."""
+    if f"{value:.2f}" in raw_text:
+        return True
+    dec_str = f"{value:.2f}".rstrip("0").rstrip(".")
+    if dec_str and dec_str in raw_text:
+        return True
+    if f"{value:.2f}".replace(".", ",") in raw_text:
+        return True
+    return False
+
+
+def _amount_appears_in_text_or_selected_price(raw_text: str, value: float, original_amount: float) -> bool:
+    """True if value appears as standalone number, or (Selected Price context and 21XX → 1XX heuristic)."""
+    if _amount_appears_in_text(raw_text, value):
+        return True
+    # Rapido: "Selected Price\n2147" with no standalone "147" — treat 2147 as ₹147
+    if value == int(value) and 2100 <= original_amount < 2200 and "selected price" in raw_text.lower():
+        return True
+    return False
 
 
 def _line_looks_like_address_or_trip(line: str) -> bool:
@@ -697,18 +751,28 @@ def bill_extraction_reasoning_instruction() -> str:
     )
 
 
-def _bill_extraction_from_text_prompt(ocr_text: str) -> str:
+# Separator used in OCR text so the LLM sees line boundaries (each ; is a new line / change of context)
+OCR_LINE_SEPARATOR = " ; "
+
+
+def _bill_extraction_from_text_prompt(ocr_text: str, use_line_separator: bool = True) -> str:
     """User prompt for LLM extraction from raw OCR text (no image). Same JSON schema as vision."""
     instruction = (
-        "Below is the raw OCR text from a receipt or bill. Extract the reimbursement fields and return "
-        "exactly one JSON object with keys: amount, month, bill_date, vendor_name, currency, line_items. "
+        "Below is the raw OCR text from a receipt or bill. "
+        "Each ' ; ' marks a new line / change of context (e.g. the amount is on the line after 'Selected Price', not merged with the next line). "
+        "Extract the reimbursement fields and return exactly one JSON object with keys: amount, month, bill_date, vendor_name, currency, line_items. "
         "Rules: amount = Grand Total / Net Payable / final total or, for ride receipts (Ola, Uber, Rapido), "
-        "'Selected Price' or 'Fare'—never invoice/order/ride ID. month = YYYY-MM (always derive from bill_date or "
+        "the number on the line immediately after 'Selected Price' or 'Fare'—never invoice/order/ride ID or numbers from addresses. "
+        "month = YYYY-MM (always derive from bill_date or "
         "'Time of Ride' / 'Invoice Date' when you have a date; e.g. 'Nov 22nd 2024' -> '2024-11'). "
         "bill_date = YYYY-MM-DD. line_items = array of {description, amount, quantity, code}. "
         "Output only the JSON object, no markdown or explanation.\n\n---\n\n"
     )
-    return instruction + (ocr_text or "").strip()
+    text = (ocr_text or "").strip()
+    if use_line_separator and text:
+        # Replace newlines with ; so the LLM sees explicit line boundaries and doesn't merge lines
+        text = OCR_LINE_SEPARATOR.join(line.strip() for line in text.splitlines() if line.strip())
+    return instruction + text
 
 
 def _fix_invalid_json_escapes(s: str) -> str:
@@ -872,6 +936,31 @@ def _normalize_llm_bill_json(
         for item in out["line_items"]
     ]
     return out
+
+
+def apply_rupee_correction_to_bill(raw_text: str, bill: dict[str, Any]) -> None:
+    """
+    Correct amount in bill when OCR/LLM read ₹ as leading 2 or 7 (e.g. 2147 → 147 for Selected Price).
+    Updates bill in place (amount and line_items that match the old amount).
+    """
+    if not raw_text or not bill or "amount" not in bill:
+        return
+    try:
+        old_amt = float(bill["amount"])
+    except (TypeError, ValueError):
+        return
+    if old_amt <= 0:
+        return
+    corrected = _correct_rupee_read_as_leading_2(raw_text, old_amt)
+    if corrected != old_amt:
+        bill["amount"] = corrected
+        for li in bill.get("line_items") or []:
+            if isinstance(li, dict) and "amount" in li:
+                try:
+                    if float(li["amount"]) == old_amt:
+                        li["amount"] = corrected
+                except (TypeError, ValueError):
+                    pass
 
 
 def parse_llm_extraction(

@@ -69,6 +69,14 @@ class OCRConfig:
     engine: str = "tesseract"  # tesseract | easyocr
     dpi: int = 300  # PDF→image DPI; higher can help small text (e.g. 400 for receipts)
     mask_rupee_symbol: bool = False  # mask ₹ with template matching before OCR to reduce 2/7 misreads
+    rupee_mask_threshold: float = 0.5  # template match threshold (0.3–0.95); higher = stricter
+    rupee_mask_shrink_px: int = 2  # shrink mask inward so digits next to ₹ are not erased
+    # Tesseract options (used when engine is tesseract)
+    tesseract_psm: int = 11  # 3=full page, 6=block, 11=sparse text (good for receipts)
+    tesseract_oem: int = 3  # 3=LSTM only
+    tesseract_lang: str = "eng"  # e.g. eng or eng+hin for Hindi numerals
+    preprocessor: str = "auto"  # none | pil | opencv | auto (auto=opencv+deskew if available)
+    deskew: bool = True  # correct skew before OCR when preprocessor supports it
 
 
 @dataclass(frozen=True)
@@ -199,6 +207,13 @@ def _config_from_dict(data: dict[str, Any]) -> AppConfig:
                 engine=str(ocr_data.get("engine", "tesseract")),
                 dpi=_coerce_int(ocr_data.get("dpi", 300)),
                 mask_rupee_symbol=_coerce_bool(ocr_data.get("mask_rupee_symbol", False)),
+                rupee_mask_threshold=_coerce_float(ocr_data.get("rupee_mask_threshold", 0.5)),
+                rupee_mask_shrink_px=_coerce_int(ocr_data.get("rupee_mask_shrink_px", 2)),
+                tesseract_psm=_coerce_int(ocr_data.get("tesseract_psm", 11)),
+                tesseract_oem=_coerce_int(ocr_data.get("tesseract_oem", 3)),
+                tesseract_lang=str(ocr_data.get("tesseract_lang", "eng")).strip() or "eng",
+                preprocessor=str(ocr_data.get("preprocessor", "auto")).strip().lower() or "auto",
+                deskew=_coerce_bool(ocr_data.get("deskew", True)),
             )
             if isinstance(ocr_data := data.get("ocr"), dict)
             else OCRConfig()
